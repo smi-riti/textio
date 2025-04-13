@@ -29,8 +29,6 @@ return new class extends Migration
             $table->text('meta_description')->nullable();
             $table->decimal('shipping_cost', 10, 2)->nullable();
             $table->integer('min_qty')->default(1);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('added_by', 50)->default('admin');
             $table->timestamps();
             $table->softDeletes();
         });
