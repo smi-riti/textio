@@ -42,7 +42,6 @@ class ManageCategory extends Component
             'is_active' => 'boolean',
             'meta_title' => 'nullable|string|max:200',
             'meta_description' => 'nullable|string',
-            'order' => 'integer|min:0',
         ];
     }
 
@@ -67,11 +66,7 @@ class ManageCategory extends Component
             'description' => $this->description,
             'is_active' => $this->is_active,
             'meta_title' => $this->meta_title,
-            'meta_description' => $this->meta_description,
-            'order' => $this->order,
-            'created_by' => Auth::id(),
-            'updated_by' => Auth::id(),
-            'level' => $this->parent_category_id ? Category::find($this->parent_category_id)->level + 1 : 0,
+            'meta_description' => $this->meta_description,          
         ];
 
         if ($this->image && $this->image instanceof \Illuminate\Http\UploadedFile) {
@@ -101,9 +96,8 @@ class ManageCategory extends Component
         $this->is_active = $category->is_active;
         $this->meta_title = $category->meta_title;
         $this->meta_description = $category->meta_description;
-        $this->order = $category->order;
         $this->imagePreview = $category->image;
-        $this->image = null; // Reset file input
+        $this->image = null;
     }
 
     // Delete category
@@ -125,19 +119,19 @@ class ManageCategory extends Component
     {
         $this->reset([
             'title', 'slug', 'parent_category_id', 'image', 'description',
-            'is_active', 'meta_title', 'meta_description', 'order', 'editingCategoryId', 'imagePreview'
+            'is_active', 'meta_title', 'meta_description',  'editingCategoryId', 'imagePreview'
         ]);
     }
 
     // Render the component
     public function render()
-    {
-        $query = $this->showDeleted ? Category::withTransed(): Category::query();
-        $categories = $query->with('parent')->orderBy('order')->get();
-        $parentCategories = Category::whereNull('parent_category_id')->where('is_active',true)->orderBy('order')->get();
-        return view('livewire.admin.category.manage-category',[
-            'categories' => $categories,
-            'parentCategories' => $parentCategories,
-        ]);
-    }
+{
+    $query = $this->showDeleted ? Category::withTrashed() : Category::query();
+    $categories = $query->with('parent')->get();
+    $parentCategories = Category::whereNull('parent_category_id')->where('is_active', true)->get();
+    return view('livewire.admin.category.manage-category', [
+        'categories' => $categories,
+        'parentCategories' => $parentCategories,
+    ]);
+}
 }
