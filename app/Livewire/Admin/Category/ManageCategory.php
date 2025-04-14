@@ -15,7 +15,6 @@ class ManageCategory extends Component
 
     // Properties for form
     public $title = '';
-    public $slug = '';
     public $parent_category_id = null;
     public $image;
     public $description = '';
@@ -35,7 +34,6 @@ class ManageCategory extends Component
     {
         return [
             'title' => 'required|string|max:100',
-            'slug' => 'required|string|max:120|unique:categories,slug,' . ($this->editingCategoryId ?: 'NULL') . ',id',
             'parent_category_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|max:2048', // 2MB max
             'description' => 'nullable|string',
@@ -45,14 +43,7 @@ class ManageCategory extends Component
         ];
     }
 
-    // Real-time validation
-    public function updated($propertyName)
-    {
-        $this->validateOnly($propertyName);
-        if ($propertyName === 'title' && !$this->slug) {
-            $this->slug = Str::slug($this->title);
-        }
-    }
+
 
     // Save category (create or update)
     public function saveCategory()
@@ -61,7 +52,7 @@ class ManageCategory extends Component
 
         $data = [
             'title' => $this->title,
-            'slug' => $this->slug,
+            'slug' => Str::slug($this->title), 
             'parent_category_id' => $this->parent_category_id,
             'description' => $this->description,
             'is_active' => $this->is_active,
@@ -90,7 +81,6 @@ class ManageCategory extends Component
         $category = Category::findOrFail($id);
         $this->editingCategoryId = $id;
         $this->title = $category->title;
-        $this->slug = $category->slug;
         $this->parent_category_id = $category->parent_category_id;
         $this->description = $category->description;
         $this->is_active = $category->is_active;
@@ -118,7 +108,7 @@ class ManageCategory extends Component
     public function resetForm()
     {
         $this->reset([
-            'title', 'slug', 'parent_category_id', 'image', 'description',
+            'title', 'parent_category_id', 'image', 'description',
             'is_active', 'meta_title', 'meta_description',  'editingCategoryId', 'imagePreview'
         ]);
     }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Str;
 
 class Brand extends Model
 {
@@ -23,7 +24,15 @@ class Brand extends Model
         'is_active' => 'boolean',
         
     ];
-
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = $value;
+        $this->attributes['slug'] = Str::slug($value);
+    }
 
     public function products()
     {

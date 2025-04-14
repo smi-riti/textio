@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Str;
 
 class Category extends Model
 {
@@ -39,6 +40,14 @@ class Category extends Model
     {
         return $this->hasMany(Product::class);
     }
-
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+    public function setCatTitleAttribute($value)
+    {
+        $this->attributes['title'] = $value;
+        $this->attributes['slug'] = Str::slug($value);
+    }
 
 }
