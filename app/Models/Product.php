@@ -3,22 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
-        'name',
-        'slug',
-        'description',
-        'price',
-        'stock',
-        'is_active',
-        'meta_title',
-        'meta_description',
-        'category_id',
-        'brand_id',
+        'name', 'slug', 'category_id', 'brand_id', 'unit_price', 'description',
+        'current_stock', 'published', 'discount', 'discount_type', 'tags',
+        'meta_title', 'meta_description', 'shipping_cost', 'min_qty', 'user_id',
+        'thumbnail_img', 
     ];
-
     protected $casts = [
         'is_active' => 'boolean',
     ];
@@ -40,5 +35,9 @@ class Product extends Model
     {
         $this->attributes['name'] = $value;
         $this->attributes['slug'] = \Str::slug($value);
+    }
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
     }
 }

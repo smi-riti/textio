@@ -14,14 +14,14 @@
                 <!-- Name -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700">Product Name</label>
-                    <input type="text" id="name" wire:model="name" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="name" wire:model="name" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     @error('name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Category -->
                 <div>
                     <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
-                    <select id="category_id" wire:model="category_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <select id="category_id" wire:model="category_id" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Select Category</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->title }}</option>
@@ -33,7 +33,7 @@
                 <!-- Brand -->
                 <div>
                     <label for="brand_id" class="block text-sm font-medium text-gray-700">Brand (Optional)</label>
-                    <select id="brand_id" wire:model="brand_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <select id="brand_id" wire:model="brand_id" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Select Brand</option>
                         @foreach ($brands as $brand)
                             <option value="{{ $brand->id }}">{{ $brand->name }}</option>
@@ -44,36 +44,36 @@
 
                 <!-- Unit Price -->
                 <div>
-                    <label for="unit_price" class="block text-sm font-medium text-gray-700">Unit Price</label>
-                    <input type="number" step="0.01" id="unit_price" wire:model="unit_price" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <label for="unit_price" class="block text-sm font-medium text-gray-700">Price</label>
+                    <input type="number" step="0.01" id="unit_price" wire:model="unit_price" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     @error('unit_price') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Current Stock -->
                 <div>
                     <label for="current_stock" class="block text-sm font-medium text-gray-700">Stock</label>
-                    <input type="number" id="current_stock" wire:model="current_stock" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="number" id="current_stock" wire:model="current_stock" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     @error('current_stock') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Minimum Quantity -->
                 <div>
                     <label for="min_qty" class="block text-sm font-medium text-gray-700">Minimum Quantity</label>
-                    <input type="number" id="min_qty" wire:model="min_qty" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="number" id="min_qty" wire:model="min_qty" class="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     @error('min_qty') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Discount -->
                 <div>
                     <label for="discount" class="block text-sm font-medium text-gray-700">Discount</label>
-                    <input type="number" step="0.01" id="discount" wire:model="discount" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="number" step="0.01" id="discount" wire:model="discount" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     @error('discount') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Discount Type -->
                 <div>
                     <label for="discount_type" class="block text-sm font-medium text-gray-700">Discount Type</label>
-                    <select id="discount_type" wire:model="discount_type" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <select id="discount_type" wire:model="discount_type" class="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="flat">Flat</option>
                         <option value="percent">Percent</option>
                     </select>
@@ -83,20 +83,20 @@
                 <!-- Shipping Cost -->
                 <div>
                     <label for="shipping_cost" class="block text-sm font-medium text-gray-700">Shipping Cost</label>
-                    <input type="number" step="0.01" id="shipping_cost" wire:model="shipping_cost" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="number" step="0.01" id="shipping_cost" wire:model="shipping_cost" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                     @error('shipping_cost') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Tags -->
                 <div>
                     <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
-                    <input type="text" id="tags" wire:model="tags" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="comma,separated,tags">
+                    <input type="text" id="tags" wire:model="tags" class="mt-1 block w-full border-gray-300 p-3 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="comma,separated,tags">
                     @error('tags') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Published -->
                 <div class="flex items-center">
-                    <input type="checkbox" id="published" wire:model="published" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <input type="checkbox" id="published" wire:model="published" class="h-4 w-4 p-3 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
                     <label for="published" class="ml-2 block text-sm text-gray-900">Published</label>
                 </div>
             </div>
@@ -104,21 +104,21 @@
             <!-- Description -->
             <div class="mt-4">
                 <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                <textarea id="description" wire:model="description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                <textarea id="description" wire:model="description" rows="4" class="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                 @error('description') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <!-- Meta Title -->
             <div class="mt-4">
                 <label for="meta_title" class="block text-sm font-medium text-gray-700">Meta Title</label>
-                <input type="text" id="meta_title" wire:model="meta_title" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <input type="text" id="meta_title" wire:model="meta_title" class="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                 @error('meta_title') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <!-- Meta Description -->
             <div class="mt-4">
                 <label for="meta_description" class="block text-sm font-medium text-gray-700">Meta Description</label>
-                <textarea id="meta_description" wire:model="meta_description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                <textarea id="meta_description" wire:model="meta_description" rows="4" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                 @error('meta_description') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
@@ -140,7 +140,7 @@
                     {{ $editingProductId ? 'Update Product' : 'Add Product' }}
                 </button>
                 @if ($editingProductId)
-                    <button type="button" wire:click="resetForm" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
+                    <button type="button" wire:click="resetForm" class="bg-gray-300 p-3 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
                         Cancel
                     </button>
                 @endif
