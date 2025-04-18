@@ -4,8 +4,10 @@
         <div class="flex items-center justify-between h-16">
             <!-- Logo -->
             <div class="flex-shrink-0">
-                <a href="/" class="flex items-center">
-                    <img src="assets/ShopWave.png" class="h-10 w-auto" alt="ShopWave Logo">
+            <a href="{{route('public.home')}}" wire:navigate class="flex items-center">
+                    <img src="{{ asset('assets/textio.png') }}"
+                        class="h-24"
+                        alt="Learn Syntax Logo">
                 </a>
             </div>
 

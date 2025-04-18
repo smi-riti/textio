@@ -1,7 +1,7 @@
 <div class="bg-gray-200 font-sans">
     <div class="min-h-screen">
         <!-- Hero Section with Customization Call-to-Action -->
-        <section class="bg-gradient-to-r from-gray-800 to-black text-white py-12">
+        <section class="bg-gradient-to-r from-gray-400 to-black text-white py-12">
             <div class="container mx-auto px-4 flex flex-col lg:flex-row items-center">
                 <div class="lg:w-1/2 text-center lg:text-left">
                     <h1 class="text-3xl lg:text-5xl font-bold mb-4">Design Your Brand Today!</h1>
@@ -12,7 +12,7 @@
                     </div>
                 </div>
                 <div class="lg:w-1/2 mt-6 lg:mt-0">
-                    <img src="/api/placeholder/600/400" alt="Custom Design Banner" class="rounded-lg shadow-lg w-full transform hover:scale-105 transition">
+                    <img src="{{ 'assets/brand.png' }}" alt="Custom Design Banner" class="h-74 w-74">
                 </div>
             </div>
         </section>
