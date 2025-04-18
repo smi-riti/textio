@@ -27,6 +27,15 @@ Route::get('/product-add', function () {
     return view('admin.products.create');
 })->name('product-add');
 
+
+Route::get('/brand-list', function () {
+    return view('admin.brand.list');
+})->name('brand-list');
+Route::get('/brand-add', function () {
+    return view('admin.brand.create');
+})->name('brand-add');
+
+
 Route::get('/category-add', function () {
     return view('admin.category.create');
 })->name('category-add');

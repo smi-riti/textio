@@ -609,10 +609,10 @@
                 </a>
                 <ul>
                     <li>
-                        <a href="orders.html">Add</a>
+                        <a href="{{route('brand-add')}}">Add</a>
                     </li>
                     <li>
-                        <a href="order-detail.html">Detail</a>
+                        <a href="{{route('brand-list')}}">Detail</a>
                     </li>
                 </ul>
             </li>
