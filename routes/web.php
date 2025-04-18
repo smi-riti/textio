@@ -17,3 +17,7 @@ Route::prefix('admin')->group(function () {
     Route::get('products',ManageProduct::class)->name('admin.products');
     Route::get('productImage',MultipleImages::class)->name('admin.product-image');
 });
+
+Route::get('/dashboard', function () {
+    return view('admin.dashboard');
+})->name('dashboard');
