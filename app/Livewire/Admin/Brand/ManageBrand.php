@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin\Brand;
 
 use App\Models\Brand;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Str;
@@ -22,6 +23,7 @@ class ManageBrand extends Component
     public $imagePreview = null;
     public $showDeleted = false;
 
+    #[Layout('components.layouts.admin')]
     protected function rules()
     {
         return [

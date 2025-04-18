@@ -1,134 +1,109 @@
-<div class="container mx-auto px-4 py-8">
+<div class="container px-4 py-5">
     <!-- Success Message -->
     @if (session()->has('message'))
-        <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 mb-6 rounded-md shadow-sm"
-            role="alert">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 mr-2 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clip-rule="evenodd" />
+        <div class="alert alert-success alert-dismissible fade show border-start border-4 border-success" role="alert">
+            <div class="d-flex align-items-center">
+                <svg class="bi bi-check-circle-fill flex-shrink-0 me-2" width="20" height="20" fill="currentColor" aria-hidden="true">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
                 </svg>
-                <p class="font-medium">{{ session('message') }}</p>
+                <p class="mb-0 fw-medium">{{ session('message') }}</p>
             </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Category Form Column -->
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-xl border shadow-md overflow-hidden">
-                <div class="px-6 py-4">
-                    <h2 class="text-xl font-semibold">
+    <div class="row g-4">
+        <!-- Brand Form Column -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">
                         {{ $editingBrandId ? 'Edit Brand' : 'Create New Brand' }}
                     </h2>
                 </div>
-                <div class="p-6">
+                <div class="card-body">
                     <form wire:submit.prevent="saveBrand">
-                        <!-- Title -->
-                        <div class="mb-5">
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Brand name*</label>
-                            <input type="text" id="name" wire:model.blur="name"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
-                            @error('name') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+                        <!-- Brand Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Brand Name*</label>
+                            <input type="text" id="name" wire:model.blur="name" class="form-control" required>
+                            @error('name') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         <!-- Slug -->
-                        <div class="mb-5">
-                            <label for="slug" class="block text-sm font-medium text-gray-700 mb-1">Slug*</label>
-                            <input type="text" id="slug" wire:model.live="slug" readonly
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
-                            @error('slug') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Slug*</label>
+                            <input type="text" id="slug" wire:model.live="slug" class="form-control" readonly required>
+                            @error('slug') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         <!-- Image Upload -->
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Brand Logo</label>
-                            <div class="mt-1 flex items-center">
-                                <label for="logo" class="cursor-pointer">
-                                    <div
-                                        class="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-blue-400 transition-colors duration-200">
-                                        <div class="flex flex-col items-center justify-center space-y-2">
-                                            <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                </path>
-                                            </svg>
-                                            <span class="text-sm text-gray-600">Click to upload logo</span>
-                                        </div>
-                                        <input id="logo" type="file" wire:model="logo" class="hidden">
+                        <div class="mb-3">
+                            <label for="logo" class="form-label">Brand Logo</label>
+                            <div class="input-group">
+                                <label for="logo" class="border border-dashed p-4 w-100 text-center rounded">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <svg class="bi bi-image mb-2" width="40" height="40" fill="currentColor" aria-hidden="true">
+                                            <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                        </svg>
+                                        <span class="small text-muted">Click to upload logo</span>
                                     </div>
+                                    <input id="logo" type="file" wire:model="logo" class="d-none" accept="image/*">
                                 </label>
                             </div>
                             @if ($imagePreview)
                                 <div class="mt-3">
-                                    <p class="text-sm text-gray-500 mb-1">logo Preview:</p>
-                                    <img src="{{ $imagePreview }}" alt="Preview"
-                                        class="h-24 w-24 object-cover rounded-md border">
+                                    <p class="small text-muted mb-1">Logo Preview:</p>
+                                    <img src="{{ $imagePreview }}" alt="Logo Preview" class="img-thumbnail" style="max-width: 96px; max-height: 96px;">
                                 </div>
                             @elseif ($logo)
-                                <div wire:loading wire:target="logo" class="mt-3 text-sm text-blue-600">
+                                <div wire:loading wire:target="logo" class="mt-3 small text-primary">
                                     Uploading...
                                 </div>
                             @endif
-                            @error('logo') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+                            @error('logo') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         <!-- Status Toggle -->
-                        <div class="mb-5">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="is_active" wire:model="is_active" class="sr-only peer">
-                                <div
-                                    class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
-                                </div>
-                                <span class="ms-3 text-sm font-medium text-gray-700">Active Status</span>
-                            </label>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active" wire:model="is_active">
+                                <label class="form-check-label" for="is_active">Active Status</label>
+                            </div>
                         </div>
 
                         <!-- Description -->
-                        <div class="mb-5">
-                            <label for="description"
-                                class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                            <textarea id="description" wire:model="description" rows="3"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"></textarea>
-                            @error('description') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea id="description" wire:model="description" rows="3" class="form-control"></textarea>
+                            @error('description') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
                         </div>
 
                         <!-- SEO Section -->
-                        <div class="border-t border-gray-200 pt-5 mb-5">
-                            <h3 class="text-lg font-medium text-gray-900 mb-3">SEO Settings</h3>
-
+                        <div class="border-top pt-4 mb-3">
+                            <h3 class="h6 mb-3">SEO Settings</h3>
                             <!-- Meta Title -->
-                            <div class="mb-4">
-                                <label for="meta_title" class="block text-sm font-medium text-gray-700 mb-1">Meta
-                                    Title</label>
-                                <input type="text" id="meta_title" wire:model="meta_title"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
-                                @error('meta_title') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p> @enderror
+                            <div class="mb-3">
+                                <label for="meta_title" class="form-label">Meta Title</label>
+                                <input type="text" id="meta_title" wire:model="meta_title" class="form-control">
+                                @error('meta_title') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
                             </div>
-
                             <!-- Meta Description -->
-                            <div>
-                                <label for="meta_description" class="block text-sm font-medium text-gray-700 mb-1">Meta
-                                    Description</label>
-                                <textarea id="meta_description" wire:model="meta_description" rows="3"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"></textarea>
-                                @error('meta_description') <p class="mt-1 text-sm text-rose-600">{{ $message }}</p>
-                                @enderror
+                            <div class="mb-3">
+                                <label for="meta_description" class="form-label">Meta Description</label>
+                                <textarea id="meta_description" wire:model="meta_description" rows="3" class="form-control"></textarea>
+                                @error('meta_description') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
 
                         <!-- Form Actions -->
-                        <div class="flex justify-end space-x-3 pt-4">
+                        <div class="d-flex justify-content-end gap-2 pt-3">
                             @if ($editingBrandId)
-                                <button type="button" wire:click="resetForm"
-                                    class="px-4 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                                <button type="button" wire:click="resetForm" class="btn btn-outline-secondary">
                                     Cancel
                                 </button>
                             @endif
-                            <button type="submit"
-                                class="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                            <button type="submit" class="btn btn-primary">
                                 {{ $editingBrandId ? 'Update Brand' : 'Create Brand' }}
                             </button>
                         </div>
@@ -137,118 +112,83 @@
             </div>
         </div>
 
-        <!-- Category List Column -->
-        <div class="lg:col-span-2 ">
-            <div class="bg-white rounded-xl border shadow-md overflow-hidden">
-                <div class="px-6 py-4 flex justify-between items-center">
-                    <h2 class="text-xl font-semibold">Brand Management</h2>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" wire:model="showDeleted" class="sr-only peer">
-                        <div
-                            class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
-                        </div>
-                        <span class="ms-3 text-sm font-medium ">Show Deleted</span>
-                    </label>
+        <!-- Brand List Column -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0">Brand Management</h2>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="showDeleted" wire:model="showDeleted">
+                        <label class="form-check-label" for="showDeleted">Show Deleted</label>
+                    </div>
                 </div>
-                <div class="p-6">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
                                 <tr>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Logo</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Name</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status</th>
-                                    <th scope="col"
-                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions</th>
+                                    <th scope="col" class="px-3 py-2">Logo</th>
+                                    <th scope="col" class="px-3 py-2">Name</th>
+                                    <th scope="col" class="px-3 py-2">Status</th>
+                                    <th scope="col" class="px-3 py-2 text-end">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody>
                                 @forelse ($brands as $brand)
-                                    <tr
-                                        class="{{ $brand->trashed() ? 'bg-rose-50' : ($brand->is_active ? '' : 'bg-amber-50') }}">
-                                        <!-- Image -->
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                    <tr class="{{ $brand->trashed() ? 'table-danger' : ($brand->is_active ? '' : 'table-warning') }}">
+                                        <!-- Logo -->
+                                        <td class="px-3 py-2 align-middle">
                                             @if ($brand->logo)
-                                                <img src="{{ Storage::url($brand->logo) }}" alt="{{ $brand->name }}"
-                                                    class="h-10 w-10 object-cover rounded-md">
+                                                <img src="{{ Storage::url($brand->logo) }}" alt="{{ $brand->name }}" class="img-thumbnail" style="width: 40px; height: 40px;">
                                             @else
-                                                <div
-                                                    class="h-10 w-10 flex items-center justify-center bg-gray-100 rounded-md text-gray-400">
-                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                        </path>
+                                                <div class="d-flex align-items-center justify-content-center bg-light rounded" style="width: 40px; height: 40px;">
+                                                    <svg class="bi bi-image" width="24" height="24" fill="currentColor" aria-hidden="true">
+                                                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
                                                     </svg>
                                                 </div>
                                             @endif
                                         </td>
                                         <!-- Name -->
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            {{ $brand->name }}
-                                        </td>
+                                        <td class="px-3 py-2 align-middle">{{ $brand->name }}</td>
                                         <!-- Status -->
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-3 py-2 align-middle">
                                             @if($brand->trashed())
-                                                <span
-                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-rose-100 text-rose-800">
-                                                    Deleted
-                                                </span>
+                                                <span class="badge bg-danger">Deleted</span>
                                             @else
-                                                <span
-                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $brand->is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                                                <span class="badge {{ $brand->is_active ? 'bg-success' : 'bg-warning' }}">
                                                     {{ $brand->is_active ? 'Active' : 'Inactive' }}
                                                 </span>
                                             @endif
                                         </td>
                                         <!-- Actions -->
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <div class="flex justify-end space-x-3">
+                                        <td class="px-3 py-2 align-middle text-end">
+                                            <div class="d-flex justify-content-end gap-2">
                                                 @if ($brand->trashed())
-                                                    <button wire:click="restoreBrand({{ $brand->id }})"
-                                                        class="text-emerald-600 hover:text-emerald-900" title="Restore">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                                            </path>
+                                                    <button wire:click="restoreBrand({{ $brand->id }})" class="btn btn-sm btn-outline-success" title="Restore">
+                                                        <svg class="bi bi-arrow-counterclockwise" width="16" height="16" fill="currentColor" aria-hidden="true">
+                                                            <path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/>
+                                                            <path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/>
                                                         </svg>
                                                     </button>
                                                 @else
-                                                    <button wire:click="editBrand({{ $brand->id }})"
-                                                        class="text-blue-600 hover:text-blue-900" title="Edit">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                            </path>
+                                                    <button wire:click="editBrand({{ $brand->id }})" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                        <svg class="bi bi-pencil" width="16" height="16" fill="currentColor" aria-hidden="true">
+                                                            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                                                         </svg>
                                                     </button>
-                                                    <button wire:click="deleteBrand({{ $brand->id }})"
-                                                        class="text-rose-600 hover:text-rose-900" title="Delete">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                            </path>
+                                                    <button wire:click="deleteBrand({{ $brand->id }})" class="btn btn-sm btn-outline-danger" title="Delete">
+                                                        <svg class="bi bi-trash" width="16" height="16" fill="currentColor" aria-hidden="true">
+                                                            <path d="M5.5 5.5A.5.5 0 0 1 6 5h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5zm2.5 6.5a.5.5 0 0 1-.5-.5V6.5a.5.5 0 0 1 1 0v5a.5.5 0 0 1-.5.5z"/>
+                                                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
                                                         </svg>
                                                     </button>
                                                 @endif
-                                            </div>
+                                                </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                                        <td colspan="4" class="px-3 py-2 text-center text-muted">
                                             No Brands found
                                         </td>
                                     </tr>
@@ -256,7 +196,6 @@
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </div>
         </div>

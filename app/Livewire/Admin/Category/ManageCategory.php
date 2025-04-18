@@ -4,6 +4,7 @@ namespace App\Livewire\Admin\Category;
 
 use App\Models\Category;
 use Auth;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -30,6 +31,8 @@ class ManageCategory extends Component
     public $showDeleted = false;
 
     // Validation rules
+    #[Layout('components.layouts.admin')]
+
     protected function rules()
     {
         return [
