@@ -593,10 +593,10 @@
                 </a>
                 <ul>
                     <li>
-                        <a href="orders.html">Add</a>
+                        <a href="{{route('category-add')}}">Add</a>
                     </li>
                     <li>
-                        <a href="order-detail.html">Detail</a>
+                        <a href="{{route('category-list')}}">Detail</a>
                     </li>
                 </ul>
             </li>
@@ -626,7 +626,7 @@
                 </a>
                 <ul>
                     <li>
-                        <a href="product-list.html">Add
+                        <a href="{{route('product-add')}}">Add
                             </a>
                     </li>
                     <li>
@@ -634,7 +634,7 @@
                             View</a>
                     </li>
                     <li>
-                        <a href="product-detail.html">Product Detail</a>
+                        <a href="{{route('product-list')}}">Product Detail</a>
                     </li>
                     
                 </ul>
