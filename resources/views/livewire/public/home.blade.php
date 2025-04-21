@@ -23,7 +23,7 @@
                 <h2 class="text-2xl lg:text-3xl font-bold text-center mb-8 text-black">Create Your Perfect Product</h2>
                 <div class="flex flex-col lg:flex-row items-center gap-8">
                     <div class="lg:w-1/2">
-                        <img src="/api/placeholder/500/300" alt="Design Tool" class="rounded-lg shadow-md w-full">
+                        <img src="{{ asset('assets/design.png') }}" alt="Design Tool" class=" w-full">
                     </div>
                     <div class="lg:w-1/2">
                         <h3 class="text-xl font-semibold text-black mb-4">Easy Customization Tool</h3>

@@ -2,23 +2,23 @@
 
 namespace App\Livewire\Auth;
 
-use App\Mail\UserRegisterMail;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+#[Layout('components.layouts.app')]
 class Register extends Component
 {
     public $name = '';
     public $email = '';
-    public $contact = '';
     public $password = '';
-  
+    public $password_confirmation = '';
 
     protected $rules = [
         'name' => 'required|min:3',
-        'email' => 'required|email|unique:users',      
+        'email' => 'required|email|unique:users,email',
         'password' => 'required|min:8|confirmed',
     ];
 
@@ -28,15 +28,17 @@ class Register extends Component
 
         $user = User::create([
             'name' => $this->name,
-            'email' => $this->email,          
+            'email' => $this->email,
             'password' => Hash::make($this->password),
         ]);
-       
-        return redirect()->route('public.home');
+        //  the user in
+        Auth::login($user);
+
+        return redirect()->route('public.home')->with('success', 'Registration successful!');
     }
 
     public function render()
     {
-        return view('livewire.auth.register');
+        return view('livewire.auth.register')->layout('layouts.app');
     }
 }

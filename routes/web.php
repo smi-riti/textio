@@ -6,13 +6,16 @@ use App\Livewire\Admin\ManageCoupon;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Product\ManageProduct;
 use App\Livewire\Admin\Product\MultipleImages;
+use App\Livewire\Auth\Login;
+use App\Livewire\Auth\Register;
 use App\Livewire\Public\Home;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
 //     return view('welcome');
 // });
-
+Route::get('login',Login::class)->name('login');
+Route::get('register',Register::class)->name('register');
 Route::get('/',Home::class)->name('public.home');
 Route::prefix('admin')->group(function () {
     Route::get('/',Dashboard::class)->name('admin.dashboard');
@@ -49,10 +52,3 @@ Route::get('/category-list', function () {
     return view('admin.category.list');
 })->name('category-list');
 
-
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
