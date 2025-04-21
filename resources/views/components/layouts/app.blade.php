@@ -21,6 +21,7 @@
     <div class="">
         {{ $slot }}
     </div>
+    <livewire:public.footer />
 
     @livewireScripts
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>

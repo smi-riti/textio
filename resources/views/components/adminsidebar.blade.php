@@ -61,7 +61,7 @@
                 </ul>
             </li>
             <li>
-                <a href="{{route('admin.categories')}}">
+                <a wire:navigate href="{{route('admin.categories')}}">
                     <span class="nav-link-icon">
                         <i class="bi bi-receipt"></i>
                     </span>
@@ -69,7 +69,7 @@
                 </a>                
             </li>
   <li>
-                <a href="{{ route('admin.brands') }}">
+                <a wire:navigate href="{{ route('admin.brands') }}">
                     <span class="nav-link-icon">
                         <i class="bi bi-receipt"></i>
                     </span>
@@ -78,7 +78,7 @@
             </li>
 
             <li>
-                <a href="{{ route('admin.products') }}">
+                <a wire:navigate href="{{ route('admin.products') }}">
                     <span class="nav-link-icon">
                         <i class="bi bi-truck"></i>
                     </span>
@@ -117,7 +117,7 @@
                 </a>
             </li>
             <li>
-                <a href="coupons.html">
+                <a wire:navigate href="{{ route('admin.coupon') }}">
                     <span class="nav-link-icon">
                         <i class="bi bi-tag"></i>
                     </span>

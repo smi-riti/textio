@@ -2,6 +2,7 @@
 
 use App\Livewire\Admin\Brand\ManageBrand;
 use App\Livewire\Admin\Category\ManageCategory;
+use App\Livewire\Admin\ManageCoupon;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Product\ManageProduct;
 use App\Livewire\Admin\Product\MultipleImages;
@@ -19,6 +20,7 @@ Route::prefix('admin')->group(function () {
     Route::get('brands',ManageBrand::class)->name('admin.brands');
     Route::get('products',ManageProduct::class)->name('admin.products');
     Route::get('productImage',MultipleImages::class)->name('admin.product-image');
+    Route::get('coupon',ManageCoupon::class)->name('admin.coupon');
 });
 
 Route::get('/dashboard', function () {
