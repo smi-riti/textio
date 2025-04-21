@@ -61,59 +61,30 @@
                 </ul>
             </li>
             <li>
-                <a href="#">
+                <a wire:navigate href="{{route('admin.categories')}}">
                     <span class="nav-link-icon">
                         <i class="bi bi-receipt"></i>
                     </span>
                     <span>Category</span>
-                </a>
-                <ul>
-                    <li>
-                        <a href="{{route('category-add')}}">Add</a>
-                    </li>
-                    <li>
-                        <a href="{{route('category-list')}}">Detail</a>
-                    </li>
-                </ul>
+                </a>                
             </li>
   <li>
-                <a href="#">
+                <a wire:navigate href="{{ route('admin.brands') }}">
                     <span class="nav-link-icon">
                         <i class="bi bi-receipt"></i>
                     </span>
                     <span>Brand</span>
-                </a>
-                <ul>
-                    <li>
-                        <a href="{{route('brand-add')}}">Add</a>
-                    </li>
-                    <li>
-                        <a href="{{route('brand-list')}}">Detail</a>
-                    </li>
-                </ul>
+                </a>               
             </li>
 
             <li>
-                <a href="#">
+                <a wire:navigate href="{{ route('admin.products') }}">
                     <span class="nav-link-icon">
                         <i class="bi bi-truck"></i>
                     </span>
                     <span>Products</span>
                 </a>
-                <ul>
-                    <li>
-                        <a href="{{route('product-add')}}">Add
-                            </a>
-                    </li>
-                    <li>
-                        <a href="product-grid.html">Grid
-                            View</a>
-                    </li>
-                    <li>
-                        <a href="{{route('product-list')}}">Product Detail</a>
-                    </li>
-                    
-                </ul>
+                
             </li>
             <li>
                 <a href="#">
@@ -146,7 +117,7 @@
                 </a>
             </li>
             <li>
-                <a href="coupons.html">
+                <a wire:navigate href="{{ route('admin.coupon') }}">
                     <span class="nav-link-icon">
                         <i class="bi bi-tag"></i>
                     </span>

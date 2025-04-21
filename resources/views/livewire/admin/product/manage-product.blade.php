@@ -1,208 +1,301 @@
-<div class="container mx-auto p-4">
-    <!-- Success Message -->
-    @if (session()->has('message'))
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-            {{ session('message') }}
+<div>
+    <div>
+        <!-- Success Message -->
+        @if (session()->has('message'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('message') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        <!-- Add Product Button -->
+        <div class="d-flex justify-content-between mb-3 p-4">
+            <button class="btn btn-primary btn-sm" wire:click="openModal">Add Product</button>
         </div>
-    @endif
 
-    <!-- Product Form -->
-    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
-        <h2 class="text-2xl font-bold mb-4">{{ $editingProductId ? 'Edit Product' : 'Add New Product' }}</h2>
-        <form wire:submit.prevent="saveProduct">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Name -->
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Product Name</label>
-                    <input type="text" id="name" wire:model="name" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    @error('name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Category -->
-                <div>
-                    <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
-                    <select id="category_id" wire:model="category_id" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Select Category</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->title }}</option>
-                        @endforeach
-                    </select>
-                    @error('category_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Brand -->
-                <div>
-                    <label for="brand_id" class="block text-sm font-medium text-gray-700">Brand (Optional)</label>
-                    <select id="brand_id" wire:model="brand_id" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Select Brand</option>
-                        @foreach ($brands as $brand)
-                            <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('brand_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Unit Price -->
-                <div>
-                    <label for="unit_price" class="block text-sm font-medium text-gray-700">Price</label>
-                    <input type="number" step="0.01" id="unit_price" wire:model="unit_price" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    @error('unit_price') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Current Stock -->
-                <div>
-                    <label for="current_stock" class="block text-sm font-medium text-gray-700">Stock</label>
-                    <input type="number" id="current_stock" wire:model="current_stock" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    @error('current_stock') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Minimum Quantity -->
-                <div>
-                    <label for="min_qty" class="block text-sm font-medium text-gray-700">Minimum Quantity</label>
-                    <input type="number" id="min_qty" wire:model="min_qty" class="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    @error('min_qty') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Discount -->
-                <div>
-                    <label for="discount" class="block text-sm font-medium text-gray-700">Discount</label>
-                    <input type="number" step="0.01" id="discount" wire:model="discount" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    @error('discount') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Discount Type -->
-                <div>
-                    <label for="discount_type" class="block text-sm font-medium text-gray-700">Discount Type</label>
-                    <select id="discount_type" wire:model="discount_type" class="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="flat">Flat</option>
-                        <option value="percent">Percent</option>
-                    </select>
-                    @error('discount_type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Shipping Cost -->
-                <div>
-                    <label for="shipping_cost" class="block text-sm font-medium text-gray-700">Shipping Cost</label>
-                    <input type="number" step="0.01" id="shipping_cost" wire:model="shipping_cost" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                    @error('shipping_cost') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Tags -->
-                <div>
-                    <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
-                    <input type="text" id="tags" wire:model="tags" class="mt-1 block w-full border-gray-300 p-3 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="comma,separated,tags">
-                    @error('tags') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
-                <!-- Published -->
-                <div class="flex items-center">
-                    <input type="checkbox" id="published" wire:model="published" class="h-4 w-4 p-3 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
-                    <label for="published" class="ml-2 block text-sm text-gray-900">Published</label>
-                </div>
-            </div>
-
-            <!-- Description -->
-            <div class="mt-4">
-                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                <textarea id="description" wire:model="description" rows="4" class="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-                @error('description') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-
-            <!-- Meta Title -->
-            <div class="mt-4">
-                <label for="meta_title" class="block text-sm font-medium text-gray-700">Meta Title</label>
-                <input type="text" id="meta_title" wire:model="meta_title" class="mt-1 block w-full p-3 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                @error('meta_title') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-
-            <!-- Meta Description -->
-            <div class="mt-4">
-                <label for="meta_description" class="block text-sm font-medium text-gray-700">Meta Description</label>
-                <textarea id="meta_description" wire:model="meta_description" rows="4" class="mt-1 p-3 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-                @error('meta_description') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-
-            <!-- Thumbnail Image -->
-            <div class="mt-4">
-                <label for="thumbnail_img" class="block text-sm font-medium text-gray-700">Thumbnail Image</label>
-                <input type="file" id="thumbnail_img" wire:model="thumbnail_img" class="mt-1 block w-full">
-                @if ($thumbnailPreview)
-                    <img src="{{ $thumbnailPreview }}" alt="Preview" class="mt-2 h-20 w-20 object-cover rounded">
-                @elseif ($thumbnail_img)
-                    <div wire:loading wire:target="thumbnail_img">Uploading...</div>
-                @endif
-                @error('thumbnail_img') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-            </div>
-
-            <!-- Buttons -->
-            <div class="mt-6 flex space-x-4">
-                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
-                    {{ $editingProductId ? 'Update Product' : 'Add Product' }}
-                </button>
-                @if ($editingProductId)
-                    <button type="button" wire:click="resetForm" class="bg-gray-300 p-3 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400">
-                        Cancel
-                    </button>
-                @endif
-            </div>
-        </form>
-    </div>
-
-    <!-- Product List -->
-    <div class="bg-white shadow-md rounded-lg p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold">Product List</h2>
-            <label class="flex items-center">
-                <input type="checkbox" wire:model="showDeleted" class="mr-2">
-                Show Deleted
-            </label>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+        <!-- Products Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Brand</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Images</th>
+                        <th>Variants</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody>
                     @foreach ($products as $product)
-                        <tr class="{{ $product->trashed() ? 'bg-gray-100' : '' }}">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($product->thumbnail_img)
-                                    <img src="{{ $product->thumbnail_img }}" alt="{{ $product->name }}" class="h-10 w-10 object-cover rounded">
+                        <tr>
+                            <td>{{ $product->name }}</td>
+                            <td>{{ $product->category?->title ?? 'N/A' }}</td>
+                            <td>{{ $product->brand?->name ?? 'N/A' }}</td>
+                            <td>{{ $product->price }}</td>
+                            <td>{{ $product->quantity }}</td>
+                            <td>{{ $product->status ? 'Active' : 'Inactive' }}</td>
+                            <td>
+                                @if ($product->images->count() > 0)
+                                    <div class="d-flex flex-wrap">
+                                        @foreach ($product->images as $image)
+                                            <div class="position-relative m-1">
+                                                <img src="{{ Storage::url($image->image_path) }}" alt="Product Image"
+                                                    class="img-fluid" style="max-width: 50px; max-height: 50px; object-fit: cover;">
+                                                <button class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                                                    wire:click="deleteImage({{ $image->id }})">×</button>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 @else
-                                    <span class="text-gray-500">No Image</span>
+                                    No Images
                                 @endif
+                                <button class="btn btn-sm btn-primary mt-2"
+                                    wire:click="openImageModal({{ $product->id }})">Add Image</button>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $product->name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $product->category->title ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $product->brand->name ?? 'N/A' }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${{ number_format($product->unit_price, 2) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">{{ $product->current_stock }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="{{ $product->trashed() ? 'text-red-600' : ($product->published ? 'text-green-600' : 'text-red-600') }}">
-                                    {{ $product->trashed() ? 'Deleted' : ($product->published ? 'Published' : 'Unpublished') }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap flex space-x-2">
-                                @if ($product->trashed())
-                                    <button wire:click="restoreProduct({{ $product->id }})" class="text-green-600 hover:text-green-900">Restore</button>
+                            <td>
+                                @if ($product->variants->count() > 0)
+                                    <div class="d-flex flex-column">
+                                        @foreach ($product->variants as $variant)
+                                            <div class="d-flex align-items-center mb-2 flex-wrap">
+                                                <span>{{ $variant->variant_type }}: {{ $variant->variant_name }} (Stock:
+                                                    {{ $variant->stock }})</span>
+                                                @if ($variant->variant_image)
+                                                    <img src="{{ Storage::url($variant->variant_image) }}" alt="Variant Image"
+                                                        class="img-fluid ms-2"
+                                                        style="max-width: 30px; max-height: 30px; object-fit: cover;">
+                                                @endif
+                                                <button class="btn btn-sm btn-warning mx-1 mt-1"
+                                                    wire:click="editVariant({{ $variant->id }})">Edit</button>
+                                                <button class="btn btn-sm btn-danger mt-1"
+                                                    wire:click="deleteVariant({{ $variant->id }})">Delete</button>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 @else
-                                    <button wire:click="editProduct({{ $product->id }})" class="text-indigo-600 hover:text-indigo-900">Edit</button>
-                                    <button wire:click="deleteProduct({{ $product->id }})" class="text-red-600 hover:text-red-900">Delete</button>
+                                    No Variants
                                 @endif
+                                <button class="btn btn-sm btn-primary mt-2"
+                                    wire:click="openVariantModal({{ $product->id }})">Add Variant</button>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column flex-md-row gap-1">
+                                    <button class="btn btn-sm btn-warning"
+                                        wire:click="edit({{ $product->id }})">Edit</button>
+                                    <button class="btn btn-sm btn-danger"
+                                        wire:click="delete({{ $product->id }})">Delete</button>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <!-- Product Modal -->
+        <div class="modal fade {{ $showModal ? 'show d-block' : '' }}" tabindex="-1"
+            style="{{ $showModal ? 'background: rgba(0,0,0,0.5)' : '' }}">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ $isEditMode ? 'Edit Product' : 'Add Product' }}</h5>
+                        <button type="button" class="btn-close" wire:click="closeModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control @error('name') is-invalid @enderror" id="name"
+                                    wire:model="name">
+                                @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control @error('description') is-invalid @enderror"
+                                    id="description" wire:model="description"></textarea>
+                                @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="price" class="form-label">Price</label>
+                                    <input type="number" step="0.01"
+                                        class="form-control @error('price') is-invalid @enderror" id="price"
+                                        wire:model="price">
+                                    @error('price') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="discount_price" class="form-label">Discount Price</label>
+                                    <input type="number" step="0.01"
+                                        class="form-control @error('discount_price') is-invalid @enderror"
+                                        id="discount_price" wire:model="discount_price">
+                                    @error('discount_price') <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="quantity" class="form-label">Quantity</label>
+                                    <input type="number" class="form-control @error('quantity') is-invalid @enderror"
+                                        id="quantity" wire:model="quantity">
+                                    @error('quantity') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="sku" class="form-label">SKU</label>
+                                    <input type="text" class="form-control @error('sku') is-invalid @enderror" id="sku"
+                                        wire:model="sku">
+                                    @error('sku') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="category_id" class="form-label">Category</label>
+                                    <select class="form-control @error('category_id') is-invalid @enderror"
+                                        id="category_id" wire:model="category_id">
+                                        <option value="">Select Category</option>
+                                        @foreach (\App\Models\Category::all() as $category)
+                                            <option value="{{ $category->id }}">{{ $category->title }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="brand_id" class="form-label">Brand</label>
+                                    <select class="form-control @error('brand_id') is-invalid @enderror" id="brand_id"
+                                        wire:model="brand_id">
+                                        <option value="">Select Brand</option>
+                                        @foreach (\App\Models\Brand::all() as $brand)
+                                            <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('brand_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="images" class="form-label">Images</label>
+                                <input type="file" class="form-control @error('images.*') is-invalid @enderror"
+                                    id="images" wire:model="images" multiple>
+                                @error('images.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="status" wire:model="status">
+                                    <label class="form-check-label" for="status">Active</label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" wire:click="closeModal">Close</button>
+                        <button type="button" class="btn btn-primary btn-sm"
+                            wire:click="save">{{ $isEditMode ? 'Update' : 'Save' }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Upload Modal -->
+        <div class="modal fade {{ $showImageModal ? 'show d-block' : '' }}" tabindex="-1"
+            style="{{ $showImageModal ? 'background: rgba(0,0,0,0.5)' : '' }}">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Images</h5>
+                        <button type="button" class="btn-close" wire:click="closeModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="image_upload" class="form-label">Upload Images</label>
+                                <input type="file" class="form-control @error('images.*') is-invalid @enderror"
+                                    id="image_upload" wire:model="images" multiple>
+                                @error('images.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" wire:click="closeModal">Close</button>
+                        <button type="button" class="btn btn-primary btn-sm" wire:click="saveImages">Save
+                            Images</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variant Modal -->
+        <div class="modal fade {{ $showVariantModal ? 'show d-block' : '' }}" tabindex="-1"
+            style="{{ $showVariantModal ? 'background: rgba(0,0,0,0.5)' : '' }}">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ $isVariantEditMode ? 'Edit Variant' : 'Add Variant' }}</h5>
+                        <button type="button" class="btn-close" wire:click="closeModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="variant_type" class="form-label">Variant Type (e.g., Color,
+                                        Size)</label>
+                                    <input type="text" class="form-control @error('variant_type') is-invalid @enderror"
+                                        id="variant_type" wire:model="variant_type">
+                                    @error('variant_type') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="variant_name" class="form-label">Variant Name (e.g., Red, Large)</label>
+                                    <input type="text" class="form-control @error('variant_name') is-invalid @enderror"
+                                        id="variant_name" wire:model="variant_name">
+                                    @error('variant_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="variant_price" class="form-label">Price</label>
+                                    <input type="number" step="0.01"
+                                        class="form-control @error('variant_price') is-invalid @enderror"
+                                        id="variant_price" wire:model="variant_price">
+                                    @error('variant_price') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-12 col-md-6 mb-3">
+                                    <label for="variant_stock" class="form-label">Stock</label>
+                                    <input type="number"
+                                        class="form-control @error('variant_stock') is-invalid @enderror"
+                                        id="variant_stock" wire:model="variant_stock">
+                                    @error('variant_stock') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="variant_sku" class="form-label">SKU</label>
+                                <input type="text" class="form-control @error('variant_sku') is-invalid @enderror"
+                                    id="variant_sku" wire:model="variant_sku">
+                                @error('variant_sku') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="variant_image" class="form-label">Variant Image</label>
+                                <input type="file" class="form-control @error('variant_image') is-invalid @enderror"
+                                    id="variant_image" wire:model="variant_image">
+                                @error('variant_image') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" wire:click="closeModal">Close</button>
+                        <button type="button" class="btn btn-primary btn-sm"
+                            wire:click="saveVariant">{{ $isVariantEditMode ? 'Update' : 'Save' }}</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

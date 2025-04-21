@@ -13,24 +13,18 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 200);
+            $table->string('name');
             $table->string('slug')->unique();
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->foreignId('brand_id')->nullable()->constrained()->onDelete('set null');
-            $table->decimal('unit_price', 10, 2);
-            $table->text('description')->nullable();
-            $table->string('thumbnail_img')->nullable();
-            $table->integer('current_stock')->default(0);
-            $table->boolean('published')->default(true);
-            $table->decimal('discount', 10, 2)->nullable();
-            $table->enum('discount_type', ['flat', 'percent'])->nullable();
-            $table->string('tags')->nullable();
-            $table->string('meta_title', 255)->nullable();
-            $table->text('meta_description')->nullable();
-            $table->decimal('shipping_cost', 10, 2)->nullable();
-            $table->integer('min_qty')->default(1);
+            $table->longText('description')->nullable();
+            $table->decimal('price', 10, 2)->nullable();
+            $table->decimal('discount_price', 10, 2)->nullable();
+            $table->integer('quantity')->default(0)->nullable();
+            $table->string('sku')->nullable();
+            $table->foreignId('category_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('brand_id')->nullable()->constrained()->onDelete('cascade');
+            $table->boolean('status')->default(false);
             $table->timestamps();
-            $table->softDeletes();
+
         });
     
     }
