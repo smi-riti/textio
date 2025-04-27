@@ -23,7 +23,7 @@
                 <h2 class="text-2xl lg:text-3xl font-bold text-center mb-8 text-black">Create Your Perfect Product</h2>
                 <div class="flex flex-col lg:flex-row items-center gap-8">
                     <div class="lg:w-1/2">
-                        <img src="{{ asset('assets/design.png') }}" alt="Design Tool" class=" w-full">
+                        <img src="" alt="Design Tool" class=" w-full">
                     </div>
                     <div class="lg:w-1/2">
                         <h3 class="text-xl font-semibold text-black mb-4">Easy Customization Tool</h3>
@@ -103,12 +103,14 @@
                     <h2 class="text-2xl lg:text-3xl font-bold text-black">Popular Products</h2>
                     <a href="/products" class="text-gray-700 hover:text-black font-medium">View All</a>
                 </div>
+                @foreach ($products as $item)
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Product Card 1 -->
                     <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-                        <img src="/api/placeholder/300/200" alt="Business Cards" class="w-full h-48 object-cover">
+                        <img src="{{ Storage::url($item->images->first()->image_path) }}" alt="Business Cards" class="w-full h-48 object-cover">
+
                         <div class="p-4">
-                            <h3 class="text-lg font-semibold text-black mb-2">Premium Business Cards</h3>
+                            <h3 class="text-lg font-semibold text-black mb-2">{{$item->name}}</h3>
                             <p class="text-gray-700 text-sm mb-2">Choose from matte, glossy, or soft-touch finishes.</p>
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-xl font-bold text-black">From $10</span>
@@ -157,6 +159,7 @@
                         </div>
                     </div>
                 </div>
+                @endforeach
             </div>
         </section>
 
