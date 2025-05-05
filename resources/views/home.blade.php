@@ -195,7 +195,7 @@
                 </div>
             </div>
             <!-- Slide 2 -->
-            <div class="swiper-slide relative">
+            {{-- <div class="swiper-slide relative">
                 <div class="bg-gradient-to-r from-pink-500 to-red-600 h-96 md:h-[500px]">
                     <div class="container mx-auto px-4 h-full flex items-center">
                         <div class="w-full md:w-1/2 text-white">
@@ -211,7 +211,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>
@@ -1095,7 +1095,7 @@
     </button>
 
     <!-- Scripts -->
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    {{-- <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
         // Initialize Swiper
         var swiper = new Swiper('.hero-slider', {
@@ -1127,6 +1127,6 @@
                 behavior: 'smooth'
             });
         });
-    </script>
+    </script> --}}
 </body>
 </html>
