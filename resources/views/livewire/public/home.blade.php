@@ -1,18 +1,28 @@
 <div class="bg-gray-200 font-sans">
     <div class="min-h-screen">
         <!-- Hero Section with Customization Call-to-Action -->
-        <section class="bg-gradient-to-r from-gray-400 to-black text-white py-12">
-            <div class="container mx-auto px-4 flex flex-col lg:flex-row items-center">
-                <div class="lg:w-1/2 text-center lg:text-left">
-                    <h1 class="text-3xl lg:text-5xl font-bold mb-4">Design Your Brand Today!</h1>
-                    <p class="text-lg mb-6">Create custom business cards, posters, apparel, and more with our easy-to-use design tools.</p>
-                    <div class="flex justify-center lg:justify-start gap-4">
-                        <a href="/design" class="bg-white text-black font-semibold px-8 py-3 rounded-md hover:bg-gray-300 transition">Start Designing</a>
-                        <a href="/products" class="border-2 border-white text-white font-semibold px-8 py-3 rounded-md hover:bg-white hover:text-black transition">Explore Products</a>
+        <section class="bg-gradient-to-r from-gray-800 via-gray-900 to-black text-white py-16 md:py-20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-8">
+                <!-- Text Content -->
+                <div class="lg:w-1/2 text-center lg:text-left space-y-6">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
+                        Build Your Brand Identity
+                    </h1>
+                    <p class="text-lg sm:text-xl text-gray-300 max-w-md mx-auto lg:mx-0">
+                        Design stunning business cards, posters, apparel, and more with our intuitive, professional tools.
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+                        <a href="/design" class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-lg shadow-md hover:bg-indigo-700 transition duration-300">
+                            Start Designing Now
+                        </a>
+                        <a href="/products" class="border-2 border-indigo-500 text-indigo-400 font-semibold px-8 py-3 rounded-lg hover:bg-indigo-500 hover:text-white transition duration-300">
+                            Explore Our Products
+                        </a>
                     </div>
                 </div>
-                <div class="lg:w-1/2 mt-6 lg:mt-0">
-                    <img src="{{ 'assets/brand.png' }}" alt="Custom Design Banner" class="h-74 w-74">
+                <!-- Image -->
+                <div class="lg:w-1/2 mt-8 lg:mt-0 flex justify-center">
+                    <img src="assets/brand.png" alt="Custom Design Banner" class="w-full max-w-md lg:max-w-lg object-contain rounded-lg shadow-xl">
                 </div>
             </div>
         </section>

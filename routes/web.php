@@ -36,6 +36,10 @@ Route::get('/product-add', function () {
     return view('admin.products.create');
 })->name('product-add');
 
+Route::get('/home', function () {
+    return view('home');
+});
+
 
 Route::get('/brand-list', function () {
     return view('admin.brand.list');
