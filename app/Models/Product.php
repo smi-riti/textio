@@ -37,12 +37,38 @@ class Product extends Model
         $this->attributes['name'] = $value;
         $this->attributes['slug'] = \Str::slug($value);
     }
+    public function getFormattedDiscountPriceAttribute()
+    {
+        return '₹' . number_format($this->discount_price, 2);
+    }
+
+    public function getFormattedPriceAttribute()
+    {
+        return '₹' . number_format($this->price, 2);
+    }
+
+
+    public function getSavingPercentageAttribute(){
+        if($this->price <= 0){
+            return 0;
+        }
+
+        $discountPrice = $this->discount_price ?? $this->price;
+        $saving = $this->price - $discountPrice;
+
+        $percentage = ($saving/$this->price) * 100;
+
+        return number_format($percentage, 2);
+    }
+
     public function images()
     {
-        return $this->hasMany(ProductImage::class);
+        return $this->hasMany(ProductImage::class, "product_id", "id");
     }
+
+ 
     public function variants()
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(ProductVariant::class, "product_id", "id");
     }
 }
