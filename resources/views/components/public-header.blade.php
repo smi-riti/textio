@@ -109,38 +109,13 @@
     </div>
 </nav> --}}
  <!-- Top Bar -->
- <div class="bg-gray-900 text-white py-2">
-    <div class="container mx-auto px-4 flex justify-between items-center">
-        <div class="text-sm">
-            <span class="mr-4"><i class="fas fa-phone-alt mr-1"></i> +1 (555) 123-4567</span>
-            <span><i class="fas fa-envelope mr-1"></i> support@shopelite.com</span>
-        </div>
-        <div class="text-sm flex items-center">
-            <a href="#" class="mr-4 hover:text-gray-300">Track Order</a>
-            <a href="#" class="mr-4 hover:text-gray-300">Help</a>
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="flex items-center hover:text-gray-300">
-                    <span>USD</span>
-                    <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                </button>
-                <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 py-2 w-24 bg-white shadow-lg rounded-lg z-40 text-gray-800">
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">USD</a>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">EUR</a>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">GBP</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Header -->
-<header class="bg-white shadow-md">
+ <header class="bg-white shadow-md">
     <div class="container mx-auto px-4">
         <!-- Middle Header -->
-        <div class="py-4 flex items-center justify-between">
-            <a href="#" class="text-3xl font-bold text-indigo-600">Tex<span class="text-gray-800">tio</span></a>
+        <div class="py-4 flex items-center justify-between flex-wrap">
+            <a href="#" class="text-2xl sm:text-3xl font-bold text-indigo-600">Tex<span class="text-gray-800">tio</span></a>
             
-            <div class="w-full max-w-xl px-4">
+            <div class="w-full max-w-xl px-4 hidden md:block">
                 <div class="relative">
                     <input type="text" placeholder="Search for products..." class="w-full py-2 pl-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:border-indigo-500">
                     <button class="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-indigo-600">
@@ -149,82 +124,46 @@
                 </div>
             </div>
             
-            <div class="flex items-center space-x-6">
-                <a href="#" class="flex items-center hover:text-indigo-600">
-                    <i class="far fa-heart text-xl"></i>
-                    <span class="ml-1">Wishlist</span>
-                </a>
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="flex items-center hover:text-indigo-600">
-                        <i class="far fa-user text-xl"></i>
-                        <span class="ml-1">Account</span>
-                    </button>
-                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 py-2 w-48 bg-white shadow-lg rounded-lg z-40">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Sign In</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Register</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">My Orders</a>
+            <div class="flex items-center space-x-4 md:space-x-6">
+                <button class="md:hidden" x-on:click="mobileMenuOpen = !mobileMenuOpen">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <div class="hidden md:flex items-center space-x-4 md:space-x-6">
+                    <a href="#" class="flex items-center hover:text-indigo-600">
+                        <i class="far fa-heart text-xl"></i>
+                        <span class="ml-1">Wishlist</span>
+                    </a>
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="flex items-center hover:text-indigo-600">
+                            <i class="far fa-user text-xl"></i>
+                            <span class="ml-1">Account</span>
+                        </button>
+                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 py-2 w-48 bg-white shadow-lg rounded-lg z-40">
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Sign In</a>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100">Register</a>
+                            <a href="#" class="block px-4 py-2 hover:bg-gray-100">My Orders</a>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <a href="#" class="flex items-center hover:text-indigo-600">
+                            <i class="fas fa-shopping-cart text-xl"></i>
+                            <span class="ml-1">Cart</span>
+                            <span class="ml-1 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                        </a>
                     </div>
                 </div>
-                <div class="relative">
-                    <a href="#" class="flex items-center hover:text-indigo-600">
-                        <i class="fas fa-shopping-cart text-xl"></i>
-                        <span class="ml-1">Cart</span>
-                        <span class="ml-1 bg-indigo-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-                    </a>
-                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Search -->
+        <div class="w-full px-4 md:hidden mb-4">
+            <div class="relative">
+                <input type="text" placeholder="Search for products..." class="w-full py-2 pl-4 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:border-indigo-500">
+                <button class="absolute right-0 top-0 h-full px-4 text-gray-500 hover:text-indigo-600">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
         </div>
     </div>
-    
-    <!-- Navigation Bar -->
-    <nav class="bg-indigo-600 text-white">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center">
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="flex items-center px-6 py-3 bg-indigo-700 text-white">
-                        <i class="fas fa-bars mr-2"></i>
-                        <span>All Categories</span>
-                    </button>
-                    <div x-show="open" @click.away="open = false" class="absolute left-0 mt-0 w-64 bg-white shadow-lg z-40 text-gray-800">
-                        <a href="#" class="block px-4 py-3 border-b hover:bg-gray-100 flex items-center">
-                            <i class="fas fa-tshirt w-6"></i>
-                            <span>Clothing</span>
-                        </a>
-                        <a href="#" class="block px-4 py-3 border-b hover:bg-gray-100 flex items-center">
-                            <i class="fas fa-mobile-alt w-6"></i>
-                            <span>Electronics</span>
-                        </a>
-                        <a href="#" class="block px-4 py-3 border-b hover:bg-gray-100 flex items-center">
-                            <i class="fas fa-couch w-6"></i>
-                            <span>Home & Furniture</span>
-                        </a>
-                        <a href="#" class="block px-4 py-3 border-b hover:bg-gray-100 flex items-center">
-                            <i class="fas fa-heartbeat w-6"></i>
-                            <span>Health & Beauty</span>
-                        </a>
-                        <a href="#" class="block px-4 py-3 border-b hover:bg-gray-100 flex items-center">
-                            <i class="fas fa-basketball-ball w-6"></i>
-                            <span>Sports & Outdoors</span>
-                        </a>
-                        <a href="#" class="block px-4 py-3 hover:bg-gray-100 flex items-center">
-                            <i class="fas fa-ellipsis-h w-6"></i>
-                            <span>View All Categories</span>
-                        </a>
-                    </div>
-                </div>
-                <div class="flex flex-grow">
-                    <a href="#" class="px-4 py-3 hover:bg-indigo-700">Home</a>
-                    <a href="#" class="px-4 py-3 hover:bg-indigo-700">New Arrivals</a>
-                    <a href="#" class="px-4 py-3 hover:bg-indigo-700">Featured</a>
-                    <a href="#" class="px-4 py-3 hover:bg-indigo-700">Trending</a>
-                    <a href="#" class="px-4 py-3 hover:bg-indigo-700">Deals</a>
-                </div>
-                <div>
-                    <a href="#" class="px-4 py-3 flex items-center">
-                        <i class="fas fa-headset mr-1"></i> Customer Support
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
+
 </header>
