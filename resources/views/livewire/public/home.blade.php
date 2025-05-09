@@ -74,60 +74,9 @@
     <section class="container mx-auto px-4 py-12">
         <h2 class="text-2xl md:text-3xl font-bold mb-6">Shop by Category</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-indigo-50">
-                    <img src="https://via.placeholder.com/150" alt="Clothing" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Clothing</h3>
-                    <p class="text-sm text-gray-600">256 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-red-50">
-                    <img src="https://via.placeholder.com/150" alt="Electronics" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Electronics</h3>
-                    <p class="text-sm text-gray-600">189 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-green-50">
-                    <img src="https://via.placeholder.com/150" alt="Furniture" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Furniture</h3>
-                    <p class="text-sm text-gray-600">120 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-yellow-50">
-                    <img src="https://via.placeholder.com/150" alt="Beauty" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Beauty</h3>
-                    <p class="text-sm text-gray-600">78 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-blue-50">
-                    <img src="https://via.placeholder.com/150" alt="Sports" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Sports</h3>
-                    <p class="text-sm text-gray-600">95 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-purple-50">
-                    <img src="https://via.placeholder.com/150" alt="Jewelry" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Jewelry</h3>
-                    <p class="text-sm text-gray-600">45 Products</p>
-                </div>
-            </div>
+            
+            @livewire('public.category-grid')
+
         </div>
     </section>
 
