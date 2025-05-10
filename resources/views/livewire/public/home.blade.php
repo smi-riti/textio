@@ -480,6 +480,7 @@
 
      <!-- Popular Products -->
   @livewire('public.recent-product')
+  
 
     <!-- Latest Blog -->
     <section class="container mx-auto px-4 py-12">

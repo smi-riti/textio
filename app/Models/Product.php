@@ -65,7 +65,10 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class, "product_id", "id");
     }
-
+    public function firstImage()
+    {
+        return $this->hasOne(ProductImage::class)->latest(); 
+    }
  
     public function variants()
     {

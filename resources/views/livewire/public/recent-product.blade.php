@@ -13,7 +13,8 @@
         @foreach ($products as $product)
         <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
             <div class="relative">
-                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
+                <img src="{{ asset('storage/' . $product->images->first()?->image_path) }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
+
                 <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
                     <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
                         <i class="far fa-heart"></i>
@@ -35,10 +36,10 @@
                     <span class="text-sm text-gray-500 ml-2">({{ $product->reviews_count }})</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span class="text-lg font-bold text-indigo-600">${{ number_format($product->price, 2) }}</span>
-                    @if ($product->discount_price)
-                        <span class="text-sm text-gray-400 line-through ml-1">${{ number_format($product->price, 2) }}</span>
-                    @endif
+                    {{-- <span class="text-lg font-bold text-indigo-600">${{ number_format($product->price, 2) }}</span> --}}
+                   
+                        <span class="text-sm text-indigo-600 ml-1">Rs.{{ number_format($product->discount_price, 2) }}</span>
+                   
                     <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
                         Add to Cart
                     </button>
