@@ -74,60 +74,9 @@
     <section class="container mx-auto px-4 py-12">
         <h2 class="text-2xl md:text-3xl font-bold mb-6">Shop by Category</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-indigo-50">
-                    <img src="https://via.placeholder.com/150" alt="Clothing" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Clothing</h3>
-                    <p class="text-sm text-gray-600">256 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-red-50">
-                    <img src="https://via.placeholder.com/150" alt="Electronics" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Electronics</h3>
-                    <p class="text-sm text-gray-600">189 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-green-50">
-                    <img src="https://via.placeholder.com/150" alt="Furniture" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Furniture</h3>
-                    <p class="text-sm text-gray-600">120 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-yellow-50">
-                    <img src="https://via.placeholder.com/150" alt="Beauty" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Beauty</h3>
-                    <p class="text-sm text-gray-600">78 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-blue-50">
-                    <img src="https://via.placeholder.com/150" alt="Sports" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Sports</h3>
-                    <p class="text-sm text-gray-600">95 Products</p>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition">
-                <div class="p-4 bg-purple-50">
-                    <img src="https://via.placeholder.com/150" alt="Jewelry" class="mx-auto">
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="font-semibold">Jewelry</h3>
-                    <p class="text-sm text-gray-600">45 Products</p>
-                </div>
-            </div>
+            
+            @livewire('public.category-grid')
+
         </div>
     </section>
 
@@ -460,81 +409,13 @@
    
 
     <!-- Brands -->
-    <section class="bg-white py-12">
-        <div class="container mx-auto px-4">
-            <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center">Shop by Brand</h2>
-            <div class="flex flex-wrap justify-center items-center gap-8">
-                <div class="grayscale hover:grayscale-0 transition p-4">
-                    <img src="https://via.placeholder.com/150x50?text=Brand+1" alt="Brand" class="h-10">
-                </div>
-                <div class="grayscale hover:grayscale-0 transition p-4">
-                    <img src="https://via.placeholder.com/150x50?text=Brand+2" alt="Brand" class="h-10">
-                </div>
-                <div class="grayscale hover:grayscale-0 transition p-4">
-                    <img src="https://via.placeholder.com/150x50?text=Brand+3" alt="Brand" class="h-10">
-                </div>
-                <div class="grayscale hover:grayscale-0 transition p-4">
-                    <img src="https://via.placeholder.com/150x50?text=Brand+4" alt="Brand" class="h-10">
-                </div>
-                <div class="grayscale hover:grayscale-0 transition p-4">
-                    <img src="https://via.placeholder.com/150x50?text=Brand+5" alt="Brand" class="h-10">
-                </div>
-                <div class="grayscale hover:grayscale-0 transition p-4">
-                    <img src="https://via.placeholder.com/150x50?text=Brand+6" alt="Brand" class="h-10">
-                </div>
-            </div>
-        </div>
-    </section>
+  @livewire('public.brand-display')
 
 
      <!-- Popular Products -->
-     <section class="container mx-auto px-4 py-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-bold">Popular Products</h2>
-            <div class="space-x-2">
-                <button class="px-3 py-1 bg-indigo-600 text-white rounded-md">All</button>
-                <button class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md">New</button>
-                <button class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md">Featured</button>
-                <button class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md">Sale</button>
-            </div>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            @foreach($popularProducts as $product)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                    <div class="relative">
-                        <img src="{{ $product->images->first()->url ?? 'https://via.placeholder.com/300' }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? 'Uncategorized' }}</div>
-                        <h3 class="font-medium mb-1">{{ $product->name }}</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <i class="{{ $i <= $product->average_rating ? 'fas fa-star' : 'far fa-star' }}"></i>
-                                @endfor
-                            </div>
-                            <span class="text-sm text-gray-500 ml-2">({{ $product->reviews_count ?? 0 }})</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-lg font-bold text-indigo-600">${{ number_format($product->price, 2) }}</span>
-                            <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </section>
+  @livewire('public.recent-product')
+  
+
     <!-- Latest Blog -->
     <section class="container mx-auto px-4 py-12">
         <div class="flex justify-between items-center mb-6">

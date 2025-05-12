@@ -65,23 +65,7 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class, "product_id", "id");
     }
-    public function getAverageRatingAttribute()
-    {
-        // Replace with actual logic, e.g., average from a reviews table
-        return $this->reviews()->avg('rating') ?? 0;
-    }
 
-    // Optional: Computed property for reviews count
-    public function getReviewsCountAttribute()
-    {
-        // Replace with actual logic
-        return $this->reviews()->count();
-    }
-
-    public function reviews()
-    {
-        return $this->hasMany(ProductReview::class);
-    }
  
     public function variants()
     {
