@@ -333,22 +333,29 @@
     </section>
 
     <!-- Popular Products -->
-    <section class="container mx-auto px-4 py-12">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-bold">Popular Products</h2>
-            <div class="space-x-2">
-                <button class="px-3 py-1 bg-indigo-600 text-white rounded-md">All</button>
-                <button class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md">New</button>
-                <button class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md">Featured</button>
-                <button class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md">Sale</button>
-            </div>
+   <!-- Popular Products -->
+<section class="container mx-auto px-4 py-12">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold">Popular Products</h2>
+        <div class="space-x-2">
+            <button wire:click="updatePopularFilter('all')" class="px-3 py-1 {{ $popularFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">All</button>
+            <button wire:click="updatePopularFilter('new')" class="px-3 py-1 {{ $popularFilter === 'new' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">New</button>
+            <button wire:click="updatePopularFilter('sale')" class="px-3 py-1 {{ $popularFilter === 'sale' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">Sale</button>
         </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            <!-- Product 1 -->
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        @forelse($popularProducts as $product)
             <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
                 <div class="relative">
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
+                    @if($product->discount_price)
+                        <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">
+                            -{{ number_format(($product->price - $product->discount_price) / $product->price * 100, 0) }}%
+                        </span>
+                    @elseif($product->created_at->diffInDays(now()) <= 7)
+                        <span class="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 product-badge">New</span>
+                    @endif
+                    <img src="{{ $product->images->first()->url ?? 'https://via.placeholder.com/300' }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
                     <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
                         <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
                             <i class="far fa-heart"></i>
@@ -359,169 +366,96 @@
                     </div>
                 </div>
                 <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Electronics</div>
-                    <h3 class="font-medium mb-1">Smartphone X Pro</h3>
+                    <div class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? 'Uncategorized' }}</div>
+                    <h3 class="font-medium mb-1">{{ $product->name }}</h3>
                     <div class="flex items-center mb-2">
                         <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="{{ $i <= ($product->average_rating ?? 0) ? 'fas fa-star' : 'far fa-star' }}"></i>
+                            @endfor
                         </div>
-                        <span class="text-sm text-gray-500 ml-2">(125)</span>
+                        <span class="text-sm text-gray-500 ml-2">({{ $product->reviews_count ?? 0 }})</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$899.99</span>
+                        <div>
+                            <span class="text-lg font-bold text-indigo-600">${{ number_format($product->discount_price ?? $product->price, 2) }}</span>
+                            @if($product->discount_price)
+                                <span class="text-sm text-gray-400 line-through ml-1">${{ number_format($product->price, 2) }}</span>
+                            @endif
+                        </div>
                         <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
                             Add to Cart
                         </button>
                     </div>
                 </div>
             </div>
-            
-            <!-- Product 2 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Clothing</div>
-                    <h3 class="font-medium mb-1">Formal Slim Fit Shirt</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2">(84)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$49.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 3 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Home</div>
-                    <h3 class="font-medium mb-1">Modern Coffee Table</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2">(62)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$199.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 4 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <span class="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 product-badge">New</span>
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Sports</div>
-                    <h3 class="font-medium mb-1">Running Shoes</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2">(38)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$129.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 5 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Jewelry</div>
-                    <h3 class="font-medium mb-1">Silver Necklace</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2">(94)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$79.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
+        @empty
+            <p class="text-gray-600">No popular products available.</p>
+        @endforelse
+    </div>
+</section>
+
+<!-- Recent Products -->
+<section class="container mx-auto px-4 py-12">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold">Recent Products</h2>
+        <div class="space-x-2">
+            <button wire:click="updateRecentFilter('all')" class="px-3 py-1 {{ $recentFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">All</button>
+            <button wire:click="updateRecentFilter('new')" class="px-3 py-1 {{ $recentFilter === 'new' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">New</button>
+            <button wire:click="updateRecentFilter('sale')" class="px-3 py-1 {{ $recentFilter === 'sale' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">Sale</button>
         </div>
-    </section>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        @forelse($recentProducts as $product)
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
+                <div class="relative">
+                    @if($product->discount_price)
+                        <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">
+                            -{{ number_format(($product->price - $product->discount_price) / $product->price * 100, 0) }}%
+                        </span>
+                    @elseif($product->created_at->diffInDays(now()) <= 7)
+                        <span class="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 product-badge">New</span>
+                    @endif
+                    <img src="{{ $product->images->first()->url ?? 'https://via.placeholder.com/300' }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
+                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
+                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? 'Uncategorized' }}</div>
+                    <h3 class="font-medium mb-1">{{ $product->name }}</h3>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-yellow-400">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="{{ $i <= ($product->average_rating ?? 0) ? 'fas fa-star' : 'far fa-star' }}"></i>
+                            @endfor
+                        </div>
+                        <span class="text-sm text-gray-500 ml-2">({{ $product->reviews_count ?? 0 }})</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-lg font-bold text-indigo-600">${{ number_format($product->discount_price ?? $product->price, 2) }}</span>
+                            @if($product->discount_price)
+                                <span class="text-sm text-gray-400 line-through ml-1">${{ number_format($product->price, 2) }}</span>
+                            @endif
+                        </div>
+                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @empty
+            <p class="text-gray-600">No recent products available.</p>
+        @endforelse
+    </div>
+</section>
 
    
 
@@ -556,7 +490,7 @@
      <!-- Popular Products -->
      <section class="container mx-auto px-4 py-12">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-bold">Recent Products</h2>
+            <h2 class="text-2xl md:text-3xl font-bold">Popular Products</h2>
             <div class="space-x-2">
                 <button class="px-3 py-1 bg-indigo-600 text-white rounded-md">All</button>
                 <button class="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md">New</button>
@@ -566,184 +500,41 @@
         </div>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            <!-- Product 1 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Electronics</div>
-                    <h3 class="font-medium mb-1">Smartphone X Pro</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
+            @foreach($popularProducts as $product)
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
+                    <div class="relative">
+                        <img src="{{ $product->images->first()->url ?? 'https://via.placeholder.com/300' }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
+                        <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
+                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fas fa-search"></i>
+                            </button>
                         </div>
-                        <span class="text-sm text-gray-500 ml-2">(125)</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$899.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 2 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Clothing</div>
-                    <h3 class="font-medium mb-1">Formal Slim Fit Shirt</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
+                    <div class="p-4">
+                        <div class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? 'Uncategorized' }}</div>
+                        <h3 class="font-medium mb-1">{{ $product->name }}</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="{{ $i <= $product->average_rating ? 'fas fa-star' : 'far fa-star' }}"></i>
+                                @endfor
+                            </div>
+                            <span class="text-sm text-gray-500 ml-2">({{ $product->reviews_count ?? 0 }})</span>
                         </div>
-                        <span class="text-sm text-gray-500 ml-2">(84)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$49.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 3 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Home</div>
-                    <h3 class="font-medium mb-1">Modern Coffee Table</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-bold text-indigo-600">${{ number_format($product->price, 2) }}</span>
+                            <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
+                                Add to Cart
+                            </button>
                         </div>
-                        <span class="text-sm text-gray-500 ml-2">(62)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$199.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Product 4 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <span class="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 product-badge">New</span>
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Sports</div>
-                    <h3 class="font-medium mb-1">Running Shoes</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="far fa-star"></i>
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2">(38)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$129.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Product 5 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">Jewelry</div>
-                    <h3 class="font-medium mb-1">Silver Necklace</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2">(94)</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-lg font-bold text-indigo-600">$79.99</span>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
+            @endforeach
         </div>
     </section>
-
     <!-- Latest Blog -->
     <section class="container mx-auto px-4 py-12">
         <div class="flex justify-between items-center mb-6">
