@@ -1,6 +1,6 @@
 <div class="bg-gray-50 text-gray-800">
 
-{{-- <x-public-header/> --}}
+    {{-- <x-public-header /> --}}
 
     <!-- Hero Slider -->
     <div class="bg-gray-800">
@@ -11,21 +11,27 @@
                     <div class="container mx-auto px-4 h-full flex items-center">
                         <div class="w-full md:w-1/2 text-white">
                             <h1 class="text-4xl md:text-5xl font-bold mb-4">Summer Collection 2025</h1>
-                            <p class="text-lg mb-6">Discover the latest trends and styles for the summer season. Up to 40% off on selected items.</p>
+                            <p class="text-lg mb-6">Discover the latest trends and styles for the summer season. Up to
+                                40% off on selected items.</p>
                             <div class="flex space-x-4">
-                                <a href="#" class="px-6 py-3 bg-white text-indigo-600 font-medium rounded-lg hover:bg-gray-100 transition">Shop Now</a>
-                                <a href="#" class="px-6 py-3 border border-white text-white font-medium rounded-lg hover:bg-white hover:text-indigo-600 transition">View Collection</a>
+                                <a href="#"
+                                    class="px-6 py-3 bg-white text-indigo-600 font-medium rounded-lg hover:bg-gray-100 transition">Shop
+                                    Now</a>
+                                <a href="#"
+                                    class="px-6 py-3 border border-white text-white font-medium rounded-lg hover:bg-white hover:text-indigo-600 transition">View
+                                    Collection</a>
                             </div>
                         </div>
                         <div class="hidden md:block w-1/2">
-                            <img src="https://via.placeholder.com/600x400" alt="Summer Collection" class="ml-auto animate-float">
+                            <img src="https://via.placeholder.com/600x400" alt="Summer Collection"
+                                class="ml-auto animate-float">
                         </div>
                     </div>
                 </div>
             </div>
-          
+
         </div>
-       
+
     </div>
 
     <!-- Features -->
@@ -74,419 +80,114 @@
     <section class="container mx-auto px-4 py-12">
         <h2 class="text-2xl md:text-3xl font-bold mb-6">Shop by Category</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            
+
             @livewire('public.category-grid')
 
         </div>
     </section>
 
-    <!-- Flash Sale -->
-    <section class="bg-gray-100 py-12">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center mb-6">
-                <div class="flex items-center">
-                    <h2 class="text-2xl md:text-3xl font-bold">Flash Sale</h2>
-                    <div class="ml-4 sale-timer px-4 py-2 rounded-lg text-white flex items-center">
-                        <i class="far fa-clock mr-2"></i>
-                        <span>Ends in: </span>
-                        <span class="ml-2 font-mono">23:59:59</span>
-                    </div>
-                </div>
-                <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">View All</a>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Product 1 -->
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                    <div class="relative">
-                        <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">-40%</span>
-                        <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="text-sm text-gray-500 mb-1">Electronics</div>
-                        <h3 class="font-medium mb-1">Wireless Bluetooth Headphones</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
-                            <span class="text-sm text-gray-500 ml-2">(45)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-lg font-bold text-indigo-600">$59.99</span>
-                                <span class="text-sm text-gray-400 line-through ml-1">$99.99</span>
-                            </div>
-                            <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Product 2 -->
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                    <div class="relative">
-                        <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">-25%</span>
-                        <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="text-sm text-gray-500 mb-1">Fashion</div>
-                        <h3 class="font-medium mb-1">Men's Casual Jacket</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                            </div>
-                            <span class="text-sm text-gray-500 ml-2">(32)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-lg font-bold text-indigo-600">$74.99</span>
-                                <span class="text-sm text-gray-400 line-through ml-1">$99.99</span>
-                            </div>
-                            <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Product 3 -->
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                    <div class="relative">
-                        <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">-50%</span>
-                        <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="text-sm text-gray-500 mb-1">Home</div>
-                        <h3 class="font-medium mb-1">Smart LED Table Lamp</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <span class="text-sm text-gray-500 ml-2">(78)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-lg font-bold text-indigo-600">$29.99</span>
-                                <span class="text-sm text-gray-400 line-through ml-1">$59.99</span>
-                            </div>
-                            <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Product 4 -->
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                    <div class="relative">
-                        <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">-30%</span>
-                        <img src="https://via.placeholder.com/300" alt="Product" class="w-full h-48 object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="p-4">
-                        <div class="text-sm text-gray-500 mb-1">Beauty</div>
-                        <h3 class="font-medium mb-1">Luxury Skincare Set</h3>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                            </div>
-                            <span class="text-sm text-gray-500 ml-2">(56)</span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <span class="text-lg font-bold text-indigo-600">$69.99</span>
-                                <span class="text-sm text-gray-400 line-through ml-1">$99.99</span>
-                            </div>
-                            <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Banner -->
-    <section class="container mx-auto px-4 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="relative rounded-lg overflow-hidden h-64 shadow-lg">
-                <img src="https://via.placeholder.com/800x400" alt="Banner" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-600/80 to-transparent flex items-center">
-                    <div class="p-8 text-white">
-                        <h3 class="text-2xl font-bold mb-2">New Season Arrivals</h3>
-                        <p class="mb-4">Check out the latest styles and trends</p>
-                        <a href="#" class="bg-white text-blue-600 px-4 py-2 rounded-full font-medium hover:bg-blue-50 transition">Shop Now</a>
-                    </div>
-                </div>
-            </div>
-            <div class="relative rounded-lg overflow-hidden h-64 shadow-lg">
-                <img src="https://via.placeholder.com/800x400" alt="Banner" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-r from-purple-600/80 to-transparent flex items-center">
-                    <div class="p-8 text-white">
-                        <h3 class="text-2xl font-bold mb-2">Electronics Sale</h3>
-                        <p class="mb-4">Get up to 40% off on selected items</p>
-                        <a href="#" class="bg-white text-purple-600 px-4 py-2 rounded-full font-medium hover:bg-purple-50 transition">Shop Now</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Popular Products -->
-   <!-- Popular Products -->
-<section class="container mx-auto px-4 py-12">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl md:text-3xl font-bold">Popular Products</h2>
-        <div class="space-x-2">
-            <button wire:click="updatePopularFilter('all')" class="px-3 py-1 {{ $popularFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">All</button>
-            <button wire:click="updatePopularFilter('new')" class="px-3 py-1 {{ $popularFilter === 'new' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">New</button>
-            <button wire:click="updatePopularFilter('sale')" class="px-3 py-1 {{ $popularFilter === 'sale' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">Sale</button>
-        </div>
-    </div>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        @forelse($popularProducts as $product)
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    @if($product->discount_price)
-                        <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">
-                            -{{ number_format(($product->price - $product->discount_price) / $product->price * 100, 0) }}%
-                        </span>
-                    @elseif($product->created_at->diffInDays(now()) <= 7)
-                        <span class="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 product-badge">New</span>
-                    @endif
-                    <img src="{{ $product->images->first()->url ?? 'https://via.placeholder.com/300' }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? 'Uncategorized' }}</div>
-                    <h3 class="font-medium mb-1">{{ $product->name }}</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            @for($i = 1; $i <= 5; $i++)
-                                <i class="{{ $i <= ($product->average_rating ?? 0) ? 'fas fa-star' : 'far fa-star' }}"></i>
-                            @endfor
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2">({{ $product->reviews_count ?? 0 }})</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-lg font-bold text-indigo-600">${{ number_format($product->discount_price ?? $product->price, 2) }}</span>
-                            @if($product->discount_price)
-                                <span class="text-sm text-gray-400 line-through ml-1">${{ number_format($product->price, 2) }}</span>
-                            @endif
-                        </div>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <p class="text-gray-600">No popular products available.</p>
-        @endforelse
-    </div>
-</section>
-
-<!-- Recent Products -->
-<section class="container mx-auto px-4 py-12">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl md:text-3xl font-bold">Recent Products</h2>
-        <div class="space-x-2">
-            <button wire:click="updateRecentFilter('all')" class="px-3 py-1 {{ $recentFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">All</button>
-            <button wire:click="updateRecentFilter('new')" class="px-3 py-1 {{ $recentFilter === 'new' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">New</button>
-            <button wire:click="updateRecentFilter('sale')" class="px-3 py-1 {{ $recentFilter === 'sale' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">Sale</button>
-        </div>
-    </div>
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        @forelse($recentProducts as $product)
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <div class="relative">
-                    @if($product->discount_price)
-                        <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">
-                            -{{ number_format(($product->price - $product->discount_price) / $product->price * 100, 0) }}%
-                        </span>
-                    @elseif($product->created_at->diffInDays(now()) <= 7)
-                        <span class="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 product-badge">New</span>
-                    @endif
-                    <img src="{{ $product->images->first()->url ?? 'https://via.placeholder.com/300' }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
-                    <div class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <div class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? 'Uncategorized' }}</div>
-                    <h3 class="font-medium mb-1">{{ $product->name }}</h3>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            @for($i = 1; $i <= 5; $i++)
-                                <i class="{{ $i <= ($product->average_rating ?? 0) ? 'fas fa-star' : 'far fa-star' }}"></i>
-                            @endfor
-                        </div>
-                        <span class="text-sm text-gray-500 ml-2">({{ $product->reviews_count ?? 0 }})</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-lg font-bold text-indigo-600">${{ number_format($product->discount_price ?? $product->price, 2) }}</span>
-                            @if($product->discount_price)
-                                <span class="text-sm text-gray-400 line-through ml-1">${{ number_format($product->price, 2) }}</span>
-                            @endif
-                        </div>
-                        <button class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition">
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div>
-        @empty
-            <p class="text-gray-600">No recent products available.</p>
-        @endforelse
-    </div>
-</section>
-
-   
-
-    <!-- Brands -->
-  @livewire('public.brand-display')
-
-
-     <!-- Popular Products -->
-  @livewire('public.recent-product')
-  
-
-    <!-- Latest Blog -->
     <section class="container mx-auto px-4 py-12">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-bold">Latest Articles</h2>
-            <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">View All Posts</a>
+            <h2 class="text-2xl md:text-3xl font-bold">Popular Products</h2>
+            <div class="space-x-2">
+                <button wire:click="updatePopularFilter('all')"
+                    class="px-3 py-1 {{ $popularFilter === 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">All</button>
+                <button wire:click="updatePopularFilter('new')"
+                    class="px-3 py-1 {{ $popularFilter === 'new' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">New</button>
+                <button wire:click="updatePopularFilter('sale')"
+                    class="px-3 py-1 {{ $popularFilter === 'sale' ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }} rounded-md">Sale</button>
+            </div>
         </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Blog Post 1 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <img src="https://via.placeholder.com/600x400" alt="Blog" class="w-full h-48 object-cover">
-                <div class="p-6">
-                    <div class="flex items-center text-sm text-gray-500 mb-2">
-                        <i class="far fa-calendar-alt mr-2"></i> May 10, 2025
-                        <span class="mx-2">•</span>
-                        <i class="far fa-comment mr-2"></i> 24 Comments
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            @forelse($popularProducts as $product)
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
+                    <div class="relative">
+                        @if($product->discount_price)
+                            <span class="absolute top-0 right-0 bg-red-500 text-white px-3 py-1 product-badge">
+                                -{{ number_format(($product->price - $product->discount_price) / $product->price * 100, 0) }}%
+                            </span>
+                        @elseif($product->created_at->diffInDays(now()) <= 7)
+                            <span class="absolute top-0 left-0 bg-green-500 text-white px-3 py-1 product-badge">New</span>
+                        @endif
+
+                        <img src="{{ $product->images->first()->url ?? 'https://via.placeholder.com/300' }}"
+                            alt="{{ $product->name }}" class="w-full h-48 object-cover">
+                        <div
+                            class="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition flex items-center justify-center">
+                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <button class="bg-white p-2 rounded-full mx-1 hover:bg-indigo-600 hover:text-white transition">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
                     </div>
-                    <h3 class="font-bold text-xl mb-2">Summer Fashion Trends for 2025</h3>
-                    <p class="text-gray-600 mb-4">Discover the hottest fashion trends for the upcoming summer season and stay ahead of the curve.</p>
-                    <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">Read More →</a>
-                </div>
-            </div>
-            
-            <!-- Blog Post 2 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <img src="https://via.placeholder.com/600x400" alt="Blog" class="w-full h-48 object-cover">
-                <div class="p-6">
-                    <div class="flex items-center text-sm text-gray-500 mb-2">
-                        <i class="far fa-calendar-alt mr-2"></i> May 5, 2025
-                        <span class="mx-2">•</span>
-                        <i class="far fa-comment mr-2"></i> 18 Comments
+                    <div class="p-4">
+                        <div class="text-sm text-gray-500 mb-1">{{ $product->category->name ?? 'Uncategorized' }}</div>
+                        <h3 class="font-medium mb-1">{{ $product->name }}</h3>
+                        <div class="flex items-center mb-2">
+                            <div class="flex text-yellow-400">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <i class="{{ $i <= ($product->average_rating ?? 0) ? 'fas fa-star' : 'far fa-star' }}"></i>
+                                @endfor
+                            </div>
+                            <span class="text-sm text-gray-500 ml-2">({{ $product->reviews_count ?? 0 }})</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <span
+                                    class="text-lg font-bold text-indigo-600">${{ number_format($product->discount_price ?? $product->price, 2) }}</span>
+                                @if($product->discount_price)
+                                    <span
+                                        class="text-sm text-gray-400 line-through ml-1">${{ number_format($product->price, 2) }}</span>
+                                @endif
+                            </div>
+                            <a class="bg-indigo-600 text-white px-3 py-1 rounded-full hover:bg-indigo-700 transition"
+                                href="{{ route('public.product.detail', $product->slug) }}">
+                                Add to Cart
+                            </a>
+                        </div>
                     </div>
-                    <h3 class="font-bold text-xl mb-2">Tech Gadgets You Need in 2025</h3>
-                    <p class="text-gray-600 mb-4">Explore the latest tech gadgets that are revolutionizing how we live, work, and play in 2025.</p>
-                    <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">Read More →</a>
                 </div>
-            </div>
-            
-            <!-- Blog Post 3 -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
-                <img src="https://via.placeholder.com/600x400" alt="Blog" class="w-full h-48 object-cover">
-                <div class="p-6">
-                    <div class="flex items-center text-sm text-gray-500 mb-2">
-                        <i class="far fa-calendar-alt mr-2"></i> April 28, 2025
-                        <span class="mx-2">•</span>
-                        <i class="far fa-comment mr-2"></i> 32 Comments
-                    </div>
-                    <h3 class="font-bold text-xl mb-2">Home Decor Ideas for Small Spaces</h3>
-                    <p class="text-gray-600 mb-4">Transform your small living space with these creative and practical home decor ideas.</p>
-                    <a href="#" class="text-indigo-600 hover:text-indigo-800 font-medium">Read More →</a>
-                </div>
-            </div>
+            @empty
+                <p class="text-gray-600">No popular products available.</p>
+            @endforelse
         </div>
     </section>
+
+
+
+    <!-- Brands -->
+    {{-- @livewire('public.brand-display') --}}
+
+
+    <!-- Popular Products -->
+    @livewire('public.recent-product')
+
 
     <!-- Newsletter -->
     <section class="bg-indigo-600 py-12 text-white">
         <div class="container mx-auto px-4 text-center">
             <h2 class="text-2xl md:text-3xl font-bold mb-2">Subscribe to Our Newsletter</h2>
-            <p class="mb-6 max-w-xl mx-auto">Stay up to date with the latest products, exclusive offers, and news directly to your inbox.</p>
+            <p class="mb-6 max-w-xl mx-auto">Stay up to date with the latest products, exclusive offers, and news
+                directly to your inbox.</p>
             <div class="flex flex-col md:flex-row max-w-xl mx-auto">
-                <input type="email" placeholder="Enter your email" class="w-full md:flex-1 px-4 py-3 rounded-l-lg text-gray-900 focus:outline-none">
-                <button class="mt-2 md:mt-0 px-6 py-3 bg-white text-indigo-600 font-medium rounded-lg md:rounded-l-none md:rounded-r-lg hover:bg-indigo-100 transition">Subscribe</button>
+                <input type="email" placeholder="Enter your email"
+                    class="w-full md:flex-1 px-4 py-3 rounded-l-lg text-gray-900 focus:outline-none">
+                <button
+                    class="mt-2 md:mt-0 px-6 py-3 bg-white text-indigo-600 font-medium rounded-lg md:rounded-l-none md:rounded-r-lg hover:bg-indigo-100 transition">Subscribe</button>
             </div>
         </div>
     </section>
 
-  
+
 
     <!-- Scripts -->
-    {{-- <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    {{--
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <script>
         // Initialize Swiper
         var swiper = new Swiper('.hero-slider', {
@@ -505,14 +206,14 @@
                 prevEl: '.swiper-button-prev',
             },
         });
-        
+
         // Update Sale Timer
         function updateTimer() {
             // Implementation details here
         }
-        
+
         // Scroll to top
-        document.querySelector('.fixed.bottom-6.right-6').addEventListener('click', function() {
+        document.querySelector('.fixed.bottom-6.right-6').addEventListener('click', function () {
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
@@ -522,12 +223,13 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
+
         body {
             font-family: 'Poppins', sans-serif;
         }
-        
-        .swiper-button-next, .swiper-button-prev {
+
+        .swiper-button-next,
+        .swiper-button-prev {
             color: #fff;
             background: rgba(0, 0, 0, 0.5);
             width: 40px;
@@ -536,28 +238,37 @@
             background-position: center;
             background-size: 20px;
         }
-        
-        .swiper-button-next:after, .swiper-button-prev:after {
+
+        .swiper-button-next:after,
+        .swiper-button-prev:after {
             font-size: 16px;
             font-weight: bold;
         }
-        
+
         .product-badge {
             clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 10% 100%, 0% 85%);
         }
-        
+
         .sale-timer {
             background: linear-gradient(90deg, #ff4e50, #f9d423);
         }
-        
+
         .animate-float {
             animation: float 3s ease-in-out infinite;
         }
-        
+
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
         }
     </style>
 </div>

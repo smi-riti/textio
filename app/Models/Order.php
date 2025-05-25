@@ -9,7 +9,10 @@ class Order extends Model
 {
     use HasFactory;
     protected $guarded = [];
-
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
     // to show the discount price in formatted way:
     public function getFormattedDiscountPriceAttribute()
     {
@@ -24,15 +27,16 @@ class Order extends Model
 
 
     // saving percentage calculation here:
-    public function getSavingPercentageAttribute(){
-        if($this->price <= 0){
+    public function getSavingPercentageAttribute()
+    {
+        if ($this->price <= 0) {
             return 0;
         }
 
         $discountPrice = $this->discount_price ?? $this->price;
         $saving = $this->price - $discountPrice;
 
-        $percentage = ($saving/$this->price) * 100;
+        $percentage = ($saving / $this->price) * 100;
 
         return number_format($percentage, 2);
     }
@@ -57,4 +61,10 @@ class Order extends Model
     {
         // return $this->hasMany(Product_Variant::class,"id","product_id");
         return $this->hasMany(ProductVariant::class, "product_id", "id");
-    }}
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+}

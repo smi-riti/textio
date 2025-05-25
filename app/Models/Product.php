@@ -18,7 +18,10 @@ class Product extends Model
         'brand_id',
         'status',
     ];
-  
+  public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
     public function category()
     {
         return $this->belongsTo(Category::class);

@@ -8,7 +8,9 @@ use App\Livewire\Admin\Product\ManageProduct;
 use App\Livewire\Admin\Product\MultipleImages;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Public\Cart;
 use App\Livewire\Public\Home;
+use App\Livewire\Public\ProductDetail;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -25,6 +27,16 @@ Route::prefix('admin')->group(function () {
     Route::get('productImage',MultipleImages::class)->name('admin.product-image');
     Route::get('coupon',ManageCoupon::class)->name('admin.coupon');
 });
+
+Route::middleware('auth')->group(function () {
+    Route::get('/cart/{slug}', Cart::class)->name('public.cart');
+    Route::get('/order-confirmation', function () {
+        return view('order-confirmation'); 
+    })->name('order.confirmation');
+
+    
+});
+Route::get('/product/{slug}', ProductDetail::class)->name('public.product.detail');
 
 Route::get('/dashboard', function () {
     return view('admin.dashboard');
