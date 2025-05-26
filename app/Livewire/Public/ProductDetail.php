@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Public;
 
+use App\Models\Order;
+use App\Models\OrderItem;
 use Livewire\Component;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -17,63 +19,84 @@ class ProductDetail extends Component
 
     public function mount($slug)
     {
-        $this->product = Product::with(['images', 'category', 'brand', 'variants'])->where('slug', $slug)->firstOrFail();
+        $this->product = Product::with(['images', 'category', 'brand', 'variants'])
+            ->where('slug', $slug)
+            ->firstOrFail();
     }
 
     public function addToCart()
     {
+        // Ensure user is authenticated
         if (!Auth::check()) {
-            return redirect()->route('login');
+            session()->flash('error', 'Please log in to add items to your cart.');
+            return $this->redirectRoute('login');
         }
 
-        $product = $this->product;
-        $size_variant_id = $this->size_variant_id ?? null;
-        $color_variant_id = $this->color_variant_id ?? null;
-        $quantity = $this->quantity ?? 1;
+        // Validate inputs
+        $this->validate([
+            'quantity' => 'required|integer|min:1',
+            'size_variant_id' => 'nullable|exists:product_variants,id',
+            'color_variant_id' => 'nullable|exists:product_variants,id',
+        ]);
 
-        // Check stock
-        if ($product->stock < $quantity) {
-            session()->flash('error', 'Not enough stock available.');
-            return;
-        }
-
-        // Find or create order
-        $order = \App\Models\Order::firstOrCreate(
-            ['user_id' => Auth::id(), 'isOrdered' => false],
-            ['order_number' => 'ORD-' . strtoupper(\Illuminate\Support\Str::random(8))]
-        );
-
-        // Find or create order item
-        $orderItem = \App\Models\OrderItem::where([
-            'order_id' => $order->id,
-            'product_id' => $product->id,
-            'size_variant_id' => $size_variant_id,
-            'color_variant_id' => $color_variant_id,
-            'user_id' => Auth::id(),
+        // Check if an open order exists for the user
+        $exist_order = Order::where([
+            ['user_id', Auth::id()],
+            ['isOrdered', false],
         ])->first();
 
-        if ($orderItem) {
-            $orderItem->quantity += $quantity;
-            $orderItem->save();
+        if ($exist_order) {
+            // Check if the item already exists in the order
+            $exist_order_item = OrderItem::where([
+                ['user_id', Auth::id()],
+                ['order_id', $exist_order->id],
+                ['product_id', $this->product->id],
+                ['size_variant_id', $this->size_variant_id],
+                ['color_variant_id', $this->color_variant_id],
+            ])->first();
+
+            if ($exist_order_item) {
+                // Update quantity if item exists
+                $exist_order_item->quantity += $this->quantity;
+                $exist_order_item->save();
+            } else {
+                // Create new order item
+                $order_item = new OrderItem();
+                $order_item->user_id = Auth::id();
+                $order_item->order_id = $exist_order->id;
+                $order_item->product_id = $this->product->id;
+                $order_item->size_variant_id = $this->size_variant_id;
+                $order_item->color_variant_id = $this->color_variant_id;
+                $order_item->quantity = $this->quantity;
+                $order_item->save();
+            }
         } else {
-            \App\Models\OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-                'size_variant_id' => $size_variant_id,
-                'color_variant_id' => $color_variant_id,
-                'quantity' => $quantity,
-                'user_id' => Auth::id(),
-            ]);
+            // Create a new order
+            $order = new Order();
+            $order->user_id = Auth::id();
+            $order->isOrdered = false;
+            $order->order_number = 'ORD-' . strtoupper(Str::random(8));
+            $order->save();
+
+            // Create new order item
+            $order_item = new OrderItem();
+            $order_item->user_id = Auth::id();
+            $order_item->order_id = $order->id;
+            $order_item->product_id = $this->product->id;
+            $order_item->size_variant_id = $this->size_variant_id;
+            $order_item->color_variant_id = $this->color_variant_id;
+            $order_item->quantity = $this->quantity;
+            $order_item->save();
         }
 
-        // Redirect to checkout page (or cart page)
-        return redirect()->route('public.cart', ['slug' => $product->slug]);
+        session()->flash('success', 'Product added to cart successfully!');
+        $this->redirectRoute('public.cart');
     }
 
     public function buyNow()
     {
         $this->addToCart();
-        return redirect()->route('public.cart', ['slug' => $this->product->slug]);
+        return $this->redirectRoute('public.checkout');
     }
 
     public function render()

@@ -1,119 +1,102 @@
-<div class="flex flex-col lg:flex-row gap-6 mt-20 px-[8%]">
-    <div class="flex-1 w-3/4 bg-white p-4 rounded shadow-lg">
-        <h2 class="text-xl font-semibold mb-4">My Cart</h2>
+<div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-12 py-8 mt-[70px]">
+    <!-- Cart Section -->
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-semibold text-gray-800 mb-6">Your Cart</h1>
 
-        @if(session('success'))
-            <div class="bg-green-100 text-green-700 p-2 rounded mb-4">
+        @if ($order && $order->orderItems->count() > 0)
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Cart Items -->
+                @foreach ($order->orderItems as $item)
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-4 mb-4">
+                        <!-- Product Image and Details -->
+                        <div class="flex items-center gap-4">
+                            <img src="{{ asset('image/product/' . $item->product->images->first()->path) }}"
+                                alt="{{ e($item->product->name) }}"
+                                class="w-24 h-24 object-contain rounded-md">
+                            <div>
+                                <h2 class="text-lg font-medium text-gray-800">{{ e($item->product->name) }}</h2>
+                                <p class="text-gray-600">₹{{ $item->product->price }}</p>
+                                @if ($item->size_variant_id)
+                                    <p class="text-sm text-gray-500">Size: {{ $item->sizeVariant->variant_name }}</p>
+                                @endif
+                                @if ($item->color_variant_id)
+                                    <p class="text-sm text-gray-500">Color: {{ $item->colorVariant->variant_name }}</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Quantity and Actions -->
+                        <div class="flex items-center gap-4 mt-4 sm:mt-0">
+                            <div class="flex items-center">
+                                <button
+                                    wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                    class="px-2 py-1 bg-gray-200 text-gray-800 rounded-l-md hover:bg-gray-300"
+                                    aria-label="Decrease quantity"
+                                    @if ($item->quantity <= 1) disabled @endif>
+                                    -
+                                </button>
+                                <input
+                                    type="number"
+                                    wire:model="orderItems.{{ $item->id }}.quantity"
+                                    class="w-16 px-3 py-1 border border-gray-300 text-center"
+                                    min="1"
+                                    aria-label="Quantity"
+                                    readonly>
+                                <button
+                                    wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                    class="px-2 py-1 bg-gray-200 text-gray-800 rounded-r-md hover:bg-gray-300"
+                                    aria-label="Increase quantity">
+                                    +
+                                </button>
+                            </div>
+                            <button
+                                wire:click="removeItem({{ $item->id }})"
+                                class="text-red-600 hover:text-red-800"
+                                aria-label="Remove {{ e($item->product->name) }} from cart">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+
+                <!-- Cart Summary -->
+                <div class="mt-6 flex justify-between items-center">
+                    <div>
+                        <p class="text-lg font-medium text-gray-800">Total Items: {{ $order->orderItems->count() }}</p>
+                        <p class="text-xl font-bold text-gray-800">Total: ₹{{ $this->getTotal() }}</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <a href="{{ route('public.home') }}"
+                           class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition duration-200">
+                            Continue Shopping
+                        </a>
+                        <a href="{{ route('public.home') }}"
+                           class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition duration-200">
+                            Proceed to Checkout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="text-center py-10">
+                <p class="text-lg text-gray-600">Your cart is empty.</p>
+                <a href="{{ route('public.home') }}"
+                   class="mt-4 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition duration-200">
+                    Shop Now
+                </a>
+            </div>
+        @endif
+
+        <!-- Success/Error Messages -->
+        @if (session()->has('success'))
+            <div class="mt-4 p-4 bg-green-100 text-green-800 rounded-md">
                 {{ session('success') }}
             </div>
         @endif
-        @if(session('error'))
-            <div class="bg-red-100 text-red-700 p-2 rounded mb-4">
+        @if (session()->has('error'))
+            <div class="mt-4 p-4 bg-red-100 text-red-800 rounded-md">
                 {{ session('error') }}
             </div>
         @endif
-
-        @if($order && $order->orderItems && $order->orderItems->count() > 0)
-            @foreach ($order->orderItems as $item)
-                <div class="flex items-center border-b py-2 px-6 bg-slate-100 mt-4 rounded-lg shadow-sm">
-                    <div class="w-1/4">
-                        <img src="{{ $item->product->image_url ?? 'https://picsum.photos/1200/400' }}"
-                            alt="{{ $item->product->name }}" class="w-36 h-56 object-cover rounded mr-4">
-
-                        <div class="flex items-center mt-4 text-bold px-8">
-                            <button wire:click="updateQuantity({{ $item->id }}, 'decrement')"
-                                class="bg-gray-300 px-3 py-2 rounded">-</button>
-                            <span class="mx-2 text-lg">{{ $item->quantity }}</span>
-                            <button wire:click="updateQuantity({{ $item->id }}, 'increment')"
-                                class="bg-gray-300 px-3 py-2 rounded">+</button>
-                        </div>
-                    </div>
-
-                    <div class="w-3/4">
-                        <div class="flex flex-col">
-                            <h3 class="font-medium text-lg">{{ $item->product->name }}</h3>
-                            <p class="text-gray-600 text-sm">Brand: {{ $item->product->brand ?? 'N/A' }}</p>
-                            <p class="text-gray-600 text-sm">
-                                Size: {{ $item->size_variant ? $item->size_variant->name : 'N/A' }}
-                            </p>
-                            <div class="flex items-center space-x-4 mt-2">
-                                <span
-                                    class="text-lg font-semibold">₹{{ number_format($item->product->discount_price, 2) }}</span>
-                                <span
-                                    class="text-sm text-gray-500 line-through">₹{{ number_format($item->product->price, 2) }}</span>
-                                <span class="text-sm text-green-500">
-                                    {{ round((($item->product->price - $item->product->discount_price) / $item->product->price) * 100) }}%
-                                    off
-                                </span>
-                            </div>
-                            <div class="flex items-center space-x-4 mt-2">
-                                <button wire:click="saveForLater({{ $item->id }})" class="font-semibold hover:text-blue-500">
-                                    SAVE FOR LATER
-                                </button>
-                                <button wire:click="removeItem({{ $item->id }})" class="font-semibold hover:text-red-500">
-                                    REMOVE
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        @else
-            <p>Your cart is empty.</p>
-        @endif
-
-        <button wire:click="placeOrder"
-            class="bg-yellow-500 text-white mt-4 py-2 px-10 rounded shadow hover:bg-yellow-600 float-end">
-            Place Order
-        </button>
-    </div>
-
-    <div class="w-1/4 bg-white p-4 rounded shadow-lg h-96">
-        <h1 class="text-gray-300 font-black border-b capitalize">PRICE DETAILS</h1>
-        @php
-            $totalPrice = 0;
-            $totalDiscount = 0;
-            $deliveryCharges = ($order && $order->orderItems->count() > 0) ? 0 : 20; // Free delivery for non-empty cart
-            $packagingFee = 30; // Example packaging fee
-            if ($order && $order->orderItems) {
-                foreach ($order->orderItems as $item) {
-                    $totalPrice += $item->product->discount_price * $item->quantity;
-                    $totalDiscount += ($item->product->price - $item->product->discount_price) * $item->quantity;
-                }
-            }
-            $totalAmount = $totalPrice + $deliveryCharges + $packagingFee;
-        @endphp
-        <div class="flex justify-between my-2">
-            <span>Price ({{ $order && $order->orderItems ? $order->orderItems->count() : 0 }} items)</span>
-            <span>₹{{ number_format($totalPrice, 2) }}</span>
-        </div>
-        <div class="flex justify-between my-2">
-            <span>Discount</span>
-            <span class="text-green-500">-₹{{ number_format($totalDiscount, 2) }}</span>
-        </div>
-        <div class="flex justify-between my-2">
-            <span>Delivery Charges</span>
-            <div class="flex gap-2">
-                @if($deliveryCharges > 0)
-                    <span class="line-through">₹{{ number_format($deliveryCharges, 2) }}</span>
-                    <span class="text-green-500">Free</span>
-                @else
-                    <span class="text-green-500">Free</span>
-                @endif
-            </div>
-        </div>
-        <div class="flex justify-between my-2 mt-6">
-            <span>Secured Packaging Fee</span>
-            <span>₹{{ number_format($packagingFee, 2) }}</span>
-        </div>
-        <div class="border-t mt-6 pt-2 flex justify-between font-semibold">
-            <span>Total Amount</span>
-            <span>₹{{ number_format($totalAmount, 2) }}</span>
-        </div>
-        <div class="border-t mt-6">
-            <h2 class="text-green-500 font-lg mt-4">
-                You will save ₹{{ number_format($totalDiscount, 2) }} on this order
-            </h2>
-        </div>
     </div>
 </div>

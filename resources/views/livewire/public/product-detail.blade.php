@@ -1,93 +1,125 @@
-<div class="w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 lg:p-10">
-    <!-- Product Name -->
-    <h1 class="text-3xl sm:text-4xl font-extrabold mb-2 text-gray-900 tracking-tight">{{ $product->name }}</h1>
-    
-    <!-- Category -->
-    <div class="text-base text-indigo-600 mb-4 font-semibold uppercase tracking-wide">{{ $product->category->name ?? 'Uncategorized' }}</div>
-
-    <!-- Pricing -->
-    <div class="flex items-center mb-6 space-x-4">
-        <span class="text-3xl sm:text-4xl font-bold text-indigo-700">₹{{ number_format($product->discount_price ?? $product->price, 2) }}</span>
-        @if($product->discount_price)
-            <span class="text-lg text-gray-400 line-through">₹{{ number_format($product->price, 2) }}</span>
-            <span class="text-sm text-green-700 font-semibold bg-green-100 px-3 py-1 rounded-full">
-                {{ round((($product->price - $product->discount_price) / $product->price) * 100) }}% OFF
-            </span>
-        @endif
-    </div>
-
-    <!-- Rating -->
-    <div class="flex items-center mb-6">
-        <div class="flex text-yellow-500 text-lg space-x-1">
-            @for($i = 1; $i <= 5; $i++)
-                <i class="{{ $i <= ($product->average_rating ?? 0) ? 'fas fa-star' : 'far fa-star' }}" aria-hidden="true"></i>
-            @endfor
-        </div>
-        <span class="text-sm text-gray-600 ml-3">({{ $product->reviews_count ?? 0 }} reviews)</span>
-    </div>
-
-    <!-- Description -->
-    <div class="text-gray-700 mb-8 leading-relaxed text-base">{{ $product->description ?? 'No description available.' }}</div>
-
-    <!-- Variant Selection: Size -->
-    @if($product->size_variants && $product->size_variants->count() > 0)
-        <div class="mb-6">
-            <label for="size_variant" class="block text-sm font-semibold mb-2 text-gray-800">Select Size</label>
-            <select wire:model="size_variant_id" id="size_variant"
-                class="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 transition duration-200">
-                <option value="">Select Size</option>
-                @foreach($product->size_variants as $variant)
-                    <option value="{{ $variant->id }}">{{ $variant->name }}</option>
+<div class="max-w-7xl mx-auto px-6 sm:px-6 lg:px-12 py-8 mt-[70px]">
+    <!-- Product Details Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Product Image -->
+        <div class="px-7 h-[500px]">
+            <img src="{{ asset('image/product/' . $product->images->first()->path) }}"
+                alt="{{ e($product->name) }}"
+                class="w-full h-[370px] object-contain rounded-lg shadow-md">
+            <div class="flex mt-2 gap-3 items-center">
+                @foreach ($product->images->skip(1) as $image)
+                    <img src="{{ asset('image/product/' . $image->path) }}"
+                        alt="{{ e($product->name) }}"
+                        class="w-45 h-45 object-cover rounded-md">
                 @endforeach
-            </select>
+            </div>
         </div>
-    @endif
+        <div class="flex flex-col justify-start gap-4 h-full">
+            <!-- Product Title and Price -->
+            <div class="p-2">
+                <div class="flex flex-col justify-between items-start">
+                    <div class="flex w-full flex-col gap-2">
+                        <h1 class="text-2xl font-semibold mb-1">{{ e($product->name) }}</h1>
+                        <p class="text-2xl text-gray-800 font-bold">₹{{ $product->price }}</p>
+                    </div>
+                    <div class="flex w-full items-center justify-between mt-2">
+                        <div class="flex">
+                            <div class="text-yellow-500">
+                                <span class="text-xl">★</span>
+                                <span class="text-xl">★</span>
+                                <span class="text-xl">★</span>
+                                <span class="text-xl">★</span>
+                                <span class="text-gray-300 text-xl">★</span>
+                            </div>
+                            <span class="ml-2 text-gray-600">(120 reviews)</span>
+                        </div>
+                        <div class="mr-5">
+                            {{-- <livewire:wishlist-toggle :productId="$product->id" /> --}}
+                        </div>
+                    </div>
+                </div>
+                <h2 class="mt-2"><span class="font-semibold text-gray-600">Category: </span>{{ $product->category->cat_title }}</h2>
+                <p class="text-gray-700 mt-4">{{ e($product->description) }}</p>
 
-    <!-- Variant Selection: Color -->
-    @if($product->color_variants && $product->color_variants->count() > 0)
-        <div class="mb-6">
-            <label for="color_variant" class="block text-sm font-semibold mb-2 text-gray-800">Select Color</label>
-            <select wire:model="color_variant_id" id="color_variant"
-                class="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 transition duration-200">
-                <option value="">Select Color</option>
-                @foreach($product->color_variants as $variant)
-                    <option value="{{ $variant->id }}">{{ $variant->name }}</option>
-                @endforeach
-            </select>
-        </div>
-    @endif
+                <!-- Color Options -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium text-gray-800">Choose Color</h3>
+                    <div class="flex space-x-4 mt-2">
+                        @foreach ($product->variants as $item)
+                            @if ($item->variant_type === 'color')
+                                <button
+                                    wire:click="$set('color_variant_id', {{ $item->id }})"
+                                    class="w-8 h-8 rounded-full border-2 {{ $color_variant_id == $item->id ? 'border-blue-600' : 'border-gray-300' }} focus:outline-none transition-transform transform hover:scale-105"
+                                    style="background-color: {{ $item->variant_name }};"
+                                    aria-label="Choose color {{ $item->variant_name }}"
+                                    value="{{ $item->variant_name }}">
+                                </button>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
 
-    <!-- Quantity -->
-    <div class="mb-8">
-        <label for="quantity" class="block text-sm font-semibold mb-2 text-gray-800">Quantity</label>
-        <div class="flex items-center space-x-4">
-            <input type="number" wire:model="quantity" id="quantity" min="1" max="{{ $product->stock }}"
-                class="w-24 p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 transition duration-200"
-                aria-describedby="stock-info">
-            <span id="stock-info" class="text-sm text-gray-600">({{ $product->stock }} in stock)</span>
+                <!-- Size Options -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium text-gray-800">Choose Size</h3>
+                    <div class="flex space-x-4 mt-2">
+                        @foreach ($product->variants as $item)
+                            @if ($item->variant_type === 'size')
+                                <button
+                                    wire:click="$set('size_variant_id', {{ $item->id }})"
+                                    class="px-4 py-2 bg-gray-100 text-gray-800 rounded-md border {{ $size_variant_id == $item->id ? 'border-blue-600 bg-blue-100' : 'border-gray-300' }} focus:outline-none transition duration-200 hover:bg-gray-200"
+                                    aria-label="Choose size {{ $item->variant_name }}"
+                                    value="{{ $item->variant_name }}">
+                                    {{ $item->variant_name }}
+                                </button>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Quantity Input -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium text-gray-800">Quantity</h3>
+                    <div class="flex items-center mt-2">
+                        <input
+                            type="number"
+                            wire:model="quantity"
+                            min="1"
+                            class="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
+                            aria-label="Select quantity"
+                        >
+                    </div>
+                    @error('quantity')
+                        <span class="text-red-600 text-sm mt-1">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <!-- Add to Cart Button -->
+                <div class="mt-8">
+                    <button
+                        wire:click="addToCart"
+                        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-500 transition duration-200"
+                        aria-label="Add {{ $product->name }} to cart">
+                        Add to Cart
+                    </button>
+                </div>
+
+                <!-- Buy Now Button -->
+                <div class="mt-4">
+                    <button
+                        wire:click="buyNow"
+                        class="w-full bg-orange-600 text-white py-3 rounded-lg hover:bg-orange-500 transition duration-200"
+                        aria-label="Buy {{ $product->name }} now">
+                        Buy Now
+                    </button>
+                </div>
+            </div>
         </div>
-        @if($product->stock == 0)
-            <p class="text-sm text-red-600 mt-2">Out of stock</p>
-        @endif
     </div>
 
-    <!-- Actions -->
-    <div class="flex flex-col sm:flex-row gap-4 mb-8">
-        <button wire:click="addToCart" wire:loading.attr="disabled"
-            class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200 font-semibold shadow-md disabled:bg-indigo-400 disabled:cursor-not-allowed"
-            aria-label="Add to Cart">
-            <i class="fas fa-shopping-cart mr-2"></i>
-            <span wire:loading.remove>Add to Cart</span>
-            <span wire:loading>Adding...</span>
-        </button>
-        <button wire:click="buyNow" wire:loading.attr="disabled"
-            class="flex-1 bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200 font-semibold shadow-md disabled:bg-yellow-400 disabled:cursor-not-allowed"
-            aria-label="Buy Now">
-            <i class="fas fa-bolt mr-2"></i>
-            <span wire:loading.remove>Buy Now</span>
-            <span wire:loading>Processing...</span>
-        </button>
-    </div>
+    <!-- Tabs for Description, Reviews, FAQs -->
+    {{-- <livewire:public.product-lower-section :productId="$product->id" /> --}}
 
-
+    <!-- Related Products Section -->
+  
 </div>
