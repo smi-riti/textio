@@ -11,11 +11,13 @@ use App\Livewire\Auth\Register;
 use App\Livewire\Public\Cart;
 use App\Livewire\Public\Home;
 use App\Livewire\Public\ProductDetail;
+use App\Livewire\Public\Section\Header;
 use Illuminate\Support\Facades\Route;
 
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
 Route::get('/', Home::class)->name('public.home');
+
 
 Route::prefix('admin')->group(function () {
     Route::get('/', Dashboard::class)->name('admin.dashboard');
