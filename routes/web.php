@@ -12,8 +12,10 @@ use App\Livewire\Admin\Product\UpdateProduct;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Public\Cart;
-use App\Livewire\Public\Home;
 use App\Livewire\Public\ProductDetail;
+use App\Livewire\Public\Section\Header;
+use App\Livewire\Public\Section\LandingPage;
+use App\Livewire\Public\Section\ViewProduct;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
@@ -22,7 +24,8 @@ use App\Livewire\Admin\Category\UpdateCategory;
 
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
-Route::get('/', Home::class)->name('public.home');
+Route::get('/view',ViewProduct::class)->name('view.product');
+Route::get('/',LandingPage::class)->name('home');
 
 Route::prefix('admin')->group(function () {
     // Categories
@@ -62,9 +65,6 @@ Route::get('/product-add', function () {
     return view('admin.products.create');
 })->name('product-add');
 
-Route::get('/home', function () {
-    return view('home');
-});
 
 Route::get('/brand-list', function () {
     return view('admin.brand.list');
