@@ -109,7 +109,7 @@
     </div>
 </nav> --}}
  <!-- Top Bar -->
- <header class="bg-white shadow-md">
+ {{-- <header class="bg-white shadow-md">
     <div class="container mx-auto px-4">
         <!-- Middle Header -->
         <div class="py-4 flex items-center justify-between flex-wrap">
@@ -166,4 +166,4 @@
         </div>
     </div>
 
-</header>
+</header> --}}
