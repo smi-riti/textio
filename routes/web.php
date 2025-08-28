@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\Brand\ManageBrand;
+use App\Livewire\Admin\Brand\CreateBrand;
 use App\Livewire\Admin\Category\ManageCategory;
 use App\Livewire\Admin\ManageCoupon;
 use App\Livewire\Admin\Dashboard;
@@ -69,10 +70,8 @@ Route::get('/product-add', function () {
 Route::get('/brand-list', function () {
     return view('admin.brand.list');
 })->name('brand-list');
-Route::get('/brand-add', function () {
-    return view('admin.brand.create');
-})->name('brand-add');
   Route::get('/manage-brand', ManageBrand::class)->name('admin.brand.manage');
+   Route::get('/brand-add', CreateBrand::class)->name('brand-add');
 
 Route::get('/category-add', function () {
     return view('admin.category.create');
