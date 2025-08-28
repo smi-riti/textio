@@ -13,6 +13,12 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+    
+    'imagekit' => [
+    'public_key' => env('IMAGEKIT_PUBLIC_KEY'),
+    'private_key' => env('IMAGEKIT_PRIVATE_KEY'),
+    'url_endpoint' => env('IMAGEKIT_URL_ENDPOINT'),
+],
 
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),

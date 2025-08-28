@@ -19,7 +19,7 @@
 
         <!-- Slick -->
     <link rel="stylesheet" href="{{asset('assets/libs/slick/slick.css')}}" type="text/css">
-    <link href="../../css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    {{-- <link href="../../css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"> --}}
 
     <!-- Bootstrap icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -609,7 +609,7 @@
                 </a>
                 <ul>
                     <li>
-                        <a href="{{route('brand-add')}}">Add</a>
+                        <a href="{{route('admin.brand.manage')}}">Manage</a>
                     </li>
                     <li>
                         <a href="{{route('brand-list')}}">Detail</a>

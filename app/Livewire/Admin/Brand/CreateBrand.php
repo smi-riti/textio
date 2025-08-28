@@ -2,17 +2,17 @@
 
 namespace App\Livewire\Admin\Brand;
 
-use App\Models\Brand;
-use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Livewire\WithPagination;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Brand;
 
-class ManageBrand extends Component
+class CreateBrand extends Component
 {
-    use WithFileUploads, WithPagination;
+   
+
+     use WithFileUploads;
 
     public $name = '';
     public $slug = '';
@@ -22,9 +22,10 @@ class ManageBrand extends Component
     public $meta_title = '';
     public $meta_description = '';
     public $editingBrandId = null;
-    public $showDeleted = false;
+    public $imagePreview = null;
 
-    #[Layout('components.layouts.admin')]
+    protected $listeners = ['editBrand' => 'loadBrand'];
+
     protected function rules()
     {
         return [
@@ -41,13 +42,12 @@ class ManageBrand extends Component
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
-
-        if ($propertyName === 'name') {
+        if ($propertyName === 'name' && !$this->slug) {
             $this->slug = Str::slug($this->name);
         }
     }
 
-    public function saveBrand()
+   public function saveBrand()
     {
         $this->validate();
 
@@ -75,7 +75,7 @@ class ManageBrand extends Component
         $this->resetForm();
     }
 
-    public function editBrand($id)
+    public function loadBrand($id)
     {
         $brand = Brand::findOrFail($id);
         $this->editingBrandId = $id;
@@ -85,19 +85,8 @@ class ManageBrand extends Component
         $this->is_active = $brand->is_active;
         $this->meta_title = $brand->meta_title;
         $this->meta_description = $brand->meta_description;
-        $this->logo = null; // reset upload
-    }
-
-    public function deleteBrand($id)
-    {
-        Brand::findOrFail($id)->delete();
-        session()->flash('message', 'Brand deleted successfully.');
-    }
-
-    public function restoreBrand($id)
-    {
-        Brand::withTrashed()->findOrFail($id)->restore();
-        session()->flash('message', 'Brand restored successfully.');
+        $this->imagePreview = $brand->logo ? Storage::url($brand->logo) : null;
+        $this->logo = null;
     }
 
     public function resetForm()
@@ -105,15 +94,13 @@ class ManageBrand extends Component
         $this->reset([
             'name', 'slug', 'logo', 'description',
             'is_active', 'meta_title', 'meta_description',
-            'editingBrandId'
+            'editingBrandId', 'imagePreview'
         ]);
     }
 
-    public function render()
+ public function render()
     {
-        $query = $this->showDeleted ? Brand::withTrashed() : Brand::query();
-        $brands = $query->paginate(10);
-
-        return view('livewire.admin.brand.manage-brand', compact('brands'));
+        return view('livewire.admin.brand.create-brand');
     }
 }
+

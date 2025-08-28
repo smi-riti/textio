@@ -58,6 +58,7 @@ Route::get('/brand-list', function () {
 Route::get('/brand-add', function () {
     return view('admin.brand.create');
 })->name('brand-add');
+  Route::get('/manage-brand', ManageBrand::class)->name('admin.brand.manage');
 
 Route::get('/category-add', function () {
     return view('admin.category.create');
