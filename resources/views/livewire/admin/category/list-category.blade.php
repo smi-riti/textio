@@ -81,7 +81,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="h-16 w-16 flex-shrink-0">
                                             @if($category->image)
-                                                <img class="h-16 w-16 rounded-lg object-cover" src="{{ Storage::url($category->image) }}" alt="{{ $category->title }}">
+                                          <img class="h-16 w-16 rounded-lg object-cover" src="{{ $category->image }}" alt="{{ $category->title }}">
                                             @else
                                                 <div class="h-16 w-16 rounded-lg bg-gray-100 flex items-center justify-center">
                                                     <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

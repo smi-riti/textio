@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Category;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use App\Models\Category;
+use App\Services\ImageKitService;
 use Livewire\Attributes\Validate;
 use Illuminate\Support\Str;
 use Livewire\WithFileUploads;
@@ -37,8 +38,14 @@ class CreateCategory extends Component
 
     public $parentCategories = [];
 
-     // For file preview
+  // For file preview
     public $imagePreview = null;
+    
+    // Add these properties for ImageKit management
+    public $fileId = null;
+    public $imageUrl = null;
+    public $imagePath = null;
+
     public function mount()
     {
         $this->parentCategories = Category::select('id', 'title')
@@ -51,33 +58,61 @@ class CreateCategory extends Component
         $this->slug = Str::slug($value);
     }
 
-    public function save()
+      public function removeImage()
     {
-        $this->validate();
-
-        try {
-            $data = [
-                'parent_category_id' => $this->parent_category_id,
-                'title' => $this->title,
-                'slug' => $this->slug,
-                'description' => $this->description,
-                'is_active' => $this->is_active,
-                'meta_title' => $this->meta_title,
-                'meta_description' => $this->meta_description,
-            ];
-
-            if ($this->image && $this->image instanceof \Illuminate\Http\UploadedFile) {
-                $data['image'] = $this->image->store('categories', 'public');
+        if ($this->fileId) {
+            try {
+                $imageKitService = new ImageKitService();
+                $imageKitService->delete($this->fileId);
+            } catch (\Exception $e) {
+                session()->flash('error', 'Error deleting image: ' . $e->getMessage());
             }
-
-            Category::create($data);
-            session()->flash('message', 'Category created successfully.');
-
-            return redirect()->route('categories.index');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to create category. ' . $e->getMessage());
         }
+        
+        // Reset image properties
+        $this->reset('image', 'fileId', 'imageUrl', 'imagePath');
+        $this->imagePreview = null;
     }
+
+
+ public function save()
+{
+    $this->validate();
+
+    \Log::debug('Validation passed, attempting to create category');
+    \Log::debug('Data:', [
+        'title' => $this->title,
+        'slug' => Str::slug($this->title),
+        'parent_category_id' => $this->parent_category_id,
+        'description' => $this->description,
+        'is_active' => $this->is_active,
+        'meta_title' => $this->meta_title,
+        'meta_description' => $this->meta_description,
+    ]);
+
+    try {
+        $category = Category::create([
+            'title' => $this->title,
+            'slug' => Str::slug($this->title),
+            'parent_category_id' => $this->parent_category_id,
+            'image' => null,
+            'description' => $this->description,
+            'is_active' => $this->is_active,
+            'meta_title' => $this->meta_title,
+            'meta_description' => $this->meta_description,
+        ]);
+
+        \Log::debug('Category created with ID: ' . $category->id);
+        
+        session()->flash('message', 'Category created successfully!');
+        return redirect()->route('categories.index');
+        
+    } catch (\Exception $e) {
+        \Log::error('Category creation failed: ' . $e->getMessage());
+        session()->flash('error', 'Error: ' . $e->getMessage());
+    }
+}
+
     public function render()
     {
         return view('livewire.admin.category.create-category');
