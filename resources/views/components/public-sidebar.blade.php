@@ -1,4 +1,4 @@
-<div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out md:-translate-x-full">
+{{-- <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out md:-translate-x-full">
     <div class="p-4">
         <!-- Sidebar Header -->
         <div class="flex items-center justify-between mb-6">
@@ -56,4 +56,4 @@
             </a>
         </nav>
     </div>
-</div>
+</div> --}}

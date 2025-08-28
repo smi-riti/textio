@@ -1,7 +1,7 @@
  <header class="bg-white shadow-md sticky top-0 z-50">
      <div class="container mx-auto px-4">
          <div class="py-4 flex items-center justify-between">
-             <a href="#" class="text-2xl sm:text-3xl font-semibold text-purple-600">Tex<span
+             <a wire:navigate href="{{route('home')}}" class="text-2xl sm:text-3xl font-semibold text-purple-600">Tex<span
                      class="text-gray-800">tio</span></a>
 
              <div class="hidden md:flex items-center space-x-8">
@@ -29,7 +29,7 @@
                          </button>
                          <div x-show="accountDropdownOpen" @click.outside="accountDropdownOpen = false"
                              class="absolute right-0 mt-2 py-2 w-48 bg-white shadow-lg rounded-lg z-40">
-                             <a href="#" class="block px-4 py-2 hover:bg-gray-100">Sign In</a>
+                             <a href="{{route('register')}}" class="block px-4 py-2 hover:bg-gray-100">Sign In</a>
                              <a href="#" class="block px-4 py-2 hover:bg-gray-100">Register</a>
                              <a href="#" class="block px-4 py-2 hover:bg-gray-100">My Orders</a>
                          </div>
