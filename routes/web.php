@@ -6,33 +6,47 @@ use App\Livewire\Admin\ManageCoupon;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Product\ManageProduct;
 use App\Livewire\Admin\Product\MultipleImages;
+use App\Livewire\Admin\Product\ListProduct;
+use App\Livewire\Admin\Product\CreateProduct;
+use App\Livewire\Admin\Product\UpdateProduct;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Public\Cart;
 use App\Livewire\Public\Home;
 use App\Livewire\Public\ProductDetail;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Admin\Category\ListCategory;
+use App\Livewire\Admin\Category\CreateCategory;
+use App\Livewire\Admin\Category\UpdateCategory;
+
 
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
 Route::get('/', Home::class)->name('public.home');
 
 Route::prefix('admin')->group(function () {
+    // Categories
+    Route::get('/categories/list', ListCategory::class)->name('categories.index');
+    Route::get('/categories/create', CreateCategory::class)->name('categories.create');
+    Route::get('/categories/{slug}', App\Livewire\Admin\Category\ViewCategory::class)->name('categories.view');
+    Route::get('/categories/{slug}/edit', UpdateCategory::class)->name('categories.edit');
+    
+    // Products
+    Route::get('/products', ListProduct::class)->name('products.index');
+    Route::get('/products/create', CreateProduct::class)->name('products.create');
+    Route::get('/products/{product:slug}/edit', UpdateProduct::class)->name('products.edit');
+    
+    // Dashboard and other admin routes
     Route::get('/', Dashboard::class)->name('admin.dashboard');
     Route::get('categories', ManageCategory::class)->name('admin.categories');
     Route::get('brands', ManageBrand::class)->name('admin.brands');
-    Route::get('products', ManageProduct::class)->name('admin.products');
+    Route::get('products-old', ManageProduct::class)->name('admin.products');
     Route::get('productImage', MultipleImages::class)->name('admin.product-image');
     Route::get('coupon', ManageCoupon::class)->name('admin.coupon');
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('/cart', Cart::class)->name('public.cart');
-    Route::get('/order-confirmation', function () {
-        return view('order-confirmation');
-    })->name('order.confirmation');
-
-    // Updated route to point to ProductDetail component
     Route::post('/cart/add', [ProductDetail::class, 'addToCart'])->name('cart.add');
 });
 

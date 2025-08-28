@@ -9,6 +9,7 @@ use Str;
 class Category extends Model
 {
     use SoftDeletes;
+    
     protected $fillable = [
         'parent_category_id',
         'title',
@@ -22,8 +23,26 @@ class Category extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
-        
+        'deleted_at' => 'datetime',
     ];
+
+    // Boot method to handle cascade soft deletes
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::deleting(function($category) {
+            // Check for children
+            if ($category->children()->count() > 0) {
+                throw new \Exception('Cannot delete category with sub-categories');
+            }
+            
+            // Check for products
+            if ($category->products()->count() > 0) {
+                throw new \Exception('Cannot delete category with products');
+            }
+        });
+    }
 
     // Relationships
     public function parent()
