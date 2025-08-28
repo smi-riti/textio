@@ -17,6 +17,18 @@ class Product extends Model
         'category_id',
         'brand_id',
         'status',
+        'is_customizable',
+        
+        'meta_title',
+        'meta_description',
+        'featured',
+    ];
+
+    protected $casts = [
+        'print_area' => 'array',
+        'is_customizable' => 'boolean',
+        'featured' => 'boolean',
+        'status' => 'boolean',
     ];
   public function orderItems()
     {
@@ -73,5 +85,10 @@ class Product extends Model
     public function variants()
     {
         return $this->hasMany(ProductVariant::class, "product_id", "id");
+    }
+
+    public function highlights()
+    {
+        return $this->hasMany(ProductHighlist::class, "product_id", "id");
     }
 }

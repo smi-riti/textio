@@ -26,6 +26,9 @@
     <!-- Main style file -->
     <link rel="stylesheet" href="{{asset('assets/dist/css/app.min.css')}}" type="text/css">
 
+
+    {{-- tailwind Scripts--}}
+    <script src="https://cdn.tailwindcss.com"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
         tailwind.config = {
