@@ -16,6 +16,7 @@ use App\Livewire\Public\ProductDetail;
 use App\Livewire\Public\Section\Header;
 use App\Livewire\Public\Section\LandingPage;
 use App\Livewire\Public\Section\ViewProduct;
+use App\Livewire\Public\AllProduct;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
@@ -80,3 +81,7 @@ Route::get('/category-add', function () {
 Route::get('/category-list', function () {
     return view('admin.category.list');
 })->name('category-list');
+
+
+//NEw Routes
+Route::get('/our-products', AllProduct::class)->name('public.product.all');
