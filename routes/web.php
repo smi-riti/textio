@@ -25,7 +25,7 @@ use App\Livewire\Admin\Category\UpdateCategory;
 
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
-Route::get('/view',ViewProduct::class)->name('view.product');
+Route::get('/view/{slug}',ViewProduct::class)->name('view.product');
 Route::get('/',LandingPage::class)->name('home');
 
 Route::prefix('admin')->group(function () {
