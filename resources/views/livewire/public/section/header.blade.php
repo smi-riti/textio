@@ -19,7 +19,7 @@
                      <i class="fas fa-bars text-xl"></i>
                  </button>
                  <div class="hidden md:flex items-center space-x-6">
-                     <a href="#" class="flex items-center hover:text-purple-600">
+                     <a href="{{route('wishlist.index')}}" class="flex items-center hover:text-purple-600">
                          <i class="far fa-heart text-xl"></i>
                      </a>
                      <div class="relative">

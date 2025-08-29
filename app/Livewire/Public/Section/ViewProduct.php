@@ -10,10 +10,10 @@ class ViewProduct extends Component
     public $product;
     public $slug;
     public $relatedProducts;
-    // public $review;
+    public $review;
     public $name;
     public $email;
-    // public $rating;
+    public $rating;
 
     public function mount($slug)
     {
@@ -26,28 +26,28 @@ class ViewProduct extends Component
             ->get();
     }
 
-    // public function submitReview()
-    // {
-    //     $this->validate([
-    //         'rating' => 'required|integer|between:1,5',
-    //         'review' => 'required|string|min:10',
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|email',
-    //     ]);
+    public function submitReview()
+    {
+        $this->validate([
+            'rating' => 'required|integer|between:1,5',
+            'review' => 'required|string|min:10',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+        ]);
 
-    //     // Placeholder for review submission logic
-    //     // Example: Save review to database
-    //     // Review::create([
-    //     //     'product_id' => $this->product->id,
-    //     //     'rating' => $this->rating,
-    //     //     'review' => $this->review,
-    //     //     'name' => $this->name,
-    //     //     'email' => $this->email,
-    //     // ]);
+        // Placeholder for review submission logic
+        // Example: Save review to database
+        // Review::create([
+        //     'product_id' => $this->product->id,
+        //     'rating' => $this->rating,
+        //     'review' => $this->review,
+        //     'name' => $this->name,
+        //     'email' => $this->email,
+        // ]);
 
-    //     session()->flash('message', 'Review submitted successfully!');
-    //     $this->reset(['rating', 'review', 'name', 'email']);
-    // }
+        session()->flash('message', 'Review submitted successfully!');
+        $this->reset(['rating', 'review', 'name', 'email']);
+    }
 
     public function render()
     {

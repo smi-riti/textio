@@ -92,5 +92,10 @@ class Product extends Model
         return $this->hasMany(ProductHighlist::class, "product_id", "id");
     }
 
+    public function wishlist()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
     
 }

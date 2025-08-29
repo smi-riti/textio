@@ -17,6 +17,7 @@ use App\Livewire\Public\ProductDetail;
 use App\Livewire\Public\Section\Header;
 use App\Livewire\Public\Section\LandingPage;
 use App\Livewire\Public\Section\ViewProduct;
+use App\Livewire\Public\Section\WishlistCard;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
@@ -27,6 +28,9 @@ Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
 Route::get('/view/{slug}',ViewProduct::class)->name('view.product');
 Route::get('/',LandingPage::class)->name('home');
+//  Route::get('/wishlist', Wishlist::class)->name('wishlist.index');
+
+Route::get('/wishlist', WishlistCard::class)->name('wishlist.index');
 
 Route::prefix('admin')->group(function () {
     // Categories
