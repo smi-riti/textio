@@ -1,95 +1,138 @@
-<div class="col-lg-4">
-    <div class="card shadow-sm">
-        <div class="card-header">
-            <h2 class="h5 mb-0">
+<div class="w-full lg:w-2/3 mx-auto mb-5">
+    <div class="bg-white rounded-xl  border border-gray-200">
+        <!-- Card Header -->
+        <div class="px-4 py-3 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800">
                 {{ $editingBrandId ? 'Edit Brand' : 'Create New Brand' }}
             </h2>
         </div>
-        <div class="card-body">
-            <form wire:submit.prevent="saveBrand">
+
+
+        <!-- Card Body -->
+        <div class="p-6">
+            <form wire:submit.prevent="saveBrand" class="space-y-4">
                 <!-- Brand Name -->
-                <div class="mb-3">
-                    <label for="name" class="form-label">Brand Name*</label>
-                    <input type="text" id="name" wire:model.blur="name" class="form-control" required>
-                    @error('name') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Brand Name*</label>
+                    <input type="text" id="name" wire:model.blur="name"
+                        class="mt-1 block w-full rounded-md border  border-gray-400 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        required>
+                    @error('name') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Slug -->
-                <div class="mb-3">
-                    <label for="slug" class="form-label">Slug*</label>
-                    <input type="text" id="slug" wire:model.live="slug" class="form-control" readonly required>
-                    @error('slug') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
+                <div>
+                    <label for="slug" class="block text-sm font-medium text-gray-700">Slug*</label>
+                    <input type="text" id="slug" wire:model.live="slug"
+                        class="mt-1 block w-full rounded-md border  border-gray-400 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        readonly required>
+                    @error('slug') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Image Upload -->
-                <div class="mb-3">
-                    <label for="logo" class="form-label">Brand Logo</label>
-                    <div class="input-group">
-                        <label for="logo" class="border border-dashed p-4 w-100 text-center rounded">
-                            <div class="d-flex flex-column align-items-center">
-                                <svg class="bi bi-image mb-2" width="40" height="40" fill="currentColor" aria-hidden="true">
-                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zM2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
-                                </svg>
-                                <span class="small text-muted">Click to upload logo</span>
-                            </div>
-                            <input id="logo" type="file" wire:model="logo" class="d-none" accept="image/*">
-                        </label>
+                <div>
+                    <label for="logo" class="block text-sm font-medium text-gray-700">Brand Logo</label>
+
+                    <!-- Upload Progress -->
+                    <div wire:loading wire:target="logo" class="my-2">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <span class="text-sm text-gray-500">Uploading...</span>
                     </div>
-                    @if ($imagePreview)
-                        <div class="mt-3">
-                            <p class="small text-muted mb-1">Logo Preview:</p>
-                            <img src="{{ $imagePreview }}" alt="Logo Preview" class="img-thumbnail" style="max-width: 96px; max-height: 96px;">
+
+                    <div
+                        class="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-400 border-dashed rounded-md hover:border-indigo-500 transition-colors">
+                        <div class="space-y-1 text-center">
+                            @if ($logo)
+                                @if ($logo instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile)
+                                    <img src="{{ $logo->temporaryUrl() }}" class="mx-auto h-32 w-auto object-cover mb-4 rounded-md">
+                                    <button type="button" wire:click="removeImage"
+                                        class="text-sm text-red-600 hover:text-red-800">
+                                        Remove Image
+                                    </button>
+                                @endif
+                            @elseif ($imagePreview)
+                                <img src="{{ $imagePreview }}" class="mx-auto h-32 w-auto object-cover mb-4 rounded-md">
+                                <button type="button" wire:click="removeImage"
+                                    class="text-sm text-red-600 hover:text-red-800">
+                                    Remove Image
+                                </button>
+                            @else
+                                <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
+                                    viewBox="0 0 48 48">
+                                    <path
+                                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-gray-600 justify-center">
+                                    <label for="logo"
+                                        class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                                        <span>Upload a file</span>
+                                        <input id="logo" wire:model="logo" type="file" class="sr-only" accept="image/*">
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
+                            @endif
                         </div>
-                    @elseif ($logo)
-                        <div wire:loading wire:target="logo" class="mt-3 small text-primary">
-                            Uploading...
-                        </div>
-                    @endif
-                    @error('logo') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    @error('logo') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- Status Toggle -->
-                <div class="mb-3">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="is_active" wire:model="is_active">
-                        <label class="form-check-label" for="is_active">Active Status</label>
-                    </div>
+                <div class="flex items-center">
+                    <input id="is_active" type="checkbox" wire:model="is_active"
+                        class="h-4 w-4 text-indigo-600 border border-gray-400 rounded focus:ring-indigo-500">
+                    <label for="is_active" class="ml-2 block text-sm text-gray-700">Active Status</label>
                 </div>
 
                 <!-- Description -->
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea id="description" wire:model="description" rows="3" class="form-control"></textarea>
-                    @error('description') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea id="description" wire:model="description" rows="3"
+                        class="mt-1 block w-full rounded-md border border-gray-400 border-gray-400 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                    @error('description') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                 </div>
 
                 <!-- SEO Section -->
-                <div class="border-top pt-4 mb-3">
-                    <h3 class="h6 mb-3">SEO Settings</h3>
-                    <!-- Meta Title -->
-                    <div class="mb-3">
-                        <label for="meta_title" class="form-label">Meta Title</label>
-                        <input type="text" id="meta_title" wire:model="meta_title" class="form-control">
-                        @error('meta_title') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
+                <div class="pt-4 border-t border-gray-200">
+                    <h3 class="text-md font-medium text-gray-800 mb-3">SEO Settings</h3>
+
+                    <div>
+                        <label for="meta_title" class="block text-sm font-medium text-gray-700">Meta Title</label>
+                        <input type="text" id="meta_title" wire:model="meta_title"
+                            class="mt-1 block w-full rounded-md border  border-gray-400 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        @error('meta_title') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
-                    <!-- Meta Description -->
-                    <div class="mb-3">
-                        <label for="meta_description" class="form-label">Meta Description</label>
-                        <textarea id="meta_description" wire:model="meta_description" rows="3" class="form-control"></textarea>
-                        @error('meta_description') <p class="text-danger small mt-1">{{ $message }}</p> @enderror
+
+                    <div>
+                        <label for="meta_description"
+                            class="block text-sm mt-4 font-medium text-gray-700">Meta Description</label>
+                        <textarea id="meta_description" wire:model="meta_description" rows="3"
+                            class="mt-1 block w-full rounded-md border  border-gray-400 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                        @error('meta_description') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
                 <!-- Form Actions -->
-                <div class="d-flex justify-content-end gap-2 pt-3">
+                <div class="flex justify-between items-center mt-6">
+                    <a href="{{ route('admin.brand.manage') }}" 
+       class="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-400 hover:text-white  text-sm">
+        ← Back
+    </a>
+    <div class="flex justify-end gap-2 pt-3">
                     @if ($editingBrandId)
-                        <button type="button" wire:click="resetForm" class="btn btn-outline-secondary">
+                        <button type="button" wire:click="resetForm"
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                             Cancel
                         </button>
                     @endif
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         {{ $editingBrandId ? 'Update Brand' : 'Create Brand' }}
                     </button>
+                </div>
                 </div>
             </form>
         </div>

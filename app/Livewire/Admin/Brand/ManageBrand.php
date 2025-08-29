@@ -109,11 +109,26 @@ class ManageBrand extends Component
         ]);
     }
 
+     public function showTrash()
+    {
+        $this->showDeleted = true;
+        $this->resetPage();
+    }
+    
+ public function showList()
+    {
+        $this->showDeleted = false;
+        $this->resetPage();
+    }
+
     public function render()
     {
-        $query = $this->showDeleted ? Brand::withTrashed() : Brand::query();
-        $brands = $query->paginate(10);
+        $brands = $this->showDeleted
+            ? Brand::onlyTrashed()->paginate(10)
+            : Brand::paginate(10);
 
-        return view('livewire.admin.brand.manage-brand', compact('brands'));
+        return view('livewire.admin.brand.manage-brand', [
+            'brands' => $brands,
+        ]);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Admin\Brand\ManageBrand;
+use App\Livewire\Admin\Brand\CreateBrand;
 use App\Livewire\Admin\Category\ManageCategory;
 use App\Livewire\Admin\ManageCoupon;
 use App\Livewire\Admin\Dashboard;
@@ -21,11 +22,13 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
 use App\Livewire\Admin\Category\UpdateCategory;
-
+use App\Livewire\User\Product\AddItem;
+use App\Livewire\User\Product\Show;
+use App\Livewire\User\Product\PriceDetails;
 
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
-Route::get('/view',ViewProduct::class)->name('view.product');
+Route::get('/view/{slug}',ViewProduct::class)->name('view.product');
 Route::get('/',LandingPage::class)->name('home');
 
 Route::prefix('admin')->group(function () {
@@ -70,10 +73,8 @@ Route::get('/product-add', function () {
 Route::get('/brand-list', function () {
     return view('admin.brand.list');
 })->name('brand-list');
-Route::get('/brand-add', function () {
-    return view('admin.brand.create');
-})->name('brand-add');
   Route::get('/manage-brand', ManageBrand::class)->name('admin.brand.manage');
+   Route::get('/brand-add', CreateBrand::class)->name('brand-add');
 
 Route::get('/category-add', function () {
     return view('admin.category.create');
@@ -81,6 +82,16 @@ Route::get('/category-add', function () {
 Route::get('/category-list', function () {
     return view('admin.category.list');
 })->name('category-list');
+
+
+Route::get('/product/details/{id}', PriceDetails::class)->name('product.details');
+Route::get('/product/add/{product}', AddItem::class)->name('product.add');
+Route::get('/product/show/{id}', Show::class)->name('product.show');
+
+
+
+
+
 
 
 //NEw Routes
