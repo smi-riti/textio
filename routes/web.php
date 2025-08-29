@@ -21,7 +21,9 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
 use App\Livewire\Admin\Category\UpdateCategory;
-
+use App\Livewire\User\Product\AddItem;
+use App\Livewire\User\Product\Show;
+use App\Livewire\User\Product\PriceDetails;
 
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
@@ -79,3 +81,12 @@ Route::get('/category-add', function () {
 Route::get('/category-list', function () {
     return view('admin.category.list');
 })->name('category-list');
+
+
+Route::get('/product/details/{id}', PriceDetails::class)->name('product.details');
+Route::get('/product/add/{product}', AddItem::class)->name('product.add');
+Route::get('/product/show/{id}', Show::class)->name('product.show');
+
+
+
+
