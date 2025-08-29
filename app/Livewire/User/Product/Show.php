@@ -12,6 +12,7 @@ class Show extends Component
     public $quantity = 1;
     public $selectedColor = '';
     public $selectedStorage = '';
+    public $showDetailsPage = false;
     
     public function mount($id)
     {
@@ -55,6 +56,19 @@ class Show extends Component
     
     public function addToCart()
     {
+        // Show the details page
+        $this->showDetailsPage = true;
+    }
+    
+    public function backToProduct()
+    {
+        // Go back to the product view
+        $this->showDetailsPage = false;
+    }
+    
+    public function confirmAddToCart()
+    {
+        // Actual add to cart logic
         $cartItem = [
             'product_id' => $this->product->id,
             'quantity' => $this->quantity,
@@ -65,10 +79,14 @@ class Show extends Component
         // Dispatch event or add to session
         $this->dispatch('cartUpdated', $cartItem);
         session()->flash('message', 'Product added to cart successfully!');
+        
     }
     
     public function render()
     {
-        return view('livewire.user.product.show');
+        return view('livewire.user.product.show', [
+            'totalPrice' => ($this->product->price - $this->product->discount) * $this->quantity + $this->product->delivery_charge,
+            'totalDiscount' => $this->product->discount * $this->quantity,
+        ]);
     }
 }

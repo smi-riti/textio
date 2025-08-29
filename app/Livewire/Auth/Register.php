@@ -34,7 +34,7 @@ class Register extends Component
         //  the user in
         Auth::login($user);
 
-        return redirect()->route('public.home')->with('success', 'Registration successful!');
+        return redirect()->route('home')->with('success', 'Registration successful!');
     }
 
     public function render()

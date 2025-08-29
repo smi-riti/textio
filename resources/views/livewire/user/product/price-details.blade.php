@@ -1,19 +1,19 @@
 <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
     <h2 class="text-lg font-semibold mb-4 border-b pb-2">PRICE DETAILS</h2>
-    
+
     <div class="space-y-3">
         <div class="flex justify-between">
             <span>Price ({{ $quantity }} item{{ $quantity > 1 ? 's' : '' }})</span>
             <span>₹{{ number_format($price * $quantity) }}</span>
         </div>
-        
+
         @if($discount > 0)
         <div class="flex justify-between">
             <span>Discount</span>
             <span class="text-green-600">-₹{{ number_format($totalDiscount) }}</span>
         </div>
         @endif
-        
+
         <div class="flex justify-between">
             <span>Delivery Charges</span>
             @if($deliveryCharge > 0)
@@ -22,20 +22,19 @@
                 <span class="text-green-600">FREE</span>
             @endif
         </div>
-        
+
         <div class="flex justify-between text-lg font-semibold border-t pt-3 mt-3">
             <span>Total Amount</span>
             <span>₹{{ number_format($totalPrice) }}</span>
         </div>
     </div>
-    
+
     @if($discount > 0)
     <div class="mt-4 text-green-600 font-semibold">
         You will save ₹{{ number_format($totalDiscount) }} on this order
     </div>
     @endif
-    
-    <!-- Delivery Assurance -->
+
     <div class="mt-6 p-3 bg-green-50 rounded-lg">
         <div class="flex items-start">
             <i class="fas fa-shield-alt text-green-600 mt-1 mr-2"></i>
@@ -45,8 +44,7 @@
             </div>
         </div>
     </div>
-    
-    <!-- Services -->
+
     <div class="mt-6 space-y-3">
         <div class="flex items-center">
             <i class="fas fa-undo-alt text-gray-500 mr-2"></i>

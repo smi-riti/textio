@@ -6,15 +6,14 @@ use Livewire\Component;
 
 class PriceDetails extends Component
 {
-
     public $product;
-    public $quantity = 1;
-    public $price = 0;
-    public $discount = 0;
-    public $deliveryCharge = 0;
-    
-    protected $listeners = ['cartUpdated' => 'updatePriceDetails'];
-    
+    public $quantity;
+    public $price;
+    public $discount;
+    public $deliveryCharge;
+
+    protected $listeners = ['quantityUpdated' => 'updateQuantity'];
+
     public function mount($product, $quantity, $price, $discount, $deliveryCharge)
     {
         $this->product = $product;
@@ -23,25 +22,27 @@ class PriceDetails extends Component
         $this->discount = $discount;
         $this->deliveryCharge = $deliveryCharge;
     }
-    
-    public function updatePriceDetails($cartItem)
+
+    public function updateQuantity($data)
     {
-        // Update details if needed when cart is updated
-        $this->quantity = $cartItem['quantity'];
+        $this->quantity = $data['quantity'];
     }
-    
+
     public function getTotalPriceProperty()
     {
         return ($this->price - $this->discount) * $this->quantity + $this->deliveryCharge;
     }
-    
+
     public function getTotalDiscountProperty()
     {
         return $this->discount * $this->quantity;
     }
-    
+
     public function render()
     {
-        return view('livewire.user.product.price-details');
+        return view('livewire.user.product.price-details', [
+            'totalPrice' => $this->getTotalPriceProperty(),
+            'totalDiscount' => $this->getTotalDiscountProperty(),
+        ]);
     }
 }
