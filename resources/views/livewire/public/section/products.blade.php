@@ -7,7 +7,7 @@
             <!-- Product Card 1 -->
 
            @foreach ($Products as $product)
-            <a wire:navigate href="{{route('view.product',$product->slug)}}"
+            <a wire:navigate href="{{route('public.product.detail',$product->slug)}}"
                 class="product-card  rounded-xl overflow-hidden  hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 max-w-sm ">
                 <div class="relative">
                    <img src="{{$product->image_path}}"

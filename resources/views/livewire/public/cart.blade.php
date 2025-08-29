@@ -80,7 +80,7 @@
         @else
             <div class="text-center py-10">
                 <p class="text-lg text-gray-600">Your cart is empty.</p>
-                <a href="{{ route('public.home') }}"
+                <a href="{{ route('home') }}"
                    class="mt-4 inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition duration-200">
                     Shop Now
                 </a>
