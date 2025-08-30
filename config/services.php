@@ -19,9 +19,9 @@ return [
     'private_key' => env('IMAGEKIT_PRIVATE_KEY'),
     'url_endpoint' => env('IMAGEKIT_URL_ENDPOINT'),
       'folders' => [
-        'brand' => 'brand',
-        'category' => 'category', 
-        'product' => 'product',
+       'brand' => 'textio/brand',
+        'category' => 'textio/category', 
+        'product' => 'textio/product',
     ],
 ],
 

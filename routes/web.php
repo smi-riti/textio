@@ -73,17 +73,6 @@ Route::get('/category-list', function () {
 })->name('category-list');
 
 
-
-Route::get('/product/details/{id}', PriceDetails::class)->name('product.details');
-Route::get('/product/add/{product}', AddItem::class)->name('product.add');
-Route::get('/product/show/{id}', Show::class)->name('product.show');
-
-
-
-
-
-
-
 //NEw Routes
 Route::get('/our-products', AllProduct::class)->name('public.product.all');
 
