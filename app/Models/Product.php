@@ -17,8 +17,8 @@ class Product extends Model
         'category_id',
         'brand_id',
         'status',
-        'is_customizable',
-        
+            'is_customizable',
+        'print_area',
         'meta_title',
         'meta_description',
         'featured',
