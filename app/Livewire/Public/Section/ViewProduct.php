@@ -107,19 +107,19 @@ class ViewProduct extends Component
     //         'email' => 'required|email',
     //     ]);
 
-    //     // Placeholder for review submission logic
-    //     // Example: Save review to database
-    //     // Review::create([
-    //     //     'product_id' => $this->product->id,
-    //     //     'rating' => $this->rating,
-    //     //     'review' => $this->review,
-    //     //     'name' => $this->name,
-    //     //     'email' => $this->email,
-    //     // ]);
+        // Placeholder for review submission logic
+        // Example: Save review to database
+        // Review::create([
+        //     'product_id' => $this->product->id,
+        //     'rating' => $this->rating,
+        //     'review' => $this->review,
+        //     'name' => $this->name,
+        //     'email' => $this->email,
+        // ]);
 
-    //     session()->flash('message', 'Review submitted successfully!');
-    //     $this->reset(['rating', 'review', 'name', 'email']);
-    // }
+        session()->flash('message', 'Review submitted successfully!');
+        $this->reset(['rating', 'review', 'name', 'email']);
+    }
 
     public function render()
     {

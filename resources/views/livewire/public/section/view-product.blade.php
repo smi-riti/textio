@@ -164,21 +164,25 @@
                                 @endif
                             </div>
 
-                            <!-- Main Image -->
-                            <div class="relative order-1 md:order-2 flex-1">
-                                <div class="relative overflow-hidden rounded-xl bg-gray-100">
-                                    <img :src="images[activeImageIndex]" class="w-full h-96 object-contain zoom-image"
-                                        alt="{{ $product->name }}" @mousemove="zoomImage($event)">
-                                    <!-- Eye icon for fullscreen -->
-                                    <button
-                                        class="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md hover:bg-purple-500 hover:text-white transition-colors"
-                                        @click="openFullscreen()">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
+                        <!-- Main Image -->
+                        <div class="relative order-1 md:order-2 flex-1">
+                            <div></div>
+                            <div class="relative overflow-hidden rounded-xl bg-gray-100">
+                                <img :src="images[activeImageIndex]" class="w-full h-96 object-contain zoom-image"
+                                    alt="{{ $product->name }}" @mousemove="zoomImage($event)">
+                                <!-- Eye icon for fullscreen -->
+                                <button class="absolute top-2 right-2 p-2 rounded-full bg-white transition-colors"
+                                    @click="openFullscreen()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <!-- Wishlist button component -->
+                                <div class="absolute top-2 right-16">
+                                    <livewire:public.section.wishlist-button :productId="$product->id" />
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
 
                     <!-- Product Info -->
                     <div class="lg:w-1/2">
@@ -301,29 +305,29 @@
                     </button>
                 </div>
 
-                <!-- Tabs Section -->
-                <div class="mb-16">
-                    <!-- Tab Headers -->
-                    <div class="flex gap-5 border-b border-gray-200 mb-6">
-                        <button class="px-2 py-3 font-medium border-b-2 transition-colors"
-                            :class="activeTab === 'description' ? 'border-purple-600 text-purple-600' :
-                                'border-transparent text-gray-500 hover:text-gray-700'"
-                            @click="activeTab = 'description'">
-                            Description
-                        </button>
-                        <button class="px-2 py-3 font-medium border-b-2 transition-colors"
-                            :class="activeTab === 'reviews' ? 'border-purple-600 text-purple-600' :
-                                'border-transparent text-gray-500 hover:text-gray-700'"
-                            @click="activeTab = 'reviews'">
-                            Reviews
-                        </button>
-                        <button class="px-2 py-3 font-medium border-b-2 transition-colors"
-                            :class="activeTab === 'additional' ? 'border-purple-600 text-purple-600' :
-                                'border-transparent text-gray-500 hover:text-gray-700'"
-                            @click="activeTab = 'additional'">
-                            Additional Information
-                        </button>
-                    </div>
+            <!-- Tabs Section -->
+            <div class="mb-16">
+                <!-- Tab Headers -->
+                <div class="flex gap-5 border-b border-gray-200 mb-6">
+                    <button class="px-2 py-3 font-medium border-b-2 transition-colors"
+                        :class="activeTab === 'description' ? 'border-purple-600 text-purple-600' :
+                            'border-transparent text-gray-500 hover:text-gray-700'"
+                        @click="activeTab = 'description'">
+                        Description
+                    </button>
+                    <button class="px-2 py-3 font-medium border-b-2 transition-colors"
+                        :class="activeTab === 'reviews' ? 'border-purple-600 text-purple-600' :
+                            'border-transparent text-gray-500 hover:text-gray-700'"
+                        @click="activeTab = 'reviews'">
+                        Reviews
+                    </button>
+                    <button class="px-2 py-3 font-medium border-b-2 transition-colors"
+                        :class="activeTab === 'additional' ? 'border-purple-600 text-purple-600' :
+                            'border-transparent text-gray-500 hover:text-gray-700'"
+                        @click="activeTab = 'additional'">
+                        Additional Information
+                    </button>
+                </div>
 
                     <!-- Tab Contents -->
                     <div x-show="activeTab === 'description'" class="tab-content">
