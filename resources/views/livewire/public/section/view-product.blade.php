@@ -111,24 +111,20 @@
                         </div>
 
                         <!-- Main Image -->
-                        <div class="relative  order-1 md:order-2 flex-1">
-                            <div> 
-                            </div>
+                        <div class="relative order-1 md:order-2 flex-1">
+                            <div></div>
                             <div class="relative overflow-hidden rounded-xl bg-gray-100">
                                 <img :src="images[activeImageIndex]" class="w-full h-96 object-contain zoom-image"
                                     alt="{{ $product->name }}" @mousemove="zoomImage($event)">
                                 <!-- Eye icon for fullscreen -->
-                                <button
-                                    class="absolute top-2 right-2 p-2 rounded-full bg-white     transition-colors"
+                                <button class="absolute top-2 right-2 p-2 rounded-full bg-white transition-colors"
                                     @click="openFullscreen()">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <!-- Heart icon for favorite/wishlist -->
-                                <button
-                                    class="absolute top-2 right-16 p-2 rounded-full bg-white    transition-colors"
-                                    @click="toggleFavorite()">
-                                    <i class="fas fa-heart"></i>
-                                </button>
+                                <!-- Wishlist button component -->
+                                <div class="absolute top-2 right-16">
+                                    <livewire:public.section.wishlist-button :productId="$product->id" />
+                                </div>
                             </div>
                         </div>
                     </div>

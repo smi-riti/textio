@@ -4,20 +4,16 @@
         <p class="text-center text-gray-600 mb-12">Discover our most popular custom printing products</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            @foreach ($products as $product)
+            @foreach ($Products as $product)
                 <div class="product-card rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 max-w-sm">
                     <div class="relative">
                         <a wire:navigate href="{{ route('view.product', $product->slug) }}">
-                            <img src="{{ $product->images->first()?->image_path ?? asset('images/placeholder.jpg') }}"
+                            <img src="{{asset('storage/' .$product->images->first()?->image_path) ?? asset('images/placeholder.jpg') }}"
                                  alt="{{ $product->name }}"
                                  class="w-full h-64 object-cover">
                         </a>
                         <div class="absolute top-3 right-3 hover:shadow text-xs font-semibold rounded-full uppercase tracking-wide">
-                            <button 
-                                wire:click="toggleWishlist({{ $product->id }})"
-                                class="p-2 rounded-full bg-white transition-colors {{ in_array($product->id, $wishlist) ? 'text-red-500' : 'text-gray-200' }}">
-                                <i class="fas fa-heart"></i>
-                            </button>
+                            <livewire:public.section.wishlist-button :productId="$product->id" />
                         </div>
                     </div>
                     <div class="p-6 text-center">

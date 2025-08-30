@@ -30,6 +30,11 @@ Route::get('/view/{slug}',ViewProduct::class)->name('view.product');
 Route::get('/',LandingPage::class)->name('home');
 //  Route::get('/wishlist', Wishlist::class)->name('wishlist.index');
 
+Route::post('/logout',function(){
+    Auth::logout();
+    return redirect('/login');
+})->name('logout');
+
 Route::get('/wishlist', WishlistCard::class)->name('wishlist.index');
 
 Route::prefix('admin')->group(function () {

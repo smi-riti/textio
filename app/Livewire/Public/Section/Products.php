@@ -3,43 +3,44 @@
 namespace App\Livewire\Public\Section;
 
 use App\Models\Product;
+use Livewire\Component;
 use App\Models\Wishlist;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 
 class Products extends Component
 {
-    public $products;
-    public $wishlist = [];
+    public $Products;
 
-    public function mount()
+   public function mount()
+{
+    $this->Products = Product::with(['images' => function($query) {
+            $query->where('is_primary', true); 
+        }])
+        ->select('id', 'name', 'slug', 'price', 'discount_price')
+        ->where('status', true)
+        ->where('featured', true)
+        ->inRandomOrder()
+        ->latest()
+        ->limit(4)
+        ->get();
+
+        //dd($testing);
+
+}
+
+ public function toggleWishlist($productId)
     {
-        $this->products = Product::with([
-            'images' => function ($query) {
-                $query->where('is_primary', true);
-            }
-        ])
-            ->select('id', 'name', 'slug', 'price', 'discount_price')
-            ->where('status', true)
-            ->where('featured', true)
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
-
-        $this->loadWishlist();
-    }
-
-    public function toggleWishlist($productId)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
-        }
-
+        $sessionId = session()->getId();
         $userId = Auth::id();
+
         // Check if product is in wishlist
-        $wishlistItem = Wishlist::where('user_id', $userId)
-            ->where('product_id', $productId)
+        $wishlistItem = Wishlist::where('product_id', $productId)
+            ->where(function ($query) use ($userId, $sessionId) {
+                $query->where('user_id', $userId)
+                      ->orWhere('session_id', $sessionId);
+            })
             ->first();
+
         if ($wishlistItem) {
             // Remove from wishlist
             $wishlistItem->delete();
@@ -48,10 +49,10 @@ class Products extends Component
             // Add to wishlist
             Wishlist::create([
                 'user_id' => $userId,
+                'session_id' => $sessionId,
                 'product_id' => $productId,
             ]);
             $this->dispatch('notify', ['message' => 'Added to wishlist', 'type' => 'success']);
-
         }
 
         // Reload wishlist status
@@ -60,14 +61,15 @@ class Products extends Component
 
     protected function loadWishlist()
     {
-        if (Auth::check()) {
-            $this->wishlist = Wishlist::where('user_id', Auth::id())
-                ->pluck('product_id')
-                ->toArray();
-        } else {
-            $this->wishlist = [];
-        }
+        $sessionId = session()->getId();
+        $userId = Auth::id();
+
+        $this->wishlist = Wishlist::where('user_id', $userId)
+            ->orWhere('session_id', $sessionId)
+            ->pluck('product_id')
+            ->toArray();
     }
+
 
     public function render()
     {

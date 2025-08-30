@@ -1,8 +1,8 @@
  <header class="bg-white shadow-md sticky top-0 z-50">
      <div class="container mx-auto px-4">
          <div class="py-4 flex items-center justify-between">
-             <a wire:navigate href="{{route('home')}}" class="text-2xl sm:text-3xl font-semibold text-purple-600">Tex<span
-                     class="text-gray-800">tio</span></a>
+             <a wire:navigate href="{{ route('home') }}"
+                 class="text-2xl sm:text-3xl font-semibold text-purple-600">Tex<span class="text-gray-800">tio</span></a>
 
              <div class="hidden md:flex items-center space-x-8">
                  <nav class="flex space-x-8">
@@ -19,7 +19,7 @@
                      <i class="fas fa-bars text-xl"></i>
                  </button>
                  <div class="hidden md:flex items-center space-x-6">
-                     <a href="{{route('wishlist.index')}}" class="flex items-center hover:text-purple-600">
+                     <a href="{{ route('wishlist.index') }}" class="flex items-center hover:text-purple-600">
                          <i class="far fa-heart text-xl"></i>
                      </a>
                      <div class="relative">
@@ -29,9 +29,23 @@
                          </button>
                          <div x-show="accountDropdownOpen" @click.outside="accountDropdownOpen = false"
                              class="absolute right-0 mt-2 py-2 w-48 bg-white shadow-lg rounded-lg z-40">
-                             <a href="{{route('register')}}" class="block px-4 py-2 hover:bg-gray-100">Sign In</a>
-                             <a href="#" class="block px-4 py-2 hover:bg-gray-100">Register</a>
-                             <a href="#" class="block px-4 py-2 hover:bg-gray-100">My Orders</a>
+                             @auth
+                                 <a href="#" class="block px-4 py-2 hover:bg-gray-100">My Orders</a>
+                                 <form action="{{ route('logout') }}" method="post">
+                                    @csrf
+                                    <div class="block px-4 py-2 hover:bg-gray-100">
+                                     <button type="submit" class=" hover:bg-gray-100">Logout</button>
+
+                                    </div>
+
+                                 </form>
+
+                             @endauth
+                             @guest
+                                 <a href="{{ route('register') }}" class="block px-4 py-2 hover:bg-gray-100">Sign In</a>
+                                 <a href="#" class="block px-4 py-2 hover:bg-gray-100">Register</a>
+                             @endguest
+
                          </div>
                      </div>
                      <div class="relative">
@@ -54,6 +68,11 @@
                  <a href="#" class="text-gray-700 hover:text-purple-600 font-medium">Posters</a>
                  <a href="#" class="text-gray-700 hover:text-purple-600 font-medium">All Products</a>
              </nav>
+             <hr>
+             <div>
+                 <a href=""
+                     class="flex text-center items-center justify-center py-1 bg-purple-900 mt-2 text-white rounded">Login</a>
+             </div>
          </div>
      </div>
  </header>
