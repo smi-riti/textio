@@ -1,54 +1,67 @@
 <?php
 
-namespace App\Livewire\User\Product;
+namespace App\Http\Livewire\User\Product;
 
 use Livewire\Component;
-use App\Models\Product;
+use App\Models\Cart;
+use Illuminate\Support\Facades\Auth;
 
 class AddItem extends Component
 {
     public $product;
-    public $selectedColor = '';
-    public $selectedStorage = '';
     public $quantity = 1;
-    public $price = 0;
-    public $discount = 0;
-    public $deliveryCharge = 0;
+    public $selectedColor;
+    public $selectedStorage;
 
-    public function mount($slug, $quantity, $selectedColor, $selectedStorage)
+    public function addToCart()
     {
-        $this->product = Product::with(['images', 'variants'])->where('slug', $slug)->firstOrFail();
-        $this->price = $this->product->price;
-        $this->discount = $this->product->discount;
-        $this->deliveryCharge = $this->product->delivery_charge;
-        $this->quantity = $quantity;
-        $this->selectedColor = $selectedColor;
-        $this->selectedStorage = $selectedStorage;
-
-        // Set default variant selections if not provided
-        if ($this->product->variants->isNotEmpty()) {
-            $colorVariant = $this->product->variants->where('type', 'color')->first();
-            $storageVariant = $this->product->variants->where('type', 'storage')->first();
-            if ($colorVariant && !$this->selectedColor) {
-                $this->selectedColor = $colorVariant->value;
-            }
-            if ($storageVariant && !$this->selectedStorage) {
-                $this->selectedStorage = $storageVariant->value;
-            }
+        if (!Auth::check()) {
+            return redirect()->route('login');
         }
+
+    }
+
+    public function handleCartItem()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        // Find the product variant ID based on selected color and storage
+        $productVariantId = null;
+        if ($this->selectedColor || $this->selectedStorage) {
+            $variantQuery = $this->product->variants();
+            if ($this->selectedColor) {
+                $variantQuery->where('type', 'color')->where('value', $this->selectedColor);
+            }
+            if ($this->selectedStorage) {
+                $variantQuery->where('type', 'storage')->where('value', $this->selectedStorage);
+            }
+            $variant = $variantQuery->first();
+            $productVariantId = $variant ? $variant->id : null;
+        }
+
+        // Save to Cart model
+        Cart::create([
+            'product_id' => $this->product->id,
+            'user_id' => Auth::id(),
+            'product_variant_id' => $productVariantId,
+            'quantity' => $this->quantity,
+        ]);
+
+        session()->flash('message', 'Product added to cart successfully!');
+        return redirect()->route('public.cart');
     }
 
     public function increment()
     {
         $this->quantity++;
-        $this->dispatch('quantityUpdated', ['quantity' => $this->quantity]);
     }
 
     public function decrement()
     {
         if ($this->quantity > 1) {
             $this->quantity--;
-            $this->dispatch('quantityUpdated', ['quantity' => $this->quantity]);
         }
     }
 
@@ -62,28 +75,8 @@ class AddItem extends Component
         $this->selectedStorage = $storage;
     }
 
-    public function addToCart()
-    {
-        $cartItem = [
-            'product_id' => $this->product->id,
-            'quantity' => $this->quantity,
-            'color' => $this->selectedColor,
-            'storage' => $this->selectedStorage,
-        ];
-
-        $this->dispatch('cartUpdated', $cartItem)->to('view-product');
-    }
-
-     public function backToProduct()
-    {
-      $this->dispatch('backToProduct')->to('public.section.view-product');
-    }
-
     public function render()
     {
-        return view('livewire.user.product.add-item', [
-            'totalPrice' => ($this->price - $this->discount) * $this->quantity + $this->deliveryCharge,
-            'totalDiscount' => $this->discount * $this->quantity,
-        ]);
+        return view('livewire.user.product.add-item');
     }
 }

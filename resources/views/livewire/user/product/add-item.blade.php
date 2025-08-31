@@ -2,7 +2,7 @@
     <h2 class="text-xl font-semibold mb-4">Confirm Cart Item</h2>
 
     <div class="flex flex-col md:flex-row gap-6">
-        <!-- Product Image -->
+        <!-- Product Image --> 
         <div class="md:w-1/3">
             <div class="border rounded-lg p-4 flex items-center justify-center h-64">
                 @if($product->images->isNotEmpty())
