@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Livewire\User\Product\AddItem;
 use App\Livewire\Admin\Brand\ManageBrand;
 use App\Livewire\Admin\Brand\CreateBrand;
 use App\Livewire\Admin\Category\ManageCategory;
@@ -12,7 +13,9 @@ use App\Livewire\Admin\Product\CreateProduct;
 use App\Livewire\Admin\Product\UpdateProduct;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Public\AllProduct;
 use App\Livewire\Public\Cart;
+use App\Livewire\Public\ProductDetail;
 use App\Livewire\Public\Section\LandingPage;
 use App\Livewire\Public\Section\ViewProduct;
 use App\Livewire\Public\Section\WishlistCard;
@@ -20,18 +23,20 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
 use App\Livewire\Admin\Category\UpdateCategory;
-use Illuminate\Support\Facades\Route;
 
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
 Route::get('/',LandingPage::class)->name('home');
 //  Route::get('/wishlist', Wishlist::class)->name('wishlist.index');
-
+Route::get('/view/{slug}',ViewProduct::class)->name('view.product');
 Route::post('/logout',function(){
     Auth::logout();
     return redirect('/login');
 })->name('logout');
 
+// Route::get('/cart',AddItem::class)->name('cart');
+
+Route::get('/product/{slug}', ViewProduct::class)->name('public.product.detail');
 Route::get('/wishlist', WishlistCard::class)->name('wishlist.index');
 
 Route::prefix('admin')->group(function () {

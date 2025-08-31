@@ -3,42 +3,65 @@
 namespace App\Livewire\Public\Section;
 
 use App\Models\Product;
-use Livewire\Component;
 use App\Models\Wishlist;
+use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class Products extends Component
 {
     public $Products;
+    public $wishlist = [];
 
-   public function mount()
-{
-    $this->Products = Product::with(['images' => function($query) {
-            $query->where('is_primary', true); 
-        }])
-        ->select('id', 'name', 'slug', 'price', 'discount_price')
-        ->where('status', true)
-        ->where('featured', true)
-        ->inRandomOrder()
-        ->latest()
-        ->limit(4)
-        ->get();
-
-        //dd($testing);
-
-}
-
- public function toggleWishlist($productId)
+    public function mount()
     {
-        $sessionId = session()->getId();
+        $this->Products = Product::with([
+            'images' => function ($query) {
+                $query->where('is_primary', true);
+            }
+        ])
+            ->select('id', 'name', 'slug', 'price', 'discount_price')
+            ->where('status', true)
+            ->where('featured', true)
+            ->inRandomOrder()
+            ->latest()
+            ->limit(4)
+            ->get();
+        $this->loadWishlist();
+        // Removed incorrect dispatch: $this->dispatch("add-to-cart", productId: $product->id);
+    }
+
+    public function addToCart($productId, CartService $cartService)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please log in to add items to your cart.');
+        }
+
+        $result = $cartService->addToCart($productId, 1, null); // Default quantity=1, no variant
+
+        if ($result['success']) {
+            $this->dispatch('notify', ['message' => $result['message'], 'type' => 'success']);
+            $this->dispatch('cartUpdated'); // Optional: If other components need this
+        } else {
+            return redirect()->to($result['redirect'])->with('error', $result['message']);
+        }
+
+        return redirect()->route('public.cart')
+        ->with('success', $result['message']);
+        
+    }
+
+    public function toggleWishlist($productId)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please log in to manage your wishlist.');
+        }
+
         $userId = Auth::id();
 
         // Check if product is in wishlist
         $wishlistItem = Wishlist::where('product_id', $productId)
-            ->where(function ($query) use ($userId, $sessionId) {
-                $query->where('user_id', $userId)
-                      ->orWhere('session_id', $sessionId);
-            })
+            ->where('user_id', $userId)
             ->first();
 
         if ($wishlistItem) {
@@ -49,7 +72,6 @@ class Products extends Component
             // Add to wishlist
             Wishlist::create([
                 'user_id' => $userId,
-                'session_id' => $sessionId,
                 'product_id' => $productId,
             ]);
             $this->dispatch('notify', ['message' => 'Added to wishlist', 'type' => 'success']);
@@ -61,15 +83,15 @@ class Products extends Component
 
     protected function loadWishlist()
     {
-        $sessionId = session()->getId();
-        $userId = Auth::id();
-
-        $this->wishlist = Wishlist::where('user_id', $userId)
-            ->orWhere('session_id', $sessionId)
-            ->pluck('product_id')
-            ->toArray();
+        if (Auth::check()) {
+            $userId = Auth::id();
+            $this->wishlist = Wishlist::where('user_id', $userId)
+                ->pluck('product_id')
+                ->toArray();
+        } else {
+            $this->wishlist = [];
+        }
     }
-
 
     public function render()
     {
