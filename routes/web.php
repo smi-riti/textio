@@ -17,6 +17,8 @@ use App\Livewire\Public\AllProduct;
 use App\Livewire\Public\Cart;
 use App\Livewire\Public\ProductDetail;
 use App\Livewire\Public\Section\LandingPage;
+use App\Livewire\Public\Section\MyCart;
+use App\Livewire\Public\Section\MyOrder;
 use App\Livewire\Public\Section\ViewProduct;
 use App\Livewire\Public\Section\WishlistCard;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +38,8 @@ Route::post('/logout',function(){
 
 // Route::get('/cart',AddItem::class)->name('cart');
 
+Route::get('/mycart',MyCart::class)->name('myCart');
+Route::get('/myorder',MyOrder::class)->name('myOrder');
 Route::get('/product/{slug}', ViewProduct::class)->name('public.product.detail');
 Route::get('/wishlist', WishlistCard::class)->name('wishlist.index');
 
