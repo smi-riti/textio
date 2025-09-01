@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Public\Section;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Models\Product;
-use Illuminate\Support\Facades\Session;
+use App\Models\ProductVariant; // Add this to query variants
+use App\Services\CartService;
 
 class ViewProduct extends Component
 {
@@ -14,18 +16,13 @@ class ViewProduct extends Component
     public $quantity = 1;
     public $selectedColor = '';
     public $selectedStorage = '';
-    public $showCartConfirmation = false;
-    public $name;
-    public $email;
-    // public $review;
-    // public $rating;
-
-     protected $listeners = ['backToProduct' => 'backToProductFromAddItem'];
 
     public function mount($slug)
     {
         $this->slug = $slug;
-        $this->product = Product::with(['category', 'images', 'variants'])->where('slug', $slug)->firstOrFail();
+        $this->product = Product::with(['category', 'images', 'variants'])
+            ->where('slug', $slug)
+            ->firstOrFail();
         $this->relatedProducts = Product::where('category_id', $this->product->category_id)
             ->where('id', '!=', $this->product->id)
             ->with('images')
@@ -67,60 +64,122 @@ class ViewProduct extends Component
         $this->selectedStorage = $storage;
     }
 
-    public function addToCart()
+    public function addToCart($productId)
     {
-        $this->showCartConfirmation = true;
-    }
-
-    public function backToProduct()
-    {
-        $this->showCartConfirmation = false;
-    }
-
-       public function backToProductFromAddItem()
-    {
-        $this->showCartConfirmation = false;
-    }
-
-    public function confirmAddToCart($cartItem)
-    {
-        if (!auth()->check()) {
-            session()->flash('message', 'Please log in to add items to your cart.');
-            return redirect()->route('login');
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please log in to add items to your cart.');
         }
 
-        $cart = Session::get('cart', []);
-        $cart[] = $cartItem;
-        Session::put('cart', $cart);
+        // Resolve CartService
+        $cartService = app(CartService::class);
 
-        session()->flash('message', 'Product added to cart successfully!');
-        $this->showCartConfirmation = false;
-        return redirect()->route('public.cart');
+        // Find the product variant ID based on selected color and storage
+        $productVariantId = null;
+        if ($this->selectedColor || $this->selectedStorage) {
+            $query = ProductVariant::where('product_id', $productId);
+
+            if ($this->selectedColor) {
+                $query->where(function ($q) {
+                    $q->where('type', 'color')->where('value', $this->selectedColor);
+                });
+            }
+
+            if ($this->selectedStorage) {
+                $query->where(function ($q) {
+                    $q->where('type', 'storage')->where('value', $this->selectedStorage);
+                });
+            }
+
+            $productVariant = $query->first();
+
+            if (!$productVariant) {
+                $this->dispatch('notify', ['message' => 'Selected variant combination is not available.', 'type' => 'error']);
+                return redirect()->route('public.product.view', $this->slug)
+                    ->with('error', 'Selected variant combination is not available.');
+            }
+
+            $productVariantId = $productVariant->id;
+        }
+
+        // Add to cart with quantity and product variant ID
+        $result = $cartService->addToCart($productId, $this->quantity, $productVariantId);
+
+        if ($result['success']) {
+            $this->dispatch('notify', ['message' => $result['message'], 'type' => 'success']);
+            $this->dispatch('cartUpdated');
+            return redirect()->route('myCart')->with('success', $result['message']);
+        }
+
+        return redirect()->to($result['redirect'] ?? route('public.product.view', $this->slug))
+            ->with('error', $result['message']);
     }
 
-    // public function submitReview()
-    // {
-    //     $this->validate([
-    //         'rating' => 'required|integer|between:1,5',
-    //         'review' => 'required|string|min:10',
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|email',
-    //     ]);
+    public function buyNow()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please log in to proceed with Buy Now.');
+        }
 
-    //     // Placeholder for review submission logic
-    //     // Example: Save review to database
-    //     // Review::create([
-    //     //     'product_id' => $this->product->id,
-    //     //     'rating' => $this->rating,
-    //     //     'review' => $this->review,
-    //     //     'name' => $this->name,
-    //     //     'email' => $this->email,
-    //     // ]);
+        $colorVariantId = null;
+        $sizeVariantId = null;
 
-    //     session()->flash('message', 'Review submitted successfully!');
-    //     $this->reset(['rating', 'review', 'name', 'email']);
-    // }
+        if ($this->selectedColor || $this->selectedStorage) {
+            if ($this->selectedColor) {
+                $colorVariant = ProductVariant::where('product_id', $this->product->id)
+                    ->where('type', 'color')
+                    ->where('value', $this->selectedColor)
+                    ->first();
+                if (!$colorVariant) {
+                    $this->dispatch('notify', ['message' => 'Selected color variant is not available.', 'type' => 'error']);
+                    return redirect()->route('public.product.view', $this->slug)
+                        ->with('error', 'Selected color variant is not available.');
+                }
+                $colorVariantId = $colorVariant->id;
+            }
 
+            if ($this->selectedStorage) {
+                $sizeVariant = ProductVariant::where('product_id', $this->product->id)
+                    ->where('type', 'storage')
+                    ->where('value', $this->selectedStorage)
+                    ->first();
+                if (!$sizeVariant) {
+                    $this->dispatch('notify', ['message' => 'Selected storage variant is not available.', 'type' => 'error']);
+                    return redirect()->route('public.product.view', $this->slug)
+                        ->with('error', 'Selected storage variant is not available.');
+                }
+                $sizeVariantId = $sizeVariant->id;
+            }
+        }
+
+        $totalAmount = ($this->product->discount_price ?? $this->product->price) * $this->quantity;
+
+        session()->put('pending_order', [
+            'cartItems' => [
+                [
+                    'product_id' => $this->product->id,
+                    'color_variant_id' => $colorVariantId,
+                    'size_variant_id' => $sizeVariantId,
+                    'quantity' => $this->quantity,
+                    'product' => [
+                        'name' => $this->product->name,
+                        'price' => $this->product->price,
+                        'discount_price' => $this->product->discount_price,
+                        'image' => $this->product->images->first()?->image_path,
+                    ],
+                    'colorVariant' => $colorVariantId ? ['variant_name' => $this->selectedColor] : null,
+                    'sizeVariant' => $sizeVariantId ? ['variant_name' => $this->selectedStorage] : null,
+                ]
+            ],
+            'total_amount' => $totalAmount,
+            'user_email' => Auth::user()->email,
+            'address_id' => $address_id ?? null, // Replace with actual address_id logic
+        ]);
+
+        return redirect()->route('myOrder');
+    }
+
+
+    
     public function render()
     {
         return view('livewire.public.section.view-product', [
