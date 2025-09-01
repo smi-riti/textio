@@ -107,13 +107,79 @@ class ViewProduct extends Component
         if ($result['success']) {
             $this->dispatch('notify', ['message' => $result['message'], 'type' => 'success']);
             $this->dispatch('cartUpdated');
-            return redirect()->route('public.cart')->with('success', $result['message']);
+            return redirect()->route('myCart')->with('success', $result['message']);
         }
 
         return redirect()->to($result['redirect'] ?? route('public.product.view', $this->slug))
             ->with('error', $result['message']);
     }
 
+    public function buyNow()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Please log in to proceed with Buy Now.');
+        }
+
+        $colorVariantId = null;
+        $sizeVariantId = null;
+
+        if ($this->selectedColor || $this->selectedStorage) {
+            if ($this->selectedColor) {
+                $colorVariant = ProductVariant::where('product_id', $this->product->id)
+                    ->where('type', 'color')
+                    ->where('value', $this->selectedColor)
+                    ->first();
+                if (!$colorVariant) {
+                    $this->dispatch('notify', ['message' => 'Selected color variant is not available.', 'type' => 'error']);
+                    return redirect()->route('public.product.view', $this->slug)
+                        ->with('error', 'Selected color variant is not available.');
+                }
+                $colorVariantId = $colorVariant->id;
+            }
+
+            if ($this->selectedStorage) {
+                $sizeVariant = ProductVariant::where('product_id', $this->product->id)
+                    ->where('type', 'storage')
+                    ->where('value', $this->selectedStorage)
+                    ->first();
+                if (!$sizeVariant) {
+                    $this->dispatch('notify', ['message' => 'Selected storage variant is not available.', 'type' => 'error']);
+                    return redirect()->route('public.product.view', $this->slug)
+                        ->with('error', 'Selected storage variant is not available.');
+                }
+                $sizeVariantId = $sizeVariant->id;
+            }
+        }
+
+        $totalAmount = ($this->product->discount_price ?? $this->product->price) * $this->quantity;
+
+        session()->put('pending_order', [
+            'cartItems' => [
+                [
+                    'product_id' => $this->product->id,
+                    'color_variant_id' => $colorVariantId,
+                    'size_variant_id' => $sizeVariantId,
+                    'quantity' => $this->quantity,
+                    'product' => [
+                        'name' => $this->product->name,
+                        'price' => $this->product->price,
+                        'discount_price' => $this->product->discount_price,
+                        'image' => $this->product->images->first()?->image_path,
+                    ],
+                    'colorVariant' => $colorVariantId ? ['variant_name' => $this->selectedColor] : null,
+                    'sizeVariant' => $sizeVariantId ? ['variant_name' => $this->selectedStorage] : null,
+                ]
+            ],
+            'total_amount' => $totalAmount,
+            'user_email' => Auth::user()->email,
+            'address_id' => $address_id ?? null, // Replace with actual address_id logic
+        ]);
+
+        return redirect()->route('myOrder');
+    }
+
+
+    
     public function render()
     {
         return view('livewire.public.section.view-product', [

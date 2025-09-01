@@ -46,7 +46,7 @@ class Products extends Component
             return redirect()->to($result['redirect'])->with('error', $result['message']);
         }
 
-        return redirect()->route('public.cart')
+        return redirect()->route('myCart')
         ->with('success', $result['message']);
         
     }
