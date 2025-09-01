@@ -26,24 +26,33 @@ Route::get('register', Register::class)->name('register');
 Route::get('/',LandingPage::class)->name('home');
 Route::get('/product/{slug}', ViewProduct::class)->name('public.product.detail');
 
-Route::prefix('admin')->group(function () {
+// Admin routes protected by middleware
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+    // Dashboard
+    Route::get('/', Dashboard::class)->name('dashboard');
+    
     // Categories
     Route::get('/categories/list', ListCategory::class)->name('categories.index');
     Route::get('/categories/create', CreateCategory::class)->name('categories.create');
     Route::get('/categories/{slug}', App\Livewire\Admin\Category\ViewCategory::class)->name('categories.view');
     Route::get('/categories/{slug}/edit', UpdateCategory::class)->name('categories.edit');
+    
     // Products
     Route::get('/products', ListProduct::class)->name('products.index');
     Route::get('/products/create', CreateProduct::class)->name('products.create');
+    Route::get('/products/{product:slug}', App\Livewire\Admin\Product\ViewProduct::class)->name('products.view');
     Route::get('/products/{product:slug}/edit', UpdateProduct::class)->name('products.edit');
- // Dashboard and other admin routes
-    Route::get('/', Dashboard::class)->name('admin.dashboard');
-    Route::get('categories', ManageCategory::class)->name('admin.categories');
-    Route::get('brands', ManageBrand::class)->name('admin.brands');
-    Route::get('products-old', ManageProduct::class)->name('admin.products');
-    Route::get('productImage', MultipleImages::class)->name('admin.product-image');
-    Route::get('coupon', ManageCoupon::class)->name('admin.coupon');
+    
+    //brand
+
+    Route::get('/manage-brand', ManageBrand::class)->name('brand.manage');
     Route::get('brand-add', CreateBrand::class)->name('brand-add');
+    
+    Route::get('categories', ManageCategory::class)->name('categories');
+    Route::get('brands', ManageBrand::class)->name('brands');
+    Route::get('products-old', ManageProduct::class)->name('products');
+    Route::get('productImage', MultipleImages::class)->name('product-image');
+    Route::get('coupon', ManageCoupon::class)->name('coupon');
 });
 
 Route::middleware('auth')->group(function () {
@@ -59,12 +68,11 @@ Route::get('/product-list', function () {
     return view('admin.products.list');
 })->name('product-list');
 Route::get('/product-add', function () {
-    return view('admin.products.create');
+    return view('admin.products.create.old');
 })->name('product-add');
 Route::get('/brand-list', function () {
     return view('admin.brand.list');
 })->name('brand-list');
-Route::get('/manage-brand', ManageBrand::class)->name('admin.brand.manage');
 Route::get('/category-add', function () {
     return view('admin.category.create');
 })->name('category-add');

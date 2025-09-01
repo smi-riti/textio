@@ -8,7 +8,7 @@
     <!-- Breadcrumb -->
     <div class="text-sm text-gray-500 mb-6">
         <a href="{{ url('/') }}" class="hover:text-blue-600">Home</a> > 
-        <a href="{{ route('products.index') }}" class="hover:text-blue-600">Products</a> > 
+        <a href="{{ route('admin.products.index') }}" class="hover:text-blue-600">Products</a> > 
         <span class="text-gray-800">{{ $product->name }}</span>
     </div>
 

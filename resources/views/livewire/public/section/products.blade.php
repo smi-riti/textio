@@ -41,7 +41,7 @@
            
         </div>
 
-        <div class="text-center mt-12">catalog
+        <div class="text-center mt-12">
             <a href="{{ route('public.product.all') }}"
                 class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-300">
                 View All Products

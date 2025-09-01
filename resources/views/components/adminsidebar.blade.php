@@ -61,7 +61,7 @@
                 </ul>
             </li>
             <li>
-                <a wire:navigate href="{{route('admin.categories')}}">
+                <a wire:navigate href="{{route('admin.categories.index')}}">
                     <span class="nav-link-icon">
                         <i class="bi bi-receipt"></i>
                     </span>
@@ -78,7 +78,7 @@
             </li>
 
             <li>
-                <a wire:navigate href="{{ route('admin.products') }}">
+                <a wire:navigate href="{{ route('admin.products.index') }}">
                     <span class="nav-link-icon">
                         <i class="bi bi-truck"></i>
                     </span>

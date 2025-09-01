@@ -69,4 +69,51 @@ class Category extends Model
         $this->attributes['slug'] = Str::slug($value);
     }
 
+    /**
+     * Get optimized image URL using ImageKit transformations
+     */
+    public function getOptimizedImageUrl($width = null, $height = null, $quality = 80)
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // If it's already an ImageKit URL, add transformations
+        if (str_contains($this->image, 'ik.imagekit.io')) {
+            $transformations = [];
+            
+            if ($width) {
+                $transformations[] = "w-{$width}";
+            }
+            
+            if ($height) {
+                $transformations[] = "h-{$height}";
+            }
+            
+            $transformations[] = "q-{$quality}";
+            
+            if (!empty($transformations)) {
+                $transformString = implode(',', $transformations);
+                return str_replace('ik.imagekit.io/', "ik.imagekit.io/tr:{$transformString}/", $this->image);
+            }
+        }
+        
+        return $this->image;
+    }
+
+    /**
+     * Get thumbnail URL (small optimized version)
+     */
+    public function getThumbnailUrlAttribute()
+    {
+        return $this->getOptimizedImageUrl(150, 150, 70);
+    }
+
+    /**
+     * Get medium sized image URL
+     */
+    public function getMediumImageUrlAttribute()
+    {
+        return $this->getOptimizedImageUrl(400, 300, 80);
+    }
 }

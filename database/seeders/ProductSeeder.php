@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductHighlist;
+use App\Models\ProductVariant;
 use App\Models\Category;
 use App\Models\Brand;
 use Illuminate\Database\Seeder;
@@ -328,23 +329,140 @@ class ProductSeeder extends Seeder
                 }
             }
 
-            // Add sample images (you can customize this based on your needs)
-            // For demo purposes, we'll create placeholder image records
-            $sampleImages = [
-                'products/sample-image-1.jpg',
-                'products/sample-image-2.jpg',
+            // Add sample images with ImageKit URLs
+            $imageUrls = [
+                'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
+                'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
+                'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
             ];
 
-            foreach ($sampleImages as $index => $imagePath) {
+            foreach ($imageUrls as $index => $imageUrl) {
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image_path' => $imagePath,
+                    'image_path' => $imageUrl,
                     'is_primary' => $index === 0, // First image is primary
-                    'image_file_id' => null,
+                    'image_file_id' => 'demo_file_' . $product->id . '_' . $index,
                 ]);
+            }
+
+            // Add sample variants for customizable products
+            if ($product->is_customizable) {
+                $this->createSampleVariants($product);
             }
         }
 
         $this->command->info('Products seeded successfully with ' . count($products) . ' products!');
+    }
+
+    /**
+     * Create sample variants for a product
+     */
+    private function createSampleVariants($product)
+    {
+        $variants = [];
+
+        // Different variant patterns based on product type
+        if (str_contains($product->name, 'T-Shirt') || str_contains($product->name, 'Tee')) {
+            // T-Shirt variants: Size and Color combinations
+            $sizes = ['Small', 'Medium', 'Large', 'X-Large'];
+            $colors = ['Black', 'White', 'Navy Blue', 'Red'];
+
+            foreach ($sizes as $size) {
+                foreach ($colors as $color) {
+                    $variants[] = [
+                        'product_id' => $product->id,
+                        'variant_type' => 'Size & Color',
+                        'variant_name' => $size . ' - ' . $color,
+                        'price' => $product->discount_price + rand(0, 100),
+                        'stock' => rand(5, 25),
+                        'sku' => $product->sku . '-' . strtoupper(substr($size, 0, 1)) . strtoupper(substr($color, 0, 1)),
+                        'variant_image' => 'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
+                    ];
+                }
+            }
+        } elseif (str_contains($product->name, 'Hoodie')) {
+            // Hoodie variants: Size variations
+            $sizes = ['Small', 'Medium', 'Large', 'X-Large', 'XX-Large'];
+            
+            foreach ($sizes as $size) {
+                $variants[] = [
+                    'product_id' => $product->id,
+                    'variant_type' => 'Size',
+                    'variant_name' => $size,
+                    'price' => $product->discount_price + rand(0, 200),
+                    'stock' => rand(3, 15),
+                    'sku' => $product->sku . '-' . strtoupper(substr($size, 0, 1)),
+                    'variant_image' => 'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
+                ];
+            }
+        } elseif (str_contains($product->name, 'Mug')) {
+            // Mug variants: Different designs/themes
+            $designs = ['Classic Design', 'Modern Design', 'Vintage Design', 'Minimalist Design'];
+            
+            foreach ($designs as $design) {
+                $variants[] = [
+                    'product_id' => $product->id,
+                    'variant_type' => 'Design',
+                    'variant_name' => $design,
+                    'price' => $product->discount_price + rand(-20, 50),
+                    'stock' => rand(10, 50),
+                    'sku' => $product->sku . '-' . strtoupper(substr($design, 0, 3)),
+                    'variant_image' => 'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
+                ];
+            }
+        } elseif (str_contains($product->name, 'Bag')) {
+            // Bag variants: Color variations
+            $colors = ['Black', 'Brown', 'Navy', 'Gray', 'Beige'];
+            
+            foreach ($colors as $color) {
+                $variants[] = [
+                    'product_id' => $product->id,
+                    'variant_type' => 'Color',
+                    'variant_name' => $color,
+                    'price' => $product->discount_price + rand(-50, 100),
+                    'stock' => rand(5, 20),
+                    'sku' => $product->sku . '-' . strtoupper(substr($color, 0, 3)),
+                    'variant_image' => 'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
+                ];
+            }
+        } elseif (str_contains($product->name, 'Print') || str_contains($product->name, 'Poster')) {
+            // Print variants: Size options
+            $sizes = ['8x10', '11x14', '16x20', '20x24', '24x36'];
+            
+            foreach ($sizes as $size) {
+                $variants[] = [
+                    'product_id' => $product->id,
+                    'variant_type' => 'Size',
+                    'variant_name' => $size . ' inches',
+                    'price' => $product->discount_price + (intval(substr($size, 0, 2)) * 5),
+                    'stock' => rand(20, 100),
+                    'sku' => $product->sku . '-' . str_replace('x', 'X', $size),
+                    'variant_image' => 'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
+                ];
+            }
+        } else {
+            // Default variants for other products
+            $options = ['Option 1', 'Option 2', 'Option 3'];
+            
+            foreach ($options as $option) {
+                $variants[] = [
+                    'product_id' => $product->id,
+                    'variant_type' => 'Option',
+                    'variant_name' => $option,
+                    'price' => $product->discount_price + rand(0, 100),
+                    'stock' => rand(5, 30),
+                    'sku' => $product->sku . '-OPT' . substr($option, -1),
+                    'variant_image' => 'https://ik.imagekit.io/saloni/textio/category/category-t-shirts-1756724949_GhFp375Cx.webp',
+                ];
+            }
+        }
+
+        // Limit variants to prevent too many (max 8 per product for demo)
+        $variants = array_slice($variants, 0, 8);
+
+        // Create variants
+        foreach ($variants as $variantData) {
+            ProductVariant::create($variantData);
+        }
     }
 }

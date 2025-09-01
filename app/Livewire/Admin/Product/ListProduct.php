@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Product;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Services\ImageKitService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Storage;
@@ -87,8 +88,18 @@ class ListProduct extends Component
             if ($product) {
                 $productName = $product->name;
                 
-                // Delete associated images from storage
+                // Delete associated images from ImageKit
+                $imageKitService = new ImageKitService();
                 foreach ($product->images as $image) {
+                    if ($image->image_file_id) {
+                        try {
+                            $imageKitService->delete($image->image_file_id);
+                        } catch (\Exception $e) {
+                            \Log::error('Failed to delete image from ImageKit: ' . $e->getMessage());
+                        }
+                    }
+                    
+                    // Also delete from local storage if path exists (backward compatibility)
                     if (Storage::disk('public')->exists($image->image_path)) {
                         Storage::disk('public')->delete($image->image_path);
                     }

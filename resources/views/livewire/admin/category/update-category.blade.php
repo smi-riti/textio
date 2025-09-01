@@ -1,7 +1,7 @@
 <div class="max-w-2xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
     <div class="mb-6 flex items-center justify-between">
         <h2 class="text-2xl font-semibold text-gray-900">Update Category</h2>
-        <a href="{{ route('categories.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <a href="{{ route('admin.categories.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -60,9 +60,9 @@
         <div>
             <label class="block text-sm font-medium text-gray-700">Category Image</label>
             <div class="mt-1 flex items-center space-x-4">
-                @if($category->image)
+                @if($currentImageUrl)
                     <div class="relative group">
-                        <img src="{{ Storage::url($category->image) }}" class="h-32 w-32 object-cover rounded-lg">
+                        <img src="{{ $currentImageUrl }}" class="h-32 w-32 object-cover rounded-lg">
                         <button type="button" wire:click="deleteImage" 
                                 class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity">
                             <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,10 +73,19 @@
                 @endif
                 
                 <div class="flex items-center justify-center w-full">
+                    <!-- Upload Progress -->
+                    <div wire:loading wire:target="newImage" class="my-2">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <span class="text-sm text-gray-500">Uploading...</span>
+                    </div>
+                    
                     <label for="newImage" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-indigo-500 transition-colors">
                         <div class="flex flex-col items-center justify-center pt-5 pb-6">
                             @if ($newImage)
-                                <img src="{{ $newImage->temporaryUrl() }}" class="h-24 w-auto object-cover">
+                                <img src="{{ $newImage->temporaryUrl() }}" class="h-24 w-auto object-cover rounded-md">
+                                <p class="text-xs text-green-600 mt-1">New image selected</p>
                             @else
                                 <svg class="w-8 h-8 mb-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -121,12 +130,17 @@
         </div>
 
         <div class="flex justify-end">
-            <button type="submit"
-                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button type="submit" wire:loading.attr="disabled"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg wire:loading.remove wire:target="save" class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                 </svg>
-                Update Category
+                <svg wire:loading wire:target="save" class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span wire:loading.remove wire:target="save">Update Category</span>
+                <span wire:loading wire:target="save">Updating...</span>
             </button>
         </div>
     </form>

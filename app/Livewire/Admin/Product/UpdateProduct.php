@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\ProductImage;
 use App\Models\ProductHighlist;
+use App\Models\ProductVariant;
+use App\Services\ImageKitService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +23,10 @@ class UpdateProduct extends Component
     use WithFileUploads;
 
     public Product $product;
+    
+    // Stepper
+    public $currentStep = 1;
+    public $completedSteps = [1, 2, 3, 4]; // All steps completed by default in edit mode
     
     // Product Properties
     public $name = '';
@@ -42,9 +48,24 @@ class UpdateProduct extends Component
     public $new_highlight = '';
 
     // Images
-    public $existing_images = [];
-    public $new_images = [];
-    public $primary_image_id = null;
+    public $featured_image;
+    public $featured_image_preview;
+    public $current_featured_image;
+    
+    public $gallery_images = [];
+    public $gallery_images_preview = [];
+    public $existing_gallery_images = [];
+    public $images_to_delete = [];
+
+    // Variants
+    public $variants = [];
+
+    protected $listeners = [
+        'stepChanged' => 'handleStepChange',
+        'variantAdded' => 'handleVariantAdded',
+        'variantUpdated' => 'handleVariantUpdated', 
+        'variantDeleted' => 'handleVariantDeleted'
+    ];
 
     protected function rules()
     {
@@ -58,7 +79,7 @@ class UpdateProduct extends Component
             'description' => 'nullable|string|min:10',
             'price' => 'required|numeric|min:0', // Price is the original price
             'discount_price' => 'required|numeric|min:0', // Discount price is the selling price
-            'quantity' => 'nullable|integer|min:0',
+            'quantity' => 'required|integer|min:0',
             'sku' => [
                 'required',
                 'string',
@@ -72,9 +93,16 @@ class UpdateProduct extends Component
             'featured' => 'boolean',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
-            'new_images.*' => 'nullable|image|max:2048',
+            'gallery_images.*' => 'nullable|image|max:2048',
             'highlights' => 'nullable|array',
         ];
+
+        // Featured image is only required if there's no existing featured image
+        if (!$this->current_featured_image) {
+            $rules['featured_image'] = 'required|image|max:2048';
+        } else {
+            $rules['featured_image'] = 'nullable|image|max:2048';
+        }
 
         // Add lt:price rule - discount price (selling price) should be less than original price
         if ($this->price && is_numeric($this->price) && $this->price > 0) {
@@ -95,16 +123,20 @@ class UpdateProduct extends Component
         'sku.required' => 'SKU is required.',
         'sku.unique' => 'This SKU already exists.',
         'description.min' => 'Description must be at least 10 characters.',
+        'quantity.required' => 'Stock quantity is required.',
         'quantity.integer' => 'Stock quantity must be a valid number.',
         'category_id.exists' => 'Please select a valid category.',
         'brand_id.exists' => 'Please select a valid brand.',
-        'new_images.*.image' => 'Uploaded files must be images.',
-        'new_images.*.max' => 'Each image must not exceed 2MB.',
+        'featured_image.required' => 'Featured image is required when no existing image is present.',
+        'featured_image.image' => 'Featured image must be an image.',
+        'featured_image.max' => 'Featured image must not exceed 2MB.',
+        'gallery_images.*.image' => 'Uploaded files must be images.',
+        'gallery_images.*.max' => 'Each gallery image must not exceed 2MB.',
     ];
 
     public function mount(Product $product)
     {
-        $this->product = $product->load(['category', 'brand', 'images', 'highlights']);
+        $this->product = $product->load(['category', 'brand', 'images', 'highlights', 'variants']);
         
         // Initialize properties
         $this->name = $product->name;
@@ -123,11 +155,15 @@ class UpdateProduct extends Component
         
         // Initialize arrays
         $this->highlights = $product->highlights->pluck('highlights')->toArray();
-        $this->existing_images = $product->images->toArray();
         
-        // Set primary image
-        $primaryImage = $product->images->where('is_primary', true)->first();
-        $this->primary_image_id = $primaryImage ? $primaryImage->id : ($product->images->first()?->id ?? null);
+        // Initialize variants
+        $this->variants = $product->variants->toArray();
+        
+        // Initialize images
+        $featuredImage = $product->images->where('is_primary', true)->first();
+        $this->current_featured_image = $featuredImage;
+        
+        $this->existing_gallery_images = $product->images->where('is_primary', false)->toArray();
     }
 
     public function generateSKU()
@@ -172,8 +208,58 @@ class UpdateProduct extends Component
         $this->primary_image_id = $imageId;
     }
 
+    public function updatedFeaturedImage()
+    {
+        $this->validate(['featured_image' => 'image|max:2048']);
+        $this->featured_image_preview = $this->featured_image->temporaryUrl();
+    }
+
+    public function removeFeaturedImage()
+    {
+        $this->reset(['featured_image', 'featured_image_preview']);
+    }
+
+    public function removeCurrentFeaturedImage()
+    {
+        $this->current_featured_image = null;
+    }
+
+    public function updatedGalleryImages()
+    {
+        $this->validate(['gallery_images.*' => 'image|max:2048']);
+        
+        foreach ($this->gallery_images as $index => $image) {
+            if (!isset($this->gallery_images_preview[$index])) {
+                $this->gallery_images_preview[$index] = $image->temporaryUrl();
+            }
+        }
+    }
+
+    public function removeGalleryImage($index)
+    {
+        unset($this->gallery_images[$index]);
+        unset($this->gallery_images_preview[$index]);
+        
+        $this->gallery_images = array_values($this->gallery_images);
+        $this->gallery_images_preview = array_values($this->gallery_images_preview);
+    }
+
+    public function removeExistingGalleryImage($imageId)
+    {
+        $this->images_to_delete[] = $imageId;
+        $this->existing_gallery_images = array_filter($this->existing_gallery_images, function($image) use ($imageId) {
+            return $image['id'] != $imageId;
+        });
+    }
+
     public function update()
     {
+        \Log::info('UpdateProduct - Starting update process', [
+            'featured_image' => !empty($this->featured_image),
+            'gallery_images_count' => count($this->gallery_images),
+            'images_to_delete' => count($this->images_to_delete),
+        ]);
+
         $this->validate();
 
         try {
@@ -194,38 +280,19 @@ class UpdateProduct extends Component
                 'meta_description' => $this->meta_description ?: null,
             ]);
 
-            // Handle existing images removal - delete from storage and database
-            $existingImageIds = array_column($this->existing_images, 'id');
-            $imagesToDelete = $this->product->images()->whereNotIn('id', $existingImageIds)->get();
-            
-            foreach ($imagesToDelete as $image) {
-                // Delete physical file from storage
-                if (Storage::disk('public')->exists($image->image_path)) {
-                    Storage::disk('public')->delete($image->image_path);
-                }
-                // Delete database record
-                $image->delete();
+            // Handle images to delete
+            if (!empty($this->images_to_delete)) {
+                $this->deleteMarkedImages();
             }
 
-            // Add new images using ProductImage model
-            if (!empty($this->new_images)) {
-                foreach ($this->new_images as $image) {
-                    $path = $image->store('products', 'public');
-                    ProductImage::create([
-                        'product_id' => $this->product->id,
-                        'image_path' => $path,
-                        'is_primary' => false, // New images are not primary by default
-                        'image_file_id' => null, // Can be used for future file management
-                    ]);
-                }
+            // Handle featured image
+            if ($this->featured_image) {
+                $this->uploadNewFeaturedImage();
             }
 
-            // Update primary image - ensure only one image is primary
-            if ($this->primary_image_id) {
-                // First, set all images to not primary
-                $this->product->images()->update(['is_primary' => false]);
-                // Then set the selected image as primary
-                $this->product->images()->where('id', $this->primary_image_id)->update(['is_primary' => true]);
+            // Handle new gallery images
+            if (!empty($this->gallery_images)) {
+                $this->uploadNewGalleryImages();
             }
 
             // Update highlights - delete old ones and create new ones
@@ -240,13 +307,170 @@ class UpdateProduct extends Component
             }
 
             session()->flash('success', 'Product updated successfully!');
-            return $this->redirect(route('products.index'), navigate: true);
+            return $this->redirect(route('admin.products.index'), navigate: true);
 
         } catch (\Exception $e) {
             \Log::error('Product update error: ' . $e->getMessage());
             \Log::error('Product update trace: ' . $e->getTraceAsString());
             session()->flash('error', 'Error updating product: ' . $e->getMessage());
         }
+    }
+
+    private function deleteMarkedImages()
+    {
+        try {
+            $imageKitService = new ImageKitService();
+            $imagesToDelete = ProductImage::whereIn('id', $this->images_to_delete)->get();
+            
+            foreach ($imagesToDelete as $image) {
+                // Delete from ImageKit if file_id exists
+                if ($image->image_file_id) {
+                    try {
+                        $imageKitService->delete($image->image_file_id);
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to delete image from ImageKit: ' . $e->getMessage());
+                    }
+                }
+                
+                // Delete from database
+                $image->delete();
+            }
+            
+            \Log::info('Deleted images', ['count' => count($imagesToDelete)]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete marked images: ' . $e->getMessage());
+            throw new \Exception('Failed to delete images');
+        }
+    }
+
+    private function uploadNewFeaturedImage()
+    {
+        try {
+            // Delete current featured image if exists
+            if ($this->current_featured_image) {
+                // Mark for deletion instead of immediately deleting
+                $currentFeaturedImage = ProductImage::find($this->current_featured_image['id']);
+                if ($currentFeaturedImage) {
+                    $this->images_to_delete[] = $this->current_featured_image['id'];
+                }
+            }
+
+            $imageKitService = new ImageKitService();
+            $fileName = 'featured-' . $this->product->slug . '-' . time() . '.' . $this->featured_image->getClientOriginalExtension();
+            
+            \Log::info('Uploading new featured image', ['fileName' => $fileName]);
+            
+            $result = $imageKitService->upload(
+                $this->featured_image,
+                $fileName,
+                config('services.imagekit.folders.product')
+            );
+
+            ProductImage::create([
+                'product_id' => $this->product->id,
+                'image_path' => $result->url,
+                'image_file_id' => $result->fileId,
+                'is_primary' => true,
+            ]);
+
+            \Log::info('Featured image updated successfully', ['file_id' => $result->fileId]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to upload featured image: ' . $e->getMessage());
+            throw new \Exception('Failed to upload featured image');
+        }
+    }
+
+    private function uploadNewGalleryImages()
+    {
+        if (empty($this->gallery_images)) {
+            \Log::info('No gallery images to upload');
+            return;
+        }
+
+        try {
+            $imageKitService = new ImageKitService();
+            \Log::info('Uploading gallery images', ['count' => count($this->gallery_images)]);
+            
+            foreach ($this->gallery_images as $index => $image) {
+                $fileName = 'gallery-' . $this->product->slug . '-' . ($index + 1) . '-' . time() . '.' . $image->getClientOriginalExtension();
+                
+                \Log::info('Uploading gallery image', ['index' => $index, 'fileName' => $fileName]);
+                
+                $result = $imageKitService->upload(
+                    $image,
+                    $fileName,
+                    config('services.imagekit.folders.product')
+                );
+
+                ProductImage::create([
+                    'product_id' => $this->product->id,
+                    'image_path' => $result->url,
+                    'image_file_id' => $result->fileId,
+                    'is_primary' => false,
+                ]);
+
+                \Log::info('Gallery image uploaded successfully', ['file_id' => $result->fileId]);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to upload gallery images: ' . $e->getMessage());
+            throw new \Exception('Failed to upload gallery images');
+        }
+    }
+
+    // Stepper methods
+    public function handleStepChange($step)
+    {
+        $this->currentStep = $step;
+    }
+
+    public function nextStep()
+    {
+        if ($this->currentStep < 5) {
+            $this->currentStep++;
+        }
+    }
+
+    public function previousStep()
+    {
+        if ($this->currentStep > 1) {
+            $this->currentStep--;
+        }
+    }
+
+    public function goToStep($step)
+    {
+        $this->currentStep = $step;
+    }
+
+    // Variant handling methods
+    public function handleVariantAdded($variant)
+    {
+        $this->variants[] = $variant;
+    }
+
+    public function handleVariantUpdated($variant)
+    {
+        // Find and update variant in array
+        if (isset($variant['id'])) {
+            // Existing variant - update in database is handled by ProductVariants component
+            return;
+        }
+        
+        foreach ($this->variants as $index => $existingVariant) {
+            if ($existingVariant['temp_id'] === $variant['temp_id']) {
+                $this->variants[$index] = $variant;
+                break;
+            }
+        }
+    }
+
+    public function handleVariantDeleted($index)
+    {
+        unset($this->variants[$index]);
+        $this->variants = array_values($this->variants);
     }
 
     public function render()

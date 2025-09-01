@@ -3,8 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Symfony\Component\HttpFoundation\Response;
 class AdminMiddleware
 {
     /**
@@ -12,12 +13,15 @@ class AdminMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle($request, Closure $next)
+     // Check if the user is authenticated and is an admin
+     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || !Auth::user()->isAdmin) {
-            return redirect('/login')->withErrors('You do not have admin access.');
+        // Check if the user is authenticated and is an admin
+        if (Auth::check() && Auth::user()->isAdmin == 1) {
+            return $next($request);
         }
 
-        return $next($request);
+        // Redirect if not authorized
+        return redirect('/')->with('error', 'Unauthorized access.');
     }
 }

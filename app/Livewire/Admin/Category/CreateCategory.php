@@ -19,7 +19,7 @@ class CreateCategory extends Component
 
     public $slug = '';
 
-    #[Validate('nullable|image|max:2048')]
+    #[Validate('required|image|max:2048')]
     public $image;
     #[Validate('nullable|exists:categories,id')]
     public $parent_category_id;
@@ -58,13 +58,15 @@ class CreateCategory extends Component
         $this->slug = Str::slug($value);
     }
 
-      public function removeImage()
+    public function removeImage()
     {
         if ($this->fileId) {
             try {
                 $imageKitService = new ImageKitService();
                 $imageKitService->delete($this->fileId);
+                \Log::info('CreateCategory - Image deleted from ImageKit', ['file_id' => $this->fileId]);
             } catch (\Exception $e) {
+                \Log::error('CreateCategory - Error deleting image: ' . $e->getMessage());
                 session()->flash('error', 'Error deleting image: ' . $e->getMessage());
             }
         }
@@ -75,43 +77,74 @@ class CreateCategory extends Component
     }
 
 
- public function save()
-{
-    $this->validate();
+    public function save()
+    {
+        $this->validate();
 
-    \Log::debug('Validation passed, attempting to create category');
-    \Log::debug('Data:', [
-        'title' => $this->title,
-        'slug' => Str::slug($this->title),
-        'parent_category_id' => $this->parent_category_id,
-        'description' => $this->description,
-        'is_active' => $this->is_active,
-        'meta_title' => $this->meta_title,
-        'meta_description' => $this->meta_description,
-    ]);
+        try {
+            $categoryImageUrl = null;
 
-    try {
-        $category = Category::create([
-            'title' => $this->title,
-            'slug' => Str::slug($this->title),
-            'parent_category_id' => $this->parent_category_id,
-            'image' => null,
-            'description' => $this->description,
-            'is_active' => $this->is_active,
-            'meta_title' => $this->meta_title,
-            'meta_description' => $this->meta_description,
-        ]);
+            if ($this->image) {
+                $imageKitService = new ImageKitService();
+                \Log::info('CreateCategory - Attempting to upload image to ImageKit', [
+                    'image_type' => get_class($this->image),
+                    'image_size' => $this->image->getSize(),
+                    'image_mime' => $this->image->getClientOriginalExtension(),
+                ]);
 
-        \Log::debug('Category created with ID: ' . $category->id);
-        
-        session()->flash('message', 'Category created successfully!');
-        return redirect()->route('categories.index');
-        
-    } catch (\Exception $e) {
-        \Log::error('Category creation failed: ' . $e->getMessage());
-        session()->flash('error', 'Error: ' . $e->getMessage());
+                try {
+                    $fileName = 'category-' . Str::slug($this->title) . '-' . time() . '.' . $this->image->getClientOriginalExtension();
+                    $uploadResult = $imageKitService->upload(
+                        $this->image, 
+                        $fileName,
+                        config('services.imagekit.folders.category', 'textio/category')
+                    );
+                    
+                    if ($uploadResult && isset($uploadResult->url)) {
+                        $categoryImageUrl = $uploadResult->url;
+                        $this->fileId = $uploadResult->fileId ?? null;
+                        \Log::info('CreateCategory - Image uploaded successfully', [
+                            'url' => $categoryImageUrl,
+                            'file_id' => $this->fileId
+                        ]);
+                    } else {
+                        throw new \Exception('Invalid upload response from ImageKit');
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('CreateCategory - Image upload failed: ' . $e->getMessage());
+                    session()->flash('error', 'Image upload failed: ' . $e->getMessage());
+                    return;
+                }
+            }
+
+            \Log::info('CreateCategory - Creating category', [
+                'title' => $this->title,
+                'slug' => Str::slug($this->title),
+                'image_url' => $categoryImageUrl
+            ]);
+
+            $category = Category::create([
+                'title' => $this->title,
+                'slug' => Str::slug($this->title),
+                'parent_category_id' => $this->parent_category_id,
+                'image' => $categoryImageUrl,
+                'description' => $this->description,
+                'is_active' => $this->is_active,
+                'meta_title' => $this->meta_title,
+                'meta_description' => $this->meta_description,
+            ]);
+
+            \Log::info('CreateCategory - Category created successfully', ['category_id' => $category->id]);
+            
+            session()->flash('message', 'Category created successfully!');
+            return redirect()->route('admin.categories.index');
+            
+        } catch (\Exception $e) {
+            \Log::error('CreateCategory - Category creation failed: ' . $e->getMessage());
+            \Log::error('CreateCategory - Exception trace: ' . $e->getTraceAsString());
+            session()->flash('error', 'Error creating category: ' . $e->getMessage());
+        }
     }
-}
 
     public function render()
     {
