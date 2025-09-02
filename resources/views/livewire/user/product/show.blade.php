@@ -24,7 +24,7 @@
                     <div class="flex gap-2">
                         @foreach($product->images as $image)
                             <div class="border rounded p-1 w-1/4 cursor-pointer">
-                                <img src="{{ asset('storage/' . $image->path) }}" alt="Thumbnail" class="h-16 w-full object-contain">
+                                <img src="{{ $image->image_path }}" alt="Thumbnail" class="h-16 w-full object-contain">
                             </div>
                         @endforeach
                     </div>

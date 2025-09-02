@@ -13,7 +13,7 @@
         @foreach ($products as $product)
             <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition">
                 <div class="relative">
-                    <img src="{{ asset('storage/' . $product->images->first()?->image_path) }}" alt="{{ $product->name }}"
+                    <img src="{{ $product->images->first()?->image_path ?? asset('images/placeholder.jpg') }}" alt="{{ $product->name }}"
                         class="w-full h-48 object-cover">
 
                     <div

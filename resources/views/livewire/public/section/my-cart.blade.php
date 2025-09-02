@@ -11,8 +11,8 @@
                         <!-- Product Image -->
                         <div class="flex-shrink-0">
                             <div class="w-32 h-32 sm:w-40 sm:h-40 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                                @if($item->product->image)
-                                    <img src="{{ asset('storage/' . $item->product->image) }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
+                                @if($item->product->images && $item->product->images->first())
+                                    <img src="{{ $item->product->images->first()->image_path }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                                 @else
                                     <i class="fas fa-image text-gray-400 text-3xl sm:text-4xl"></i>
                                 @endif

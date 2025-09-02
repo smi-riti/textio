@@ -97,5 +97,10 @@ class Product extends Model
         return $this->hasMany(Wishlist::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
     
 }

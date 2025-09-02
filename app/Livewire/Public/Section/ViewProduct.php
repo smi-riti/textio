@@ -16,7 +16,10 @@ class ViewProduct extends Component
     public $quantity = 1;
     public $selectedColor = '';
     public $selectedStorage = '';
+     public $whatsappNumber;
+    public $customizationMessage;
 
+   
     public function mount($slug)
     {
         $this->slug = $slug;
@@ -40,6 +43,9 @@ class ViewProduct extends Component
                 $this->selectedStorage = $storageVariant->value;
             }
         }
+        $this->whatsappNumber = env('WHATSAPP_NUMBER', '+1234567890');
+        $this->customizationMessage = env('WHATSAPP_CUSTOMIZATION_MESSAGE', 'Hi! I\'m interested in customizing this product:');
+    
     }
 
     public function increment()
@@ -178,7 +184,16 @@ class ViewProduct extends Component
         return redirect()->route('myOrder');
     }
 
-
+     public function getCustomizationWhatsappUrl($productName, $orderNumber = null)
+    {
+        $message = $this->customizationMessage . " " . $productName;
+        if ($orderNumber) {
+            $message .= " (Order: " . $orderNumber . ")";
+        }
+        $message .= " - " . url()->current();
+        $encodedMessage = urlencode($message);
+        return "https://wa.me/" . str_replace(['+', ' ', '-'], '', $this->whatsappNumber) . "?text=" . $encodedMessage;
+    }
     
     public function render()
     {
