@@ -338,7 +338,7 @@
                             <div class="relative group sm:w-64 w-full">
                                 @if($product->images->first())
                                     <img 
-                                        src="{{ asset('storage/' . $product->images->first()->image_path) }}" 
+                                        src="{{ $product->images->first()->image_path }}" 
                                         alt="{{ $product->name }}"
                                         class="w-full h-48 sm:h-64 object-cover"
                                     >

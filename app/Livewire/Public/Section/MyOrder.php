@@ -25,9 +25,14 @@ class MyOrder extends Component
     public $city;
     public $state;
     public $postal_code;
+    public $whatsappNumber;
+    public $customizationMessage;
 
     public function mount()
     {
+        $this->whatsappNumber = env('WHATSAPP_NUMBER', '+1234567890');
+        $this->customizationMessage = env('WHATSAPP_CUSTOMIZATION_MESSAGE', 'Hi! I\'m interested in customizing this product:');
+        
         $this->pendingOrder = session()->get('pending_order', []);
         if (empty($this->pendingOrder)) {
             session()->flash('error', 'No order data found.');
@@ -124,7 +129,18 @@ class MyOrder extends Component
         session()->forget('pending_order');
 
         session()->flash('message', 'Order placed successfully! Order Number: ' . $order->order_number);
-        return redirect()->route('myCart');
+        return redirect()->route('myOrders');
+    }
+
+    public function getCustomizationWhatsappUrl($productName, $orderNumber = null)
+    {
+        $message = $this->customizationMessage . " " . $productName;
+        if ($orderNumber) {
+            $message .= " (Order: " . $orderNumber . ")";
+        }
+        $message .= " - " . url()->current();
+        $encodedMessage = urlencode($message);
+        return "https://wa.me/" . str_replace(['+', ' ', '-'], '', $this->whatsappNumber) . "?text=" . $encodedMessage;
     }
 
     public function store()

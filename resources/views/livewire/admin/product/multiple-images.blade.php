@@ -26,7 +26,7 @@
     <div class="grid grid-cols-3 gap-4">
         @foreach ($productImages as $image)
             <div class="relative border rounded p-2">
-                <img src="{{ asset('storage/image/product/' . $image->image_path) }}" alt="Product Image" class="w-full h-32 object-cover rounded">
+                <img src="{{ $image->image_path }}" alt="Product Image" class="w-full h-32 object-cover rounded">
                 <button wire:click="deleteImage({{ $image->id }})" class="absolute top-2 right-2 bg-red-500 text-white text-sm px-2 py-1 rounded hover:bg-red-600">
                     Delete
                 </button>

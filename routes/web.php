@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
 use App\Livewire\Admin\Category\UpdateCategory;
-
+use App\Livewire\Public\Section\MyOrders;
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
 Route::get('/',LandingPage::class)->name('home');
@@ -42,7 +42,8 @@ Route::post('/logout',function(){
 
 Route::get('/mycart',MyCart::class)->name('myCart');
 Route::get('/myorder',MyOrder::class)->name('myOrder');
-Route::get('/product/{slug}', ViewProduct::class)->name('public.product.detail');
+Route::get('/myorders',MyOrders::class)->name('myOrders');
+Route::get('/product/{slug}', ViewProduct::class)->name('public.product.view');
 Route::get('/wishlist', WishlistCard::class)->name('wishlist.index');
 Route::get('/account',ProfileInformation::class)->name('profile-information');
 Route::get('/account/address',ManageAddress::class)->name('Manage-address');
@@ -87,10 +88,10 @@ Route::get('/dashboard', function () {
 })->name('dashboard');
 Route::get('/product-list', function () {
     return view('admin.products.list');
-})->name('product-list');
+})->name('product-list.old');
 Route::get('/product-add', function () {
-    return view('admin.products.create.old');
-})->name('product-add');
+    return view('admin.products.create');
+})->name('product-add.old');
 Route::get('/brand-list', function () {
     return view('admin.brand.list');
 })->name('brand-list');

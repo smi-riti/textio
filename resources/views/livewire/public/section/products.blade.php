@@ -11,7 +11,7 @@
                     class="product-card rounded-xl overflow-hidden  transition-all duration-300 transform hover:-translate-y-1 max-w-sm">
                     <div class="relative">
                         <a wire:navigate href="{{ route('view.product', $product->slug) }}">
-                            <img src="{{ asset('storage/' . $product->images->first()?->image_path) ?? asset('images/placeholder.jpg') }}"
+                            <img src="{{ $product->images->first()?->image_path ?? asset('images/placeholder.jpg') }}"
                                 alt="{{ $product->name }}" class="w-full h-64 object-cover">
                         </a>
                         <div class="absolute top-3 right-3  text-xs font-semibold rounded-full uppercase tracking-wide">

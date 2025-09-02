@@ -18,7 +18,7 @@ class MyCart extends Component
     public function loadCartItems()
     {
         if (Auth::check()) {
-            $this->cartItems = Cart::with(['product', 'productVariant'])
+            $this->cartItems = Cart::with(['product.images', 'productVariant'])
                 ->where('user_id', Auth::id())
                 ->get();
         } else {
