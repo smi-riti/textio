@@ -16,6 +16,7 @@ use App\Livewire\Auth\Register;
 use App\Livewire\Public\AllProduct;
 use App\Livewire\Public\Cart;
 use App\Livewire\Public\ProductDetail;
+use App\Livewire\Public\Section\Accounts\ProfileInformation;
 use App\Livewire\Public\Section\LandingPage;
 use App\Livewire\Public\Section\MyCart;
 use App\Livewire\Public\Section\MyOrder;
@@ -42,6 +43,7 @@ Route::get('/mycart',MyCart::class)->name('myCart');
 Route::get('/myorder',MyOrder::class)->name('myOrder');
 Route::get('/product/{slug}', ViewProduct::class)->name('public.product.detail');
 Route::get('/wishlist', WishlistCard::class)->name('wishlist.index');
+Route::get('/account',ProfileInformation::class)->name('profile-information');
 
 // Admin routes protected by middleware
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
