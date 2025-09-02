@@ -14,7 +14,9 @@
             @forelse ($wishlistItems as $item)
                 <div class="flex flex-col sm:flex-row items-start sm:items-center bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition duration-300">
                     <div class="w-24 h-24 flex-shrink-0 mb-4 sm:mb-0">
-                        <img src="{{ $item->product->images->first()?->image_path ?? asset('images/placeholder.jpg') }}"
+                        {{-- <img src="{{ $item->product->images->first()?->image_path ?? asset('') }}"
+                            alt="{{ $item->product->name }}" class="w-full h-full object-cover rounded-md"> --}}
+                             <img src="/assets/images/product_38.jpg"
                             alt="{{ $item->product->name }}" class="w-full h-full object-cover rounded-md">
                     </div>
                     <div class="flex-1 sm:pl-6">
@@ -26,11 +28,11 @@
                             </button>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 mt-2">
-                            <span class="text-lg font-semibold text-purple-600">₹{{ number_format($item->product->price, 2) }}</span>
+                            <span class="text-lg font-semibold text-purple-600">₹{{ number_format($item->product->discount_price, 2) }}</span>
                             @if ($item->product->discount_price)
-                                <span class="text-sm text-gray-500 line-through">₹{{ number_format($item->product->discount_price, 2) }}</span>
+                                <span class="text-sm text-gray-500 line-through">₹{{ number_format($item->product->price, 2) }}</span>
                                 <span class="text-sm text-green-600 font-medium">
-                                    {{ round((($item->product->discount_price - $item->product->price) / $item->product->discount_price) * 100) }}% off
+                                    {{ round((($item->product->price - $item->product->discount_price) / $item->product->discount_price) * 100) }}% off
                                 </span>
                             @endif
                         </div>
