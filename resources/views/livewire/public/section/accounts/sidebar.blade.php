@@ -11,7 +11,7 @@
             <h4 class="text-sm font-semibold text-gray-800 uppercase tracking-wide">Account Settings</h4>
             <ul class="mt-3 space-y-2">
                 <li><a wire:navigate href="{{route('profile-information')}}" class="text-sm text-gray-700 hover:text-purple-600 transition duration-200">Profile Information</a></li>
-                <li><a href="" class="text-sm text-gray-700 hover:text-purple-600 transition duration-200">Manage Address</a></li>              
+                <li><a href="{{route('Manage-address')}}" class="text-sm text-gray-700 hover:text-purple-600 transition duration-200">Manage Address</a></li>              
                   <li><a wire:navigate href="{{route('wishlist.index')}}" class="text-sm text-gray-700 hover:text-purple-600 transition duration-200">My Wishlist</a></li>
 
             </ul>
