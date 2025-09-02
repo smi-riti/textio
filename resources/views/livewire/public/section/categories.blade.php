@@ -12,7 +12,8 @@
                             style="overflow-x: auto;">
                             @foreach ($categories as $category)
                                 <div class="category-card group flex-shrink-0 w-full md:w-1/4 px-2 snap-center">
-                                    <a href="{{ route('categories.view', $category->slug) }}">
+                                    {{-- <a href="{{ route('categories.view', $category->slug) }}"> --}}
+                                        <a href="">
                                         <div class="relative overflow-hidden rounded-lg bg-gray-100 h-48 md:h-64">
                                             <img src="{{ $category->image_url ?? 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1480&q=80' }}"
                                                 alt="{{ $category->title }}"

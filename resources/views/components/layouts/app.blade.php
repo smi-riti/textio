@@ -36,11 +36,21 @@
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
         
-        .add-to-cart-btn {
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-        }
+         .add-to-cart-btn {
+                opacity: 0;
+                transform: translateY(10px);
+                transition: all 0.3s ease;
+            }
+            .product-card:hover .add-to-cart-btn {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            @media (max-width: 767px) {
+                .add-to-cart-btn {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
         
         .product-card:hover .add-to-cart-btn {
             opacity: 1;
@@ -81,7 +91,6 @@
     }
     </style>
 </head>
-</head>
 
 <body class="flex flex-col min-h-screen bg-gray-50" x-data="{ 
         currentSlide: 0,
@@ -98,12 +107,30 @@
     <livewire:public.section.header/>
 
     <!-- Main Content -->
-    <main>
+    <main class="pb-16 lg:pb-0"> <!-- Added padding-bottom to prevent content from being hidden behind fixed navbar -->
         {{ $slot }}
     </main>
 
-  
-
+    <!-- Mobile bottom navbar -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-between items-center z-50">
+       
+        <a href="{{route('home')}}" class="text-center p-2 text-gray-500">
+            <i class="fas fa-home text-lg"></i>
+            <p class="text-xs mt-1">Home</p>
+        </a>
+         <a href="{{route('wishlist.index')}}" class="text-center p-2 text-purple-600">
+            <i class="fas fa-heart text-lg"></i>
+            <p class="text-xs mt-1">Wishlist</p>
+        </a>
+        <a href="{{route('myCart')}}" class="text-center p-2 text-gray-500">
+            <i class="fas fa-shopping-bag text-lg"></i>
+            <p class="text-xs mt-1">Cart</p>
+        </a>
+        <a href="#" class="text-center p-2 text-gray-500">
+            <i class="fas fa-user text-lg"></i>
+            <p class="text-xs mt-1">Profile</p>
+        </a>
+    </div>
    
     <!-- Footer -->
     <livewire:public.section.footer/>
