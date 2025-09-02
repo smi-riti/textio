@@ -251,7 +251,7 @@
                                 class="w-12 text-center border-t border-b py-1 quantity-input">
                             <button wire:click="increment" class="border rounded-r px-3 py-1 bg-gray-100">+</button>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <hr class="mb-6">
 

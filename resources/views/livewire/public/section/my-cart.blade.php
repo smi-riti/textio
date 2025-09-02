@@ -115,7 +115,7 @@
 
     <!-- Fixed Place Order Button -->
     @if($cartItems->isNotEmpty())
-        <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 z-10">
+        <div class="lg:hidden fixed mb-20 bottom-0 left-0 right-0 bg-white shadow-lg p-4 z-10">
             <div class="container mx-auto flex justify-end">
                 <button wire:click="placeOrder" class="bg-purple-600 hover:bg-purple-700 text-white py-2 sm:py-3 px-6 sm:px-8 rounded-lg font-semibold text-base sm:text-lg transition w-full sm:w-auto">
                     Place Order
