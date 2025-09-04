@@ -112,25 +112,31 @@
     </main>
 
     <!-- Mobile bottom navbar -->
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-between items-center z-50">
-       
-        <a href="{{route('home')}}" class="text-center p-2 text-gray-500">
-            <i class="fas fa-home text-lg"></i>
-            <p class="text-xs mt-1">Home</p>
+   <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-between items-center z-50" x-data="{ activeButton: 'home' }">
+    <a href="{{ route('home') }}" class="text-center p-2" :class="{ 'text-purple-600': activeButton === 'home', 'text-gray-500': activeButton !== 'home' }" @click="activeButton = 'home'">
+        <i class="fas fa-home text-lg"></i>
+        <p class="text-xs mt-1">Home</p>
+    </a>
+    <a href="{{ route('wishlist.index') }}" class="text-center p-2" :class="{ 'text-purple-600': activeButton === 'wishlist', 'text-gray-500': activeButton !== 'wishlist' }" @click="activeButton = 'wishlist'">
+        <i class="fas fa-heart text-lg"></i>
+        <p class="text-xs mt-1">Wishlist</p>
+    </a>
+    <a href="{{ route('myCart') }}" class="text-center p-2" :class="{ 'text-purple-600': activeButton === 'cart', 'text-gray-500': activeButton !== 'cart' }" @click="activeButton = 'cart'">
+        <i class="fas fa-shopping-bag text-lg"></i>
+        <p class="text-xs mt-1">Cart</p>
+    </a>
+    @guest
+        <a href="{{ route('login') }}" class="text-center p-2" :class="{ 'text-purple-600': activeButton === 'signin', 'text-gray-500': activeButton !== 'signin' }" @click="activeButton = 'signin'">
+            <i class="fas fa-sign-in-alt text-lg"></i>
+            <p class="text-xs mt-1">Sign In</p>
         </a>
-         <a href="{{route('wishlist.index')}}" class="text-center p-2 text-purple-600">
-            <i class="fas fa-heart text-lg"></i>
-            <p class="text-xs mt-1">Wishlist</p>
-        </a>
-        <a href="{{route('myCart')}}" class="text-center p-2 text-gray-500">
-            <i class="fas fa-shopping-bag text-lg"></i>
-            <p class="text-xs mt-1">Cart</p>
-        </a>
-        <a href="#" class="text-center p-2 text-gray-500">
+    @else
+        <a href="{{ route('profile-information') }}" class="text-center p-2" :class="{ 'text-purple-600': activeButton === 'profile', 'text-gray-500': activeButton !== 'profile' }" @click="activeButton = 'profile'">
             <i class="fas fa-user text-lg"></i>
             <p class="text-xs mt-1">Profile</p>
         </a>
-    </div>
+    @endguest
+</div>
    
     <!-- Footer -->
     <livewire:public.section.footer/>

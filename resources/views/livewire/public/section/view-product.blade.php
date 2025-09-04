@@ -243,7 +243,7 @@
                         </p>
                     </div>
                      <!-- Quantity Selection -->
-                    <div class="mt-6">
+                    {{-- <div class="mt-6">
                         <h3 class="font-semibold">Quantity</h3>
                         <div class="flex items-center mt-2">
                             <button wire:click="decrement" class="border rounded-l px-3 py-1 bg-gray-100">-</button>
@@ -251,9 +251,9 @@
                                 class="w-12 text-center border-t border-b py-1 quantity-input">
                             <button wire:click="increment" class="border rounded-r px-3 py-1 bg-gray-100">+</button>
                         </div>
-                    </div> --}}
+                    </div>  --}}
 
-                    <hr class="mb-6">
+                    <hr class="mb-6 mt-2">
 
                     <!-- Desktop Buttons -->
                     <div class="desktop-buttons mb-4 hidden">

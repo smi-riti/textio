@@ -9,7 +9,8 @@
                 @forelse ($cartItems as $item)
                     <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6 border-b pb-4">
                         <!-- Product Image -->
-                        <div class="flex-shrink-0">
+                       <a href="{{route('view.product',$item->product->slug)}}">
+                         <div class="flex-shrink-0">
                             <div class="w-32 h-32 sm:w-40 sm:h-40 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
                                 @if($item->product->images && $item->product->images->first())
                                     <img src="{{ $item->product->images->first()->image_path }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
@@ -18,6 +19,7 @@
                                 @endif
                             </div>
                         </div>
+                       </a>
                         
                         <!-- Product Details -->
                         <div class="flex-grow">

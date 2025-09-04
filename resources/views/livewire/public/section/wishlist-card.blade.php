@@ -1,6 +1,9 @@
 <div class="container min-h-screen bg-white mx-auto px-4 py-6 max-w-7xl flex flex-col lg:flex-row gap-6">
     <!-- Sidebar -->
    <livewire:public.section.accounts.sidebar/>
+   
+
+   
 
     <!-- Wishlist Content -->
     <div class="w-full lg:w-9/12">
@@ -12,13 +15,15 @@
         </div>
         <div class="space-y-6">
             @forelse ($wishlistItems as $item)
-                <div class="flex flex-col sm:flex-row items-start sm:items-center bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition duration-300">
-                    <div class="w-24 h-24 flex-shrink-0 mb-4 sm:mb-0">
+                <div  class="flex flex-col sm:flex-row items-start sm:items-center bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition duration-300">
+                   <a href="{{route('view.product',$item->product->slug)}}">
+                     <div class="w-24 h-24 flex-shrink-0 mb-4 sm:mb-0">
                         {{-- <img src="{{ $item->product->images->first()?->image_path ?? asset('') }}"
                             alt="{{ $item->product->name }}" class="w-full h-full object-cover rounded-md"> --}}
                              <img src="/assets/images/product_38.jpg"
                             alt="{{ $item->product->name }}" class="w-full h-full object-cover rounded-md">
                     </div>
+                   </a>
                     <div class="flex-1 sm:pl-6">
                         <div class="flex justify-between items-start">
                             <h3 class="text-lg font-semibold text-gray-900 truncate">{{ $item->product->name }}</h3>

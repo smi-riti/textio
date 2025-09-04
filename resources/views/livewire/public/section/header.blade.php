@@ -68,8 +68,23 @@
             </nav>
             <hr>
             <div>
-                <a href="{{ route('login') }}"
-                    class="flex text-center items-center justify-center py-1 bg-purple-900 mt-2 text-white rounded">Login</a>
+
+                @guest
+                    <a href="{{ route('login') }}"
+                        class="flex text-center items-center justify-center py-1 bg-purple-900 mt-2 text-white rounded">Login</a>
+                @endguest
+
+                @auth
+                    <form action="{{ route('logout') }}" method="post">
+                        @csrf
+                        <div
+                            class="flex text-center items-center justify-center py-1 bg-purple-900 mt-2 text-white rounded">
+                            <button type="submit" class="hover:bg-gray-100">Logout</button>
+                        </div>
+                    </form>
+                @endauth
+
+
             </div>
         </div>
     </div>
