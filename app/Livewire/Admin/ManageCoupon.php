@@ -7,7 +7,6 @@ use Livewire\Component;
 use App\Models\Coupon;
 
 #[Layout('components.layouts.admin')]
-
 class ManageCoupon extends Component
 {
     public $couponId;
@@ -15,16 +14,22 @@ class ManageCoupon extends Component
     public $discount_type = 'percentage';
     public $discount_value;
     public $expiration_date;
+    public $start_date;
     public $status = false;
     public $showModal = false;
     public $isEditMode = false;
+    public $minimum_purchase_amount;
     public $search = '';
+
+
 
     protected $rules = [
         'code' => 'required|string|max:255|unique:coupons,code',
         'discount_type' => 'required|in:percentage,fixed,freeShipping',
         'discount_value' => 'nullable|numeric|min:0|required_if:discount_type,percentage,fixed',
-        'expiration_date' => 'nullable|date|after_or_equal:today',
+        'start_date' => 'nullable|date|after_or_equal:today',
+        'minimum_purchase_amount'=>'required|numeric|min:0',
+        'expiration_date' => 'nullable|date|after_or_equal:start_date',
         'status' => 'boolean',
     ];
 
@@ -64,8 +69,10 @@ class ManageCoupon extends Component
         $this->couponId = $coupon->id;
         $this->code = $coupon->code;
         $this->discount_type = $coupon->discount_type;
+        $this->minimum_purchase_amount=$coupon->minimum_purchase_amount;
         $this->discount_value = $coupon->discount_value;
-        $this->expiration_date = $coupon->expiration_date ? $coupon->expiration_date->format('Y-m-d') : null;
+        $this->start_date = $coupon->start_date?->format('Y-m-d');
+        $this->expiration_date = $coupon->expiration_date?->format('Y-m-d');
         $this->status = $coupon->status;
         $this->isEditMode = true;
         $this->showModal = true;
@@ -82,8 +89,10 @@ class ManageCoupon extends Component
         $data = [
             'code' => $this->code,
             'discount_type' => $this->discount_type,
+            'minimum_purchase_amount' => $this->minimum_purchase_amount,
             'discount_value' => $this->discount_type === 'freeShipping' ? null : $this->discount_value,
-            'expiration_date' => $this->expiration_date,
+            'start_date' => $this->start_date ? \Carbon\Carbon::parse($this->start_date) : null,
+            'expiration_date' => $this->expiration_date ? \Carbon\Carbon::parse($this->expiration_date) : null,
             'status' => $this->status,
         ];
 
@@ -117,6 +126,8 @@ class ManageCoupon extends Component
         $this->code = '';
         $this->discount_type = 'percentage';
         $this->discount_value = null;
+        $this->start_date = null;
+        $this->minimum_purchase_amount = null;
         $this->expiration_date = null;
         $this->status = false;
         $this->resetValidation();

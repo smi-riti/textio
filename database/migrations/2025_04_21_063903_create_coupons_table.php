@@ -16,8 +16,10 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->enum('discount_type', ['percentage', 'fixed','freeShipping']);
             $table->decimal('discount_value')->nullable();
+            $table->decimal('minimum_purchase_amount', 8, 2);
+            $table->date('start_date')->nullable();  
             $table->date('expiration_date')->nullable();
-            $table->boolean('status')->nullable();
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }
