@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class MyOrder extends Component
 {
@@ -22,6 +23,16 @@ class MyOrder extends Component
     public $paymentMethod = 'Cash on Delivery';
     public $whatsappNumber;
     public $customizationMessage;
+    public $couponCode = '';
+    public $discountAmount = 0;
+
+    public function rules()
+    {
+        return [
+            'addressId' => 'required|exists:addresses,id,user_id,' . Auth::id(),
+            'paymentMethod' => 'required|in:Cash on Delivery,UPI',
+        ];
+    }
 
     public function mount()
     {
@@ -55,6 +66,14 @@ class MyOrder extends Component
         $this->loadUserAddresses();
     }
 
+   #[On('coupon-applied')]
+public function updateCoupon($couponCode, $discount)
+{
+        $this->discountAmount = $discount;
+        $this->couponCode = $couponCode;
+        $this->totalAmount = max(0, $this->pendingOrder['total_amount'] - $this->discountAmount);
+    }
+
     public function confirmOrder()
     {
         if (!Auth::check()) {
@@ -67,15 +86,7 @@ class MyOrder extends Component
             return redirect()->route('myCart');
         }
 
-        if (!$this->addressId || !Address::where('user_id', Auth::id())->where('id', $this->addressId)->exists()) {
-            session()->flash('error', 'Please select a valid delivery address.');
-            return;
-        }
-
-        if (!in_array($this->paymentMethod, ['Cash on Delivery', 'UPI'])) {
-            session()->flash('error', 'Please select a valid payment method.');
-            return;
-        }
+        $this->validate();
 
         $order = Order::create([
             'user_id' => Auth::id(),
@@ -84,10 +95,11 @@ class MyOrder extends Component
             'isOrdered' => true,
             'status' => 'pending',
             'total_amount' => number_format($this->totalAmount, 2, '.', ''),
+            // 'discount_amount' => number_format($this->discountAmount, 2, '.', ''),
+            'coupon_code' => $this->couponCode ?: null,
             'shipping_charge' => 0.00,
             'payment_status' => $this->paymentMethod === 'Cash on Delivery' ? 'unpaid' : 'pending',
             'payment_method' => $this->paymentMethod,
-            'coupon_code' => null,
         ]);
 
         foreach ($this->cartItems as $item) {

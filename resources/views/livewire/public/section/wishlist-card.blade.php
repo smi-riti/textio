@@ -51,7 +51,7 @@
             @empty
                 <div class="text-center text-gray-600 py-12 bg-gray-50 rounded-xl">
                     <p class="text-lg">Your wishlist is empty.</p>
-                    <a href="{{ route('shop') }}" class="mt-4 inline-block bg-purple-600 text-white py-2 px-6 rounded-full text-sm font-semibold hover:bg-purple-700 transition duration-300">
+                    <a href="{{ route('public.product.all') }}" class="mt-4 inline-block bg-purple-600 text-white py-2 px-6 rounded-full text-sm font-semibold hover:bg-purple-700 transition duration-300">
                         Start Shopping
                     </a>
                 </div>
