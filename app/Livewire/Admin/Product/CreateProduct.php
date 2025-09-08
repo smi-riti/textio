@@ -7,13 +7,14 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\ProductImage;
 use App\Models\ProductHighlist;
-use App\Models\ProductVariant;
+use App\Models\ProductVariantCombination;
 use App\Services\ImageKitService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
+
 #[Layout('components.layouts.admin')]
 class CreateProduct extends Component
 {
@@ -25,6 +26,7 @@ class CreateProduct extends Component
 
     // Product Properties
     public $name = '';
+    public $slug = '';
     public $description = '';
     public $price = '';
     public $discount_price = '';
@@ -47,13 +49,15 @@ class CreateProduct extends Component
     public $featured_image_preview;
     public $featured_image_file_id;
     public $featured_image_url;
+    public $isUploadingFeaturedImage = false;
 
     public $gallery_images = [];
     public $gallery_images_preview = [];
-    public $gallery_images_data = []; // Store ImageKit data for gallery images
+    public $gallery_images_data = [];
+    public $isUploadingGalleryImages = false;
 
     // Variants
-    public $variants = [];
+    public $variantCombinations = [];
 
     // Loading States
     public $isLoading = false;
@@ -62,20 +66,21 @@ class CreateProduct extends Component
 
     protected $listeners = [
         'stepChanged' => 'handleStepChange',
-        'variantAdded' => 'handleVariantAdded',
-        'variantUpdated' => 'handleVariantUpdated', 
-        'variantDeleted' => 'handleVariantDeleted'
+        'combinationAdded' => 'handleCombinationAdded',
+        'combinationUpdated' => 'handleCombinationUpdated',
+        'combinationDeleted' => 'handleCombinationDeleted'
     ];
 
     protected function rules()
     {
         $rules = [
             'name' => 'required|string|max:255|unique:products,name',
+            'slug' => 'required|string|max:255|unique:products,slug',
             'description' => 'nullable|string|min:10',
-            'price' => 'required|numeric|min:0', // Price is the original price
-            'discount_price' => 'required|numeric|min:0', // Discount price is the selling price
+            'price' => 'required|numeric|min:0',
+            'discount_price' => 'required|numeric|min:0',
             'quantity' => 'required|integer|min:0',
-            'sku' => 'required|string|max:100|unique:products,sku', // SKU is required
+            'sku' => 'required|string|max:100|unique:products,sku',
             'category_id' => 'nullable|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'status' => 'boolean',
@@ -88,7 +93,6 @@ class CreateProduct extends Component
             'highlights' => 'nullable|array',
         ];
 
-        // Add lt:price rule - discount price (selling price) should be less than original price
         if ($this->price && is_numeric($this->price) && $this->price > 0) {
             $rules['discount_price'] .= '|lt:price';
         }
@@ -99,6 +103,8 @@ class CreateProduct extends Component
     protected $messages = [
         'name.required' => 'Product name is required.',
         'name.unique' => 'This product name already exists.',
+        'slug.required' => 'Product slug is required.',
+        'slug.unique' => 'This product slug already exists.',
         'price.required' => 'Product price is required.',
         'price.numeric' => 'Price must be a valid number.',
         'discount_price.required' => 'Selling price (discount price) is required.',
@@ -128,6 +134,11 @@ class CreateProduct extends Component
         $this->sku = 'PRD-' . strtoupper(Str::random(8));
     }
 
+    public function updatedName($value)
+    {
+        $this->slug = Str::slug($value);
+    }
+
     public function addHighlight()
     {
         if (!empty($this->new_highlight)) {
@@ -150,7 +161,6 @@ class CreateProduct extends Component
 
     public function removeFeaturedImage()
     {
-        // Remove from ImageKit if exists
         if ($this->featured_image_file_id) {
             try {
                 $imageKitService = new ImageKitService();
@@ -166,7 +176,7 @@ class CreateProduct extends Component
     public function updatedGalleryImages()
     {
         $this->validate(['gallery_images.*' => 'image|max:2048']);
-        
+
         foreach ($this->gallery_images as $index => $image) {
             if (!isset($this->gallery_images_preview[$index])) {
                 $this->gallery_images_preview[$index] = $image->temporaryUrl();
@@ -176,7 +186,6 @@ class CreateProduct extends Component
 
     public function removeGalleryImage($index)
     {
-        // Remove from ImageKit if exists
         if (isset($this->gallery_images_data[$index]['file_id'])) {
             try {
                 $imageKitService = new ImageKitService();
@@ -189,31 +198,14 @@ class CreateProduct extends Component
         unset($this->gallery_images[$index]);
         unset($this->gallery_images_preview[$index]);
         unset($this->gallery_images_data[$index]);
-        
+
         $this->gallery_images = array_values($this->gallery_images);
         $this->gallery_images_preview = array_values($this->gallery_images_preview);
         $this->gallery_images_data = array_values($this->gallery_images_data);
     }
 
-    public function removeImage($index)
-    {
-        unset($this->images[$index]);
-        $this->images = array_values($this->images);
-        
-        // Adjust primary image index if needed
-        if ($this->primary_image_index >= count($this->images)) {
-            $this->primary_image_index = max(0, count($this->images) - 1);
-        }
-    }
-
-    public function setPrimaryImage($index)
-    {
-        $this->primary_image_index = $index;
-    }
-
     public function save()
     {
-        // Debug: Log the data being validated
         \Log::info('CreateProduct - Attempting to save product', [
             'name' => $this->name,
             'description' => $this->description,
@@ -222,18 +214,20 @@ class CreateProduct extends Component
             'brand_id' => $this->brand_id,
             'featured_image' => !empty($this->featured_image),
             'gallery_images_count' => count($this->gallery_images),
-            'highlights_count' => count($this->highlights)
+            'highlights_count' => count($this->highlights),
+            'variantCombinations_count' => count($this->variantCombinations),
         ]);
 
         $this->validate();
 
-        $this->isSaving = true; // Set saving state
-        $this->loadingMessage = 'Creating product, please wait...'; // Set loading message
+        $this->isSaving = true;
+        $this->loadingMessage = 'Creating product, please wait...';
 
         try {
             // Create the product
             $product = Product::create([
                 'name' => $this->name,
+                'slug' => $this->slug,
                 'description' => $this->description ?: null,
                 'price' => $this->price ?: null,
                 'discount_price' => $this->discount_price ?: null,
@@ -260,7 +254,7 @@ class CreateProduct extends Component
                 $this->uploadGalleryImages($product);
             }
 
-            // Save highlights using ProductHighlist model
+            // Save highlights
             if (!empty($this->highlights)) {
                 foreach ($this->highlights as $highlight) {
                     ProductHighlist::create([
@@ -271,20 +265,19 @@ class CreateProduct extends Component
                 \Log::info('CreateProduct - Highlights saved', ['count' => count($this->highlights)]);
             }
 
-            // Save variants
-            if (!empty($this->variants)) {
-                foreach ($this->variants as $variant) {
-                    ProductVariant::create([
+            // Save variant combinations
+            if (!empty($this->variantCombinations)) {
+                foreach ($this->variantCombinations as $combination) {
+                    ProductVariantCombination::create([
                         'product_id' => $product->id,
-                        'variant_type' => $variant['variant_type'],
-                        'variant_name' => $variant['variant_name'],
-                        'price' => $variant['price'] ?? null,
-                        'stock' => $variant['stock'],
-                        'sku' => $variant['sku'] ?? null,
-                        'variant_image' => $variant['variant_image'] ?? null,
+                        'price' => $combination['price'] ?? null,
+                        'stock' => $combination['stock'],
+                        'sku' => $combination['sku'] ?? null,
+                        'image' => $combination['image'] ?? null,
+                        'variant_values' => json_encode($combination['variant_values_data'] ?? []),
                     ]);
                 }
-                \Log::info('CreateProduct - Variants saved', ['count' => count($this->variants)]);
+                \Log::info('CreateProduct - Variant combinations saved', ['count' => count($this->variantCombinations)]);
             }
 
             session()->flash('success', 'Product created successfully!');
@@ -295,16 +288,17 @@ class CreateProduct extends Component
             \Log::error('Product creation trace: ' . $e->getTraceAsString());
             session()->flash('error', 'Error creating product: ' . $e->getMessage());
         } finally {
-            $this->isSaving = false; // Reset saving state
+            $this->isSaving = false;
         }
     }
 
     private function uploadFeaturedImage($product)
     {
         try {
+            $this->isUploadingFeaturedImage = true;
             $imageKitService = new ImageKitService();
             $fileName = 'featured-' . $product->slug . '-' . time() . '.' . $this->featured_image->getClientOriginalExtension();
-            
+
             $result = $imageKitService->upload(
                 $this->featured_image,
                 $fileName,
@@ -323,6 +317,8 @@ class CreateProduct extends Component
         } catch (\Exception $e) {
             \Log::error('Failed to upload featured image: ' . $e->getMessage());
             throw new \Exception('Failed to upload featured image');
+        } finally {
+            $this->isUploadingFeaturedImage = false;
         }
     }
 
@@ -334,14 +330,15 @@ class CreateProduct extends Component
         }
 
         try {
+            $this->isUploadingGalleryImages = true;
             $imageKitService = new ImageKitService();
             \Log::info('Uploading gallery images', ['count' => count($this->gallery_images)]);
-            
+
             foreach ($this->gallery_images as $index => $image) {
                 $fileName = 'gallery-' . $product->slug . '-' . ($index + 1) . '-' . time() . '.' . $image->getClientOriginalExtension();
-                
+
                 \Log::info('Uploading gallery image', ['index' => $index, 'fileName' => $fileName]);
-                
+
                 $result = $imageKitService->upload(
                     $image,
                     $fileName,
@@ -361,6 +358,8 @@ class CreateProduct extends Component
         } catch (\Exception $e) {
             \Log::error('Failed to upload gallery images: ' . $e->getMessage());
             throw new \Exception('Failed to upload gallery images');
+        } finally {
+            $this->isUploadingGalleryImages = false;
         }
     }
 
@@ -372,12 +371,11 @@ class CreateProduct extends Component
 
     public function nextStep()
     {
-        // Validate current step before proceeding
         if ($this->validateCurrentStep()) {
             if (!in_array($this->currentStep, $this->completedSteps)) {
                 $this->completedSteps[] = $this->currentStep;
             }
-            
+
             if ($this->currentStep < 5) {
                 $this->currentStep++;
             }
@@ -401,16 +399,17 @@ class CreateProduct extends Component
     private function validateCurrentStep()
     {
         switch ($this->currentStep) {
-            case 1: // Basic Info
+            case 1:
                 return $this->validate([
                     'name' => 'required|string|max:255',
+                    'slug' => 'required|string|max:255|unique:products,slug',
                     'description' => 'nullable|string|min:10',
                     'category_id' => 'nullable|exists:categories,id',
                     'brand_id' => 'nullable|exists:brands,id',
                     'sku' => 'required|string|max:100',
                 ]);
-                
-            case 2: // Pricing
+
+            case 2:
                 $rules = [
                     'price' => 'required|numeric|min:0',
                     'discount_price' => 'required|numeric|min:0',
@@ -420,48 +419,47 @@ class CreateProduct extends Component
                     $rules['discount_price'] .= '|lt:price';
                 }
                 return $this->validate($rules);
-                
-            case 3: // Images
+
+            case 3:
                 return $this->validate([
                     'featured_image' => 'required|image|max:2048',
                     'gallery_images.*' => 'nullable|image|max:2048',
                 ]);
-                
-            case 4: // Variants - optional
+
+            case 4:
                 return true;
-                
-            case 5: // SEO & Review
+
+            case 5:
                 return $this->validate([
                     'meta_title' => 'nullable|string|max:255',
                     'meta_description' => 'nullable|string|max:500',
                 ]);
-                
+
             default:
                 return true;
         }
     }
 
-    // Variant handling methods
-    public function handleVariantAdded($variant)
+    // Variant combination handling methods
+    public function handleCombinationAdded($combination)
     {
-        $this->variants[] = $variant;
+        $this->variantCombinations[] = $combination;
     }
 
-    public function handleVariantUpdated($variant)
+    public function handleCombinationUpdated($combination)
     {
-        // Find and update variant in array
-        foreach ($this->variants as $index => $existingVariant) {
-            if ($existingVariant['temp_id'] === $variant['temp_id']) {
-                $this->variants[$index] = $variant;
+        foreach ($this->variantCombinations as $index => $existingCombination) {
+            if ($existingCombination['temp_id'] === $combination['temp_id']) {
+                $this->variantCombinations[$index] = $combination;
                 break;
             }
         }
     }
 
-    public function handleVariantDeleted($index)
+    public function handleCombinationDeleted($index)
     {
-        unset($this->variants[$index]);
-        $this->variants = array_values($this->variants);
+        unset($this->variantCombinations[$index]);
+        $this->variantCombinations = array_values($this->variantCombinations);
     }
 
     public function render()

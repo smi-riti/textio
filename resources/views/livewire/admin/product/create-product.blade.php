@@ -21,6 +21,21 @@
                 </div>
             </div>
 
+            <!-- Loading Overlay -->
+            @if($isSaving)
+            <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 shadow-lg max-w-md mx-auto">
+                    <div class="flex items-center">
+                        <svg class="animate-spin h-5 w-5 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-gray-700">{{ $loadingMessage }}</span>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <form wire:submit="save" class="space-y-8">
                 <!-- Step 1: Basic Information -->
                 @if($currentStep === 1)
@@ -35,6 +50,16 @@
                                        placeholder="Enter product name"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 @error('name') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                            </div>
+
+                            <!-- Slug -->
+                            <div class="lg:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Slug *</label>
+                                <input type="text" wire:model="slug" 
+                                       placeholder="product-slug"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                @error('slug') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                                <p class="mt-1 text-sm text-gray-500">This will be used in the product URL</p>
                             </div>
 
                             <!-- Category -->
@@ -165,6 +190,31 @@
                     <div class="rounded-lg bg-white p-6 shadow-sm">
                         <h2 class="mb-6 text-lg font-medium text-gray-900">Product Images</h2>
                         
+                        <!-- Uploading Indicators -->
+                        @if($isUploadingFeaturedImage || $isUploadingGalleryImages)
+                        <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            @if($isUploadingFeaturedImage)
+                            <div class="flex items-center text-blue-700 text-sm">
+                                <svg class="animate-spin h-4 w-4 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Uploading featured image...
+                            </div>
+                            @endif
+                            
+                            @if($isUploadingGalleryImages)
+                            <div class="flex items-center text-blue-700 text-sm mt-2">
+                                <svg class="animate-spin h-4 w-4 text-blue-600 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Uploading gallery images...
+                            </div>
+                            @endif
+                        </div>
+                        @endif
+                        
                         <!-- Featured Image -->
                         <div class="mb-8">
                             <h3 class="text-sm font-medium text-gray-700 mb-3">Featured Image *</h3>
@@ -218,7 +268,7 @@
                 <!-- Step 4: Variants -->
                 @if($currentStep === 4)
                     <div class="rounded-lg bg-white p-6 shadow-sm">
-                        <livewire:admin.product.product-variants :variants="$variants" />
+                        <livewire:admin.product.product-variants :variantCombinations="$variantCombinations" :product="null" :isEdit="false" />
                     </div>
                 @endif
 

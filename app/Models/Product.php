@@ -103,4 +103,11 @@ class Product extends Model
     }
 
     
+
+    public function variantCombinations()
+    {
+        return $this->hasMany(ProductVariantCombination::class);
+    }
+
+   
 }

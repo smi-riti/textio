@@ -4,6 +4,8 @@ namespace App\Livewire\Admin\Product;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\ProductVariantValue;
+use App\Models\ProductVariantCombination;
 use App\Services\ImageKitService;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -14,15 +16,14 @@ class ProductVariants extends Component
     use WithFileUploads;
 
     public $product;
-    public $variants = [];
-    public $variant_types = ['Size', 'Color', 'Material', 'Style', 'Finish'];
+    public $variantCombinations = [];
     public $isEdit = false;
 
-    // New variant form
+    // Form state
     public $showAddForm = false;
-    public $new_variant = [
-        'variant_type' => '',
-        'variant_name' => '',
+    public $selectedVariantTypes = [];
+    public $selectedVariantValues = [];
+    public $new_combination = [
         'price' => '',
         'stock' => '',
         'sku' => '',
@@ -30,32 +31,34 @@ class ProductVariants extends Component
     ];
     public $new_variant_image_preview;
 
-    // Edit variant
-    public $editingVariant = null;
-    public $editing_variant = [];
-    public $editing_variant_image_preview;
+    // Edit state
+    public $editingCombination = null;
+    public $editing_combination = [];
+    public $editing_combination_image_preview;
+
+    // Available variants and values
+    public $availableVariants = [];
+    public $availableVariantValues = [];
 
     protected $listeners = ['refreshVariants' => '$refresh'];
 
     protected function rules()
     {
         $rules = [
-            'new_variant.variant_type' => 'required|string|max:255',
-            'new_variant.variant_name' => 'required|string|max:255',
-            'new_variant.price' => 'nullable|numeric|min:0',
-            'new_variant.stock' => 'required|integer|min:0',
-            'new_variant.sku' => 'nullable|string|max:255',
-            'new_variant.variant_image' => 'nullable|image|max:2048',
+            'selectedVariantTypes' => 'required|array|min:1',
+            'selectedVariantValues' => 'required|array|min:1',
+            'new_combination.price' => 'nullable|numeric|min:0',
+            'new_combination.stock' => 'required|integer|min:0',
+            'new_combination.sku' => 'nullable|string|max:255|unique:product_variant_combinations,sku',
+            'new_combination.variant_image' => 'nullable|image|max:2048',
         ];
 
-        if ($this->editingVariant) {
+        if ($this->editingCombination !== null) {
             $rules = [
-                'editing_variant.variant_type' => 'required|string|max:255',
-                'editing_variant.variant_name' => 'required|string|max:255',
-                'editing_variant.price' => 'nullable|numeric|min:0',
-                'editing_variant.stock' => 'required|integer|min:0',
-                'editing_variant.sku' => 'nullable|string|max:255',
-                'editing_variant.variant_image' => 'nullable|image|max:2048',
+                'editing_combination.price' => 'nullable|numeric|min:0',
+                'editing_combination.stock' => 'required|integer|min:0',
+                'editing_combination.sku' => 'nullable|string|max:255|unique:product_variant_combinations,sku,' . ($this->variantCombinations[$this->editingCombination]['id'] ?? null),
+                'editing_combination.variant_image' => 'nullable|image|max:2048',
             ];
         }
 
@@ -63,227 +66,259 @@ class ProductVariants extends Component
     }
 
     protected $messages = [
-        'new_variant.variant_type.required' => 'Variant type is required.',
-        'new_variant.variant_name.required' => 'Variant name is required.',
-        'new_variant.stock.required' => 'Stock quantity is required.',
-        'new_variant.stock.integer' => 'Stock must be a valid number.',
-        'new_variant.variant_image.image' => 'File must be an image.',
-        'new_variant.variant_image.max' => 'Image must not exceed 2MB.',
-        'editing_variant.variant_type.required' => 'Variant type is required.',
-        'editing_variant.variant_name.required' => 'Variant name is required.',
-        'editing_variant.stock.required' => 'Stock quantity is required.',
-        'editing_variant.stock.integer' => 'Stock must be a valid number.',
-        'editing_variant.variant_image.image' => 'File must be an image.',
-        'editing_variant.variant_image.max' => 'Image must not exceed 2MB.',
+        'selectedVariantTypes.required' => 'At least one variant type is required.',
+        'selectedVariantValues.required' => 'At least one variant value is required.',
+        'new_combination.stock.required' => 'Stock quantity is required.',
+        'new_combination.stock.integer' => 'Stock must be a valid number.',
+        'new_combination.variant_image.image' => 'File must be an image.',
+        'new_combination.variant_image.max' => 'Image must not exceed 2MB.',
+        'new_combination.sku.unique' => 'This SKU is already in use.',
+        'editing_combination.stock.required' => 'Stock quantity is required.',
+        'editing_combination.stock.integer' => 'Stock must be a valid number.',
+        'editing_combination.variant_image.image' => 'File must be an image.',
+        'editing_combination.variant_image.max' => 'Image must not exceed 2MB.',
+        'editing_combination.sku.unique' => 'This SKU is already in use.',
     ];
 
-    public function mount($product = null, $isEdit = false)
+    public function mount($product = null, $isEdit = false, $variantCombinations = [])
     {
-        $this->product = $product;
         $this->isEdit = $isEdit;
-        
-        if ($product && $isEdit) {
-            $this->loadVariants();
+        $this->product = $product;
+        $this->variantCombinations = $variantCombinations;
+
+        \Log::info('ProductVariants - Mounted', [
+            'product_id' => $this->product?->id,
+            'isEdit' => $isEdit,
+            'variantCombinations_count' => count($variantCombinations)
+        ]);
+
+        $this->availableVariants = ProductVariant::with('values')->get();
+
+        if ($this->product && $this->isEdit) {
+            $this->loadVariantCombinations();
         }
     }
 
-    public function loadVariants()
+    public function loadVariantCombinations()
     {
-        $this->variants = $this->product->variants->toArray();
+        $this->variantCombinations = $this->product->variantCombinations()->get()->toArray();
     }
 
     public function showAddVariantForm()
     {
         $this->showAddForm = true;
-        $this->resetNewVariant();
-        $this->generateVariantSKU();
+        $this->resetForm();
+        $this->generateCombinationSKU();
     }
 
     public function hideAddVariantForm()
     {
         $this->showAddForm = false;
-        $this->resetNewVariant();
+        $this->resetForm();
     }
 
-    public function generateVariantSKU()
+    public function generateCombinationSKU()
     {
         $productPrefix = $this->product ? Str::upper(Str::substr($this->product->name, 0, 3)) : 'PRD';
-        $this->new_variant['sku'] = $productPrefix . '-VAR-' . strtoupper(Str::random(6));
+        $this->new_combination['sku'] = $productPrefix . '-COM-' . strtoupper(Str::random(6));
     }
 
-    public function updatedNewVariantVariantImage()
+    public function updatedSelectedVariantTypes()
     {
-        $this->validate(['new_variant.variant_image' => 'image|max:2048']);
-        if ($this->new_variant['variant_image']) {
-            $this->new_variant_image_preview = $this->new_variant['variant_image']->temporaryUrl();
+        $this->selectedVariantValues = [];
+
+        $this->availableVariantValues = ProductVariantValue::whereIn('product_variant_id', $this->selectedVariantTypes)
+            ->get()
+            ->groupBy('product_variant_id')
+            ->mapWithKeys(function ($values, $variantId) {
+                $variant = $this->availableVariants->find($variantId);
+                return [$variant->variant_name => $values->pluck('value', 'id')->toArray()];
+            })->toArray();
+    }
+
+    public function updatedNewCombinationVariantImage()
+    {
+        $this->validate(['new_combination.variant_image' => 'image|max:2048']);
+        if ($this->new_combination['variant_image']) {
+            $this->new_variant_image_preview = $this->new_combination['variant_image']->temporaryUrl();
         }
     }
 
     public function removeNewVariantImage()
     {
-        $this->new_variant['variant_image'] = null;
+        $this->new_combination['variant_image'] = null;
         $this->new_variant_image_preview = null;
     }
 
-    public function addVariant()
+    public function addCombination()
     {
         $this->validate();
 
         try {
-            $variantData = [
-                'variant_type' => $this->new_variant['variant_type'],
-                'variant_name' => $this->new_variant['variant_name'],
-                'price' => $this->new_variant['price'] ?: null,
-                'stock' => $this->new_variant['stock'],
-                'sku' => $this->new_variant['sku'],
+            $variantValues = [];
+            foreach ($this->selectedVariantValues as $variantId => $valueId) {
+                if (!empty($valueId)) {
+                    $variant = $this->availableVariants->find($variantId);
+                    $value = ProductVariantValue::find($valueId);
+                    if ($variant && $value) {
+                        $variantValues[$variant->variant_name] = $value->value;
+                    }
+                }
+            }
+
+            if (empty($variantValues)) {
+                $this->addError('selectedVariantValues', 'At least one variant value must be selected.');
+                return;
+            }
+
+            // Check for duplicate combinations in memory
+            foreach ($this->variantCombinations as $existingCombination) {
+                $existingValues = isset($existingCombination['variant_values_data'])
+                    ? $existingCombination['variant_values_data']
+                    : json_decode($existingCombination['variant_values'] ?? '[]', true);
+                if ($existingValues == $variantValues) {
+                    $this->addError('selectedVariantValues', 'This variant combination already exists.');
+                    return;
+                }
+            }
+
+            $combinationData = [
+                'temp_id' => uniqid(),
+                'price' => $this->new_combination['price'] ?: null,
+                'stock' => $this->new_combination['stock'],
+                'sku' => $this->new_combination['sku'],
+                'variant_values_data' => $variantValues,
             ];
 
-            // Upload image if provided
-            if ($this->new_variant['variant_image']) {
+            if ($this->new_combination['variant_image']) {
                 $imageKitService = new ImageKitService();
-                $fileName = 'variant_' . time() . '_' . Str::random(10) . '.' . $this->new_variant['variant_image']->getClientOriginalExtension();
-                
+                $fileName = 'combination_' . time() . '_' . Str::random(10) . '.' . $this->new_combination['variant_image']->getClientOriginalExtension();
+
                 $response = $imageKitService->upload(
-                    $this->new_variant['variant_image'],
+                    $this->new_combination['variant_image'],
                     $fileName,
-                    config('services.imagekit.folders.product') . '/variants'
+                    config('services.imagekit.folders.product') . '/combinations'
                 );
 
-                $variantData['variant_image'] = $response->url;
+                $combinationData['image'] = $response->url;
             }
 
-            if ($this->product) {
-                // Create variant for existing product
-                $this->product->variants()->create($variantData);
-                $this->loadVariants();
-            } else {
-                // Add to temporary variants array for new product
-                $variantData['temp_id'] = uniqid();
-                $this->variants[] = $variantData;
-                $this->dispatch('variantAdded', $variantData);
-            }
+            $this->variantCombinations[] = $combinationData;
+            $this->dispatch('combinationAdded', $combinationData);
 
             $this->hideAddVariantForm();
-            $this->dispatch('success', 'Variant added successfully!');
+            $this->dispatch('success', 'Variant combination added successfully!');
 
         } catch (\Exception $e) {
-            $this->dispatch('error', 'Failed to add variant: ' . $e->getMessage());
+            $this->dispatch('error', 'Failed to add variant combination: ' . $e->getMessage());
         }
     }
 
-    public function editVariant($index)
+    public function editCombination($index)
     {
-        $this->editingVariant = $index;
-        $this->editing_variant = $this->variants[$index];
-        $this->editing_variant_image_preview = $this->editing_variant['variant_image'] ?? null;
+        $this->editingCombination = $index;
+        $this->editing_combination = $this->variantCombinations[$index];
+        $this->editing_combination_image_preview = $this->editing_combination['image'] ?? null;
     }
 
-    public function updatedEditingVariantVariantImage()
+    public function updatedEditingCombinationVariantImage()
     {
-        $this->validate(['editing_variant.variant_image' => 'image|max:2048']);
-        if ($this->editing_variant['variant_image']) {
-            $this->editing_variant_image_preview = $this->editing_variant['variant_image']->temporaryUrl();
+        $this->validate(['editing_combination.variant_image' => 'image|max:2048']);
+        if ($this->editing_combination['variant_image']) {
+            $this->editing_combination_image_preview = $this->editing_combination['variant_image']->temporaryUrl();
         }
     }
 
-    public function removeEditingVariantImage()
+    public function removeEditingCombinationImage()
     {
-        $this->editing_variant['variant_image'] = null;
-        $this->editing_variant_image_preview = $this->variants[$this->editingVariant]['variant_image'] ?? null;
+        $this->editing_combination['variant_image'] = null;
+        $this->editing_combination_image_preview = $this->variantCombinations[$this->editingCombination]['image'] ?? null;
     }
 
-    public function updateVariant()
+    public function updateCombination()
     {
         $this->validate();
 
         try {
-            $variantData = [
-                'variant_type' => $this->editing_variant['variant_type'],
-                'variant_name' => $this->editing_variant['variant_name'],
-                'price' => $this->editing_variant['price'] ?: null,
-                'stock' => $this->editing_variant['stock'],
-                'sku' => $this->editing_variant['sku'],
+            $combinationData = [
+                'price' => $this->editing_combination['price'] ?: null,
+                'stock' => $this->editing_combination['stock'],
+                'sku' => $this->editing_combination['sku'],
             ];
 
-            // Handle image update
-            if ($this->editing_variant['variant_image'] && is_object($this->editing_variant['variant_image'])) {
+            if ($this->editing_combination['variant_image'] && is_object($this->editing_combination['variant_image'])) {
                 $imageKitService = new ImageKitService();
-                $fileName = 'variant_' . time() . '_' . Str::random(10) . '.' . $this->editing_variant['variant_image']->getClientOriginalExtension();
-                
+                $fileName = 'combination_' . time() . '_' . Str::random(10) . '.' . $this->editing_combination['variant_image']->getClientOriginalExtension();
+
                 $response = $imageKitService->upload(
-                    $this->editing_variant['variant_image'],
+                    $this->editing_combination['variant_image'],
                     $fileName,
-                    config('services.imagekit.folders.product') . '/variants'
+                    config('services.imagekit.folders.product') . '/combinations'
                 );
 
-                $variantData['variant_image'] = $response->url;
-            } elseif (isset($this->editing_variant['variant_image'])) {
-                $variantData['variant_image'] = $this->editing_variant['variant_image'];
+                $combinationData['image'] = $response->url;
+            } elseif (isset($this->editing_combination['image'])) {
+                $combinationData['image'] = $this->editing_combination['image'];
             }
 
-            if ($this->product && isset($this->variants[$this->editingVariant]['id'])) {
-                // Update existing variant
-                $variant = ProductVariant::find($this->variants[$this->editingVariant]['id']);
-                $variant->update($variantData);
-                $this->loadVariants();
+            if ($this->product && isset($this->variantCombinations[$this->editingCombination]['id'])) {
+                $combination = ProductVariantCombination::find($this->variantCombinations[$this->editingCombination]['id']);
+                $combination->update($combinationData);
+                $this->loadVariantCombinations();
             } else {
-                // Update in temporary variants array
-                $this->variants[$this->editingVariant] = array_merge($this->variants[$this->editingVariant], $variantData);
-                $this->dispatch('variantUpdated', $this->variants[$this->editingVariant]);
+                $this->variantCombinations[$this->editingCombination] = array_merge(
+                    $this->variantCombinations[$this->editingCombination],
+                    $combinationData
+                );
+                $this->dispatch('combinationUpdated', $this->variantCombinations[$this->editingCombination]);
             }
 
             $this->cancelEdit();
-            $this->dispatch('success', 'Variant updated successfully!');
+            $this->dispatch('success', 'Variant combination updated successfully!');
 
         } catch (\Exception $e) {
-            $this->dispatch('error', 'Failed to update variant: ' . $e->getMessage());
+            $this->dispatch('error', 'Failed to update variant combination: ' . $e->getMessage());
         }
     }
 
-    public function deleteVariant($index)
+    public function deleteCombination($index)
     {
         try {
-            if ($this->product && isset($this->variants[$index]['id'])) {
-                // Delete from database
-                ProductVariant::find($this->variants[$index]['id'])->delete();
-                $this->loadVariants();
+            if ($this->product && isset($this->variantCombinations[$index]['id'])) {
+                ProductVariantCombination::find($this->variantCombinations[$index]['id'])->delete();
+                $this->loadVariantCombinations();
             } else {
-                // Remove from temporary array
-                unset($this->variants[$index]);
-                $this->variants = array_values($this->variants);
-                $this->dispatch('variantDeleted', $index);
+                unset($this->variantCombinations[$index]);
+                $this->variantCombinations = array_values($this->variantCombinations);
+                $this->dispatch('combinationDeleted', $index);
             }
 
-            $this->dispatch('success', 'Variant deleted successfully!');
+            $this->dispatch('success', 'Variant combination deleted successfully!');
 
         } catch (\Exception $e) {
-            $this->dispatch('error', 'Failed to delete variant: ' . $e->getMessage());
+            $this->dispatch('error', 'Failed to delete variant combination: ' . $e->getMessage());
         }
     }
 
     public function cancelEdit()
     {
-        $this->editingVariant = null;
-        $this->editing_variant = [];
-        $this->editing_variant_image_preview = null;
+        $this->editingCombination = null;
+        $this->editing_combination = [];
+        $this->editing_combination_image_preview = null;
     }
 
-    private function resetNewVariant()
+    private function resetForm()
     {
-        $this->new_variant = [
-            'variant_type' => '',
-            'variant_name' => '',
+        $this->selectedVariantTypes = [];
+        $this->selectedVariantValues = [];
+        $this->new_combination = [
             'price' => '',
             'stock' => '',
             'sku' => '',
             'variant_image' => null,
         ];
         $this->new_variant_image_preview = null;
-    }
-
-    public function getVariantsProperty()
-    {
-        return $this->variants;
+        $this->resetErrorBag();
     }
 
     public function render()
