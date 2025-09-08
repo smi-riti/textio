@@ -25,10 +25,12 @@
                     <i class="fas fa-bars text-xl"></i>
                 </button>
                 <div class="hidden md:flex items-center space-x-6">
-                    <a wire:navigate href="{{ route('wishlist.index') }}"
+                   @auth
+                        <a wire:navigate href="{{ route('wishlist.index') }}"
                         class="flex items-center hover:text-purple-600">
                         <i class="far fa-heart text-xl"></i>
                     </a>
+                   @endauth
                     <div class="relative">
                         <button @click="accountDropdownOpen = !accountDropdownOpen"
                             class="flex items-center hover:text-purple-600">
@@ -51,8 +53,9 @@
                                 <a wire:navigate href="#" class="block px-4 py-2 hover:bg-gray-100">Register</a>
                             @endguest
                         </div>
-                    </div>
-                    <div x-data="{ cart: @entangle('cartCount') }">
+                    </div>.
+                    @auth
+                         <div x-data="{ cart: @entangle('cartCount') }">
                         <div class="relative">
                             <a wire:navigate href="{{ route('myCart') }}"
                                 class="flex items-center hover:text-purple-600">
@@ -62,6 +65,8 @@
                             </a>
                         </div>
                     </div>
+                    @endauth
+                   
                 </div>
             </div>
         </div>

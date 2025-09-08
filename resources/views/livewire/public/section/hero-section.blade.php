@@ -34,7 +34,7 @@
                 </div>
             </div>
         </div>
-        
+    
         <!-- Carousel Controls -->
         <button @click="currentSlide = (currentSlide - 1 + 3) % 3" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full">
             <i class="fas fa-chevron-left"></i>

@@ -108,42 +108,50 @@
     </main>
 
     <!-- Mobile bottom navbar -->
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-between items-center z-50"
-        x-data="{ activeButton: '{{ Route::currentRouteName() === 'home' ? 'home' : (Route::currentRouteName() === 'wishlist.index' ? 'wishlist' : (Route::currentRouteName() === 'myCart' ? 'cart' : (auth()->guest() ? 'signin' : 'profile'))) }}' }">
-        <a wire:navigate href="{{ route('home') }}" class="text-center p-2"
-            :class="{ 'text-purple-600': activeButton === 'home', 'text-gray-500': activeButton !== 'home' }"
-            @click.stop="activeButton = 'home'">
-            <i class="fas fa-home text-lg"></i>
-            <p class="text-xs mt-1">Home</p>
+   <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-between items-center z-50"
+    x-data="{ activeButton: '{{ Route::currentRouteName() === 'home' ? 'home' : (Route::currentRouteName() === 'wishlist.index' ? 'wishlist' : (Route::currentRouteName() === 'myCart' ? 'cart' : (auth()->guest() ? 'signin' : 'profile'))) }}' }">
+    
+    <!-- Home Button -->
+    <a wire:navigate href="{{ route('home') }}" class="text-center p-2"
+        :class="{ 'text-purple-600': activeButton === 'home', 'text-gray-500': activeButton !== 'home' }"
+        @click.stop="activeButton = 'home'">
+        <i class="fas fa-home text-lg"></i>
+        <p class="text-xs mt-1">Home</p>
+    </a>
+
+    <!-- Wishlist Button -->
+    <a wire:navigate href="{{ auth()->guest() ? route('login') : route('wishlist.index') }}" class="text-center p-2"
+        :class="{ 'text-purple-600': activeButton === 'wishlist', 'text-gray-500': activeButton !== 'wishlist' }"
+        @click.stop="activeButton = '{{ auth()->guest() ? 'signin' : 'wishlist' }}'">
+        <i class="fas fa-heart text-lg"></i>
+        <p class="text-xs mt-1">Wishlist</p>
+    </a>
+
+    <!-- Cart Button -->
+    <a wire:navigate href="{{ auth()->guest() ? route('login') : route('myCart') }}" class="text-center p-2"
+        :class="{ 'text-purple-600': activeButton === 'cart', 'text-gray-500': activeButton !== 'cart' }"
+        @click.stop="activeButton = '{{ auth()->guest() ? 'signin' : 'cart' }}'">
+        <i class="fas fa-shopping-bag text-lg"></i>
+        <p class="text-xs mt-1">Cart</p>
+    </a>
+
+    <!-- Sign In / Profile Button -->
+    @guest
+        <a wire:navigate href="{{ route('login') }}" class="text-center p-2"
+            :class="{ 'text-purple-600': activeButton === 'signin', 'text-gray-500': activeButton !== 'signin' }"
+            @click.stop="activeButton = 'signin'">
+            <i class="fas fa-sign-in-alt text-lg"></i>
+            <p class="text-xs mt-1">Sign In</p>
         </a>
-        <a wire:navigate href="{{ route('wishlist.index') }}" class="text-center p-2"
-            :class="{ 'text-purple-600': activeButton === 'wishlist', 'text-gray-500': activeButton !== 'wishlist' }"
-            @click.stop="activeButton = 'wishlist'">
-            <i class="fas fa-heart text-lg"></i>
-            <p class="text-xs mt-1">Wishlist</p>
+    @else
+        <a wire:navigate href="{{ route('profile-information') }}" class="text-center p-2"
+            :class="{ 'text-purple-600': activeButton === 'profile', 'text-gray-500': activeButton !== 'profile' }"
+            @click.stop="activeButton = 'profile'">
+            <i class="fas fa-user text-lg"></i>
+            <p class="text-xs mt-1">Profile</p>
         </a>
-        <a wire:navigate href="{{ route('myCart') }}" class="text-center p-2"
-            :class="{ 'text-purple-600': activeButton === 'cart', 'text-gray-500': activeButton !== 'cart' }"
-            @click.stop="activeButton = 'cart'">
-            <i class="fas fa-shopping-bag text-lg"></i>
-            <p class="text-xs mt-1">Cart</p>
-        </a>
-        @guest
-            <a wire:navigate href="{{ route('login') }}" class="text-center p-2"
-                :class="{ 'text-purple-600': activeButton === 'signin', 'text-gray-500': activeButton !== 'signin' }"
-                @click.stop="activeButton = 'signin'">
-                <i class="fas fa-sign-in-alt text-lg"></i>
-                <p class="text-xs mt-1">Sign In</p>
-            </a>
-        @else
-            <a wire:navigate href="{{ route('profile-information') }}" class="text-center p-2"
-                :class="{ 'text-purple-600': activeButton === 'profile', 'text-gray-500': activeButton !== 'profile' }"
-                @click.stop="activeButton = 'profile'">
-                <i class="fas fa-user text-lg"></i>
-                <p class="text-xs mt-1">Profile</p>
-            </a>
-        @endguest
-    </div>
+    @endguest
+</div>
 
     <!-- Footer -->
     <livewire:public.section.footer />
