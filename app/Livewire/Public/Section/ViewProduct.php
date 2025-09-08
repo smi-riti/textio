@@ -2,35 +2,51 @@
 
 namespace App\Livewire\Public\Section;
 
+use App\Models\ProductVariantCombination;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Models\Product;
-use App\Models\ProductVariant; // Add this to query variants
+// use App\Models\ProductVariant; // Add this to query variants
+
 use App\Services\CartService;
 
 class ViewProduct extends Component
 {
     public $product;
+
+    public $VariantSize = [];
+    public $selectedSize = null;
+    public $selectedVariant = null;
     public $slug;
     public $relatedProducts;
     public $quantity = 1;
     public $selectedColor = '';
     public $selectedStorage = '';
-     public $whatsappNumber;
+    public $whatsappNumber;
     public $customizationMessage;
 
-   
+
+
     public function mount($slug)
     {
+
+
+
         $this->slug = $slug;
+
         $this->product = Product::with(['category', 'images', 'variants'])
             ->where('slug', $slug)
             ->firstOrFail();
+
         $this->relatedProducts = Product::where('category_id', $this->product->category_id)
             ->where('id', '!=', $this->product->id)
             ->with('images')
             ->take(5)
             ->get();
+
+        $testing=$this->VariantSize = ProductVariantCombination::with(['product'])->get();
+        // dd($testing);
+
 
         // Set default variant selections
         if ($this->product->variants->isNotEmpty()) {
@@ -45,8 +61,15 @@ class ViewProduct extends Component
         }
         $this->whatsappNumber = env('WHATSAPP_NUMBER', '+1234567890');
         $this->customizationMessage = env('WHATSAPP_CUSTOMIZATION_MESSAGE', 'Hi! I\'m interested in customizing this product:');
-    
+
     }
+
+
+    //variants work
+
+    // public function applyFilter(){
+
+    // }
 
     public function increment()
     {
@@ -72,6 +95,7 @@ class ViewProduct extends Component
 
     public function addToCart($productId)
     {
+
         if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'Please log in to add items to your cart.');
         }
@@ -82,8 +106,7 @@ class ViewProduct extends Component
         // Find the product variant ID based on selected color and storage
         $productVariantId = null;
         if ($this->selectedColor || $this->selectedStorage) {
-            $query = ProductVariant::where('product_id', $productId);
-
+            $query = ProductVariantCombination::where('product_id', $productId);
             if ($this->selectedColor) {
                 $query->where(function ($q) {
                     $q->where('type', 'color')->where('value', $this->selectedColor);
@@ -131,7 +154,7 @@ class ViewProduct extends Component
 
         if ($this->selectedColor || $this->selectedStorage) {
             if ($this->selectedColor) {
-                $colorVariant = ProductVariant::where('product_id', $this->product->id)
+                $colorVariant = ProductVariantCombination::where('product_id', $this->product->id)
                     ->where('type', 'color')
                     ->where('value', $this->selectedColor)
                     ->first();
@@ -144,7 +167,7 @@ class ViewProduct extends Component
             }
 
             if ($this->selectedStorage) {
-                $sizeVariant = ProductVariant::where('product_id', $this->product->id)
+                $sizeVariant = ProductVariantCombination::where('product_id', $this->product->id)
                     ->where('type', 'storage')
                     ->where('value', $this->selectedStorage)
                     ->first();
@@ -184,7 +207,7 @@ class ViewProduct extends Component
         return redirect()->route('myOrder');
     }
 
-     public function getCustomizationWhatsappUrl($productName, $orderNumber = null)
+    public function getCustomizationWhatsappUrl($productName, $orderNumber = null)
     {
         $message = $this->customizationMessage . " " . $productName;
         if ($orderNumber) {
@@ -194,7 +217,7 @@ class ViewProduct extends Component
         $encodedMessage = urlencode($message);
         return "https://wa.me/" . str_replace(['+', ' ', '-'], '', $this->whatsappNumber) . "?text=" . $encodedMessage;
     }
-    
+
     public function render()
     {
         return view('livewire.public.section.view-product', [

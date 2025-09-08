@@ -3,6 +3,8 @@
 namespace App\Livewire\Public\Section;
 
 use App\Services\WishlistService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Livewire\Component;
 
 class WishlistButton extends Component
@@ -25,6 +27,10 @@ class WishlistButton extends Component
 
     public function toggleWishlist()
     {
+        if (!Auth::check()) {
+         return $this->redirectRoute("login",navigate:true);
+        }
+
         $wishlistService = app(WishlistService::class);
         $result = $this->isInWishlist
             ? $wishlistService->removeFromWishlist($this->productId)
