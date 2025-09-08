@@ -11,11 +11,12 @@ use App\Livewire\Admin\Product\MultipleImages;
 use App\Livewire\Admin\Product\ListProduct;
 use App\Livewire\Admin\Product\CreateProduct;
 use App\Livewire\Admin\Product\UpdateProduct;
+use App\Livewire\Admin\Product\Variant\VariantName;
+use App\Livewire\Admin\Product\Variant\VariantValus;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Public\AllProduct;
 use App\Livewire\Public\Cart;
-use App\Livewire\Public\ProductDetail;
 use App\Livewire\Public\Section\Accounts\ManageAddress;
 use App\Livewire\Public\Section\Accounts\ProfileInformation;
 use App\Livewire\Public\Section\LandingPage;
@@ -52,7 +53,8 @@ Route::get('/account/address',ManageAddress::class)->name('Manage-address');
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     // Dashboard
     Route::get('/', Dashboard::class)->name('dashboard');
-    
+    Route::get('/Variant',VariantValus::class)->name('VariantValues');
+    Route::get('/Variant/Name',VariantName::class)->name('VariantName');
     // Categories
     Route::get('/categories/list', ListCategory::class)->name('categories.index');
     Route::get('/categories/create', CreateCategory::class)->name('categories.create');
