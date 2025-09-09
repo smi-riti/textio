@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CartService
 {
-    public function addToCart($productId, $quantity = 1, $productVariantId = null)
+    public function addToCart($productId, $quantity = 1, $productVariantCombinationId = null)
     {
         if (!Auth::check()) {
             return [
@@ -22,7 +22,7 @@ class CartService
         // Check if the item already exists in the cart
         $cartItem = Cart::where('user_id', $userId)
             ->where('product_id', $productId)
-            ->where('product_variant_id', $productVariantId)
+            ->where('product_variant_combination_id', $productVariantCombinationId) // Updated column name
             ->first();
 
         if ($cartItem) {
@@ -34,7 +34,7 @@ class CartService
             Cart::create([
                 'user_id' => $userId,
                 'product_id' => $productId,
-                'product_variant_id' => $productVariantId,
+                'product_variant_combination_id' => $productVariantCombinationId, // Updated column name
                 'quantity' => $quantity,
             ]);
         }

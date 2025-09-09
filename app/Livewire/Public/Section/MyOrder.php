@@ -6,6 +6,8 @@ use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\ProductVariant;
+use App\Models\ProductVariantValue;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
@@ -45,7 +47,18 @@ class MyOrder extends Component
             return redirect()->route('myCart');
         }
 
-        $this->cartItems = collect($this->pendingOrder['cartItems']);
+        // Validate and fix the cart items structure
+        $this->cartItems = collect($this->pendingOrder['cartItems'])->map(function ($item) {
+            // Ensure product array has both price and discount_price
+            if (!isset($item['product']['discount_price'])) {
+                $item['product']['discount_price'] = $item['product']['price'] ?? 0;
+            }
+            if (!isset($item['product']['price'])) {
+                $item['product']['price'] = $item['product']['discount_price'] ?? 0;
+            }
+            return $item;
+        });
+
         $this->totalAmount = $this->pendingOrder['total_amount'];
         $this->userEmail = $this->pendingOrder['user_email'];
         $this->addressId = $this->pendingOrder['address_id'] ?? null;
@@ -66,9 +79,9 @@ class MyOrder extends Component
         $this->loadUserAddresses();
     }
 
-   #[On('coupon-applied')]
-public function updateCoupon($couponCode, $discount)
-{
+    #[On('coupon-applied')]
+    public function updateCoupon($couponCode, $discount)
+    {
         $this->discountAmount = $discount;
         $this->couponCode = $couponCode;
         $this->totalAmount = max(0, $this->pendingOrder['total_amount'] - $this->discountAmount);
@@ -95,7 +108,6 @@ public function updateCoupon($couponCode, $discount)
             'isOrdered' => true,
             'status' => 'pending',
             'total_amount' => number_format($this->totalAmount, 2, '.', ''),
-            // 'discount_amount' => number_format($this->discountAmount, 2, '.', ''),
             'coupon_code' => $this->couponCode ?: null,
             'shipping_charge' => 0.00,
             'payment_status' => $this->paymentMethod === 'Cash on Delivery' ? 'unpaid' : 'pending',
@@ -103,14 +115,34 @@ public function updateCoupon($couponCode, $discount)
         ]);
 
         foreach ($this->cartItems as $item) {
-            OrderItem::create([
+            $orderItemData = [
                 'user_id' => Auth::id(),
                 'order_id' => $order->id,
                 'product_id' => $item['product_id'],
-                'color_variant_id' => $item['color_variant_id'] ?? null,
-                'size_variant_id' => $item['size_variant_id'] ?? null,
                 'quantity' => $item['quantity'],
-            ]);
+            ];
+
+            // Handle variant details if available
+           if (!empty($item['variant_details'])) {
+    if (is_array($item['variant_details']) || is_object($item['variant_details'])) {
+        foreach ($item['variant_details'] as $variant) {
+            if (is_array($variant) || is_object($variant)) {
+                foreach ($variant as $type => $value) {
+                    if ($type === 'Color') {
+                        $orderItemData['color'] = $value;
+                    } elseif ($type === 'Size') {
+                        $orderItemData['size'] = $value;
+                    }
+                }
+            }
+        }
+    } else {
+        \Log::error("variant_details is not an array or object: " . json_encode($item['variant_details']));
+    }
+}
+
+
+            OrderItem::create($orderItemData);
         }
 
         Cart::where('user_id', Auth::id())->delete();
