@@ -1,4 +1,4 @@
-<div>
+<div wire:ignore.self x-data="productPage()">
     <style>
         .zoom-image {
             transition: transform 0.5s ease;
@@ -89,18 +89,41 @@
             -webkit-appearance: none;
             margin: 0;
         }
+
+        .variant-button {
+            border: 2px solid #D1D5DB;
+            /* gray-300 */
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .variant-button:hover {
+            border-color: #8B5CF6;
+            /* purple-600 */
+        }
+
+        .variant-button.selected {
+            border-color: transparent;
+            background-color: #EDE9FE;
+            /* purple-50 */
+        }
     </style>
 
     <div class="bg-gray-50 min-h-screen">
-        <div class="container mx-auto px-2 py-5" x-data="productPage()">
+        <div class="container mx-auto px-2 py-5">
             @if (session('message'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
                     {{ session('message') }}
                 </div>
             @endif
 
-
-
+            <!-- Notification for variant selection -->
+            <div wire:ignore x-show="notification.message" class="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg"
+                :class="notification.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'">
+                <span x-text="notification.message"></span>
+                <button @click="notification.message = ''" class="ml-2 text-lg">&times;</button>
+            </div>
 
             <!-- Product Section -->
             <div class="flex flex-col lg:flex-row gap-8 mb-16">
@@ -109,26 +132,18 @@
                     <div class="flex flex-col md:flex-row gap-6">
                         <!-- Thumbnails -->
                         <div class="flex md:flex-col gap-3 order-2 md:order-1">
-                            @if ($product->images->isNotEmpty())
-                                @foreach ($product->images as $index => $image)
-                                    <img :src="'{{ $image->image_path }}'"
-                                        class="w-16 h-16 object-cover product-thumb cursor-pointer rounded-lg"
-                                        :class="{ 'active': activeImageIndex === {{ $index }} }"
-                                        @click="setActiveImage({{ $index }})" alt="Thumbnail">
-                                @endforeach
-                            @else
-                                <img :src="'{{ asset('images/placeholder.jpg') }}'"
+                            <template x-for="(thumb, index) in thumbs" :key="index">
+                                <img :src="thumb"
                                     class="w-16 h-16 object-cover product-thumb cursor-pointer rounded-lg"
-                                    :class="{ 'active': activeImageIndex === 0 }" @click="setActiveImage(0)"
-                                    alt="Placeholder Thumbnail">
-                            @endif
+                                    :class="{ 'active': activeImageIndex === index }" @click="setActiveImage(index)"
+                                    alt="Thumbnail">
+                            </template>
                         </div>
 
                         <!-- Main Image -->
                         <div class="relative order-1 md:order-2 flex-1">
-                            <div></div>
                             <div class="relative overflow-hidden rounded-xl bg-gray-100">
-                                <img :src="images[activeImageIndex]" class="w-full h-96 object-contain zoom-image"
+                                <img x-bind:src="images[activeImageIndex]" class="w-full h-96 object-contain zoom-image"
                                     alt="{{ $product->name }}" @mousemove="zoomImage($event)">
                                 <!-- Eye icon for fullscreen -->
                                 <button class="absolute top-2 right-2 p-2 rounded-full bg-white transition-colors"
@@ -162,45 +177,76 @@
                     </div>
 
                     <!-- Price -->
-                    <div class="flex items-center gap-3 mb-6 mt-5">
+                    <!-- Price with loading indicator -->
+                    <div class="flex items-center gap-3 mb-6 mt-5" wire:loading.class="opacity-50">
                         <p class="text-2xl font-semibold text-purple-600">
-                            {{ $product->formatted_discount_price ?? $product->formatted_price }}</p>
-                        @if ($product->discount_price && $product->discount_price < $product->price)
-                            <p class="text-sm text-gray-400 line-through">{{ $product->formatted_price }}</p>
-                            <p class="text-sm text-green-600">{{ $product->saving_percentage }}% Off</p>
+                            @if ($selectedVariantCombination)
+                                ₹{{ number_format($price, 2) }}
+                            @else
+                                ₹{{ number_format($product->discount_price ?? $product->price, 2) }}
+                            @endif
+                        </p>
+
+                        @if ($hasDiscount)
+                            <p class="text-sm text-gray-400 line-through">₹{{ number_format($regularPrice, 2) }}</p>
+                            <p class="text-sm text-green-600">{{ $savingPercentage }}% Off</p>
+                        @elseif(!$selectedVariantCombination && $product->discount_price && $product->discount_price < $product->price)
+                            @php
+                                $productSaving = $product->price - $product->discount_price;
+                                $productSavingPercentage = round(($productSaving / $product->price) * 100);
+                            @endphp
+                            <p class="text-sm text-gray-400 line-through">₹{{ number_format($product->price, 2) }}</p>
+                            <p class="text-sm text-green-600">{{ $productSavingPercentage }}% Off</p>
+                        @elseif(
+                            $selectedVariantCombination &&
+                                $selectedVariantCombination->price &&
+                                $selectedVariantCombination->price < $regularPrice)
+                            @php
+                                // Calculate discount for variant
+                                $variantSaving = $regularPrice - $selectedVariantCombination->price;
+                                $variantSavingPercentage = round(($variantSaving / $regularPrice) * 100);
+                            @endphp
+                            <p class="text-sm text-gray-400 line-through">₹{{ number_format($regularPrice, 2) }}</p>
+                            <p class="text-sm text-green-600">{{ $variantSavingPercentage }}% Off</p>
                         @endif
                     </div>
 
-                    <!-- Color Selection -->
-                    @if ($product->variants->where('type', 'color')->isNotEmpty())
-                        <div class="mt-6">
-                            <h3 class="font-semibold">Color</h3>
-                            <div class="flex gap-2 mt-2">
-                                @foreach ($product->variants->where('type', 'color') as $variant)
-                                    <button wire:click="selectColor('{{ $variant->value }}')"
-                                        class="border rounded p-2 {{ $selectedColor === $variant->value ? 'border-blue-600 border-2' : 'border-gray-300' }}">
-                                        {{ $variant->value }}
-                                    </button>
-                                @endforeach
+                    <!-- Variant Selection -->
+                    <!-- Variant Selection -->
+                    @if (!empty($availableVariants))
+                        @foreach ($availableVariants as $type => $values)
+                            <div class="mt-6">
+                                <h3 class="font-semibold">{{ ucfirst($type) }}</h3>
+                                <div class="flex gap-2 mt-2 flex-wrap">
+                                    @if (is_array($values))
+                                        @foreach ($values as $value)
+                                            <button
+                                                wire:click="selectVariant('{{ $type }}', '{{ $value }}')"
+                                                class="variant-button {{ isset($selectedVariants[$type]) && $selectedVariants[$type] === $value ? 'selected' : '' }}"
+                                                wire:loading.attr="disabled" wire:target="selectVariant">
+                                                {{ $value }}
+                                            </button>
+                                        @endforeach
+                                    @else
+                                        <p class="text-red-500">Invalid variant values for {{ $type }}</p>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
+                        @endforeach
+                    @else
+                        <p>No variants available.</p>
                     @endif
 
-                    <!-- Storage Selection -->
-                    @if ($product->variants->where('type', 'storage')->isNotEmpty())
-                        <div class="mt-6">
-                            <h3 class="font-semibold">Storage</h3>
-                            <div class="flex gap-2 mt-2">
-                                @foreach ($product->variants->where('type', 'storage') as $variant)
-                                    <button wire:click="selectStorage('{{ $variant->value }}')"
-                                        class="border rounded p-2 {{ $selectedStorage === $variant->value ? 'border-blue-600 border-2' : 'border-gray-300' }}">
-                                        {{ $variant->value }}
-                                    </button>
-                                @endforeach
-                            </div>
+                    <!-- Quantity Selection -->
+                    <div class="mt-6">
+                        <h3 class="font-semibold">Quantity</h3>
+                        <div class="flex items-center mt-2">
+                            <button wire:click="decrement" class="border rounded-l px-3 py-1 bg-gray-100">-</button>
+                            <input type="number" wire:model.live="quantity"
+                                class="w-12 text-center border-t border-b py-1 quantity-input">
+                            <button wire:click="increment" class="border rounded-r px-3 py-1 bg-gray-100">+</button>
                         </div>
-                    @endif
-
+                    </div>
 
                     <!-- Customization Section -->
                     @if ($product->is_customizable)
@@ -217,7 +263,6 @@
                             </div>
                             <p class="text-purple-700 mb-3">This product can be customized according to your
                                 requirements.</p>
-
                             <a href="{{ $this->getCustomizationWhatsappUrl($product->name) }}" target="_blank"
                                 class="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
                                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -228,25 +273,24 @@
                             </a>
                         </div>
                     @endif
-                    {{-- <a href="#" class="text-purple-600 hover:text-purple-800 flex items-center gap-2 mb-6">
-                        <i class="far fa-heart"></i>
-                        Browse wishlist
-                    </a> --}}
 
-                    <div class="flex gap-2">
-                        Size
-                        @foreach ($VariantSize as $size)
-                            <button>
-                                {{ $size->variant_values['Size'] ?? 'N/A' }}
-                            </button>
-                        @endforeach
+                    <!-- Desktop Buttons -->
+                    <div class="desktop-buttons mb-4 hidden md:flex">
+                        <button wire:click="addToCart({{ $product->id }})"
+                            class="flex-1 px-6 py-3 bg-gray-800 text-white rounded-full hover:bg-purple-600 transition-colors">
+                            Add to Cart
+                        </button>
+                        <button wire:click="buyNow"
+                            class="flex-1 px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-800 transition-colors">
+                            Buy Now
+                        </button>
                     </div>
 
                     <!-- Product Meta -->
                     <div class="space-y-2 text-sm text-gray-700">
                         <p class="flex gap-2">
                             <span class="font-semibold">SKU:</span>
-                            <span>{{ $product->sku }}</span>
+                            <span>{{ $sku }}</span>
                         </p>
                         <p class="flex gap-2">
                             <span class="font-semibold">Category:</span>
@@ -257,41 +301,16 @@
                             <span>Cup, Magazine, Poster, T-shirt</span>
                         </p>
                     </div>
-                    <!-- Quantity Selection -->
-                    {{-- <div class="mt-6">
-                        <h3 class="font-semibold">Quantity</h3>
-                        <div class="flex items-center mt-2">
-                            <button wire:click="decrement" class="border rounded-l px-3 py-1 bg-gray-100">-</button>
-                            <input type="number" wire:model="quantity"
-                                class="w-12 text-center border-t border-b py-1 quantity-input">
-                            <button wire:click="increment" class="border rounded-r px-3 py-1 bg-gray-100">+</button>
-                        </div>
-                    </div>  --}}
-
-                    <hr class="mb-6 mt-2">
-
-                    <!-- Desktop Buttons -->
-                    <div class="desktop-buttons mb-4 hidden">
-                        <button wire:navigate wire:click="addToCart({{ $product->id }})"
-                            class="flex-1 px-6 py-3 bg-gray-800 text-white rounded-full hover:bg-purple-600 transition-colors">
-                            Add to Cart
-                        </button>
-
-                        <button wire:navigate wire:click="buyNow"
-                            class="flex-1 px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-800 transition-colors">
-                            Buy Now
-                        </button>
-                    </div>
                 </div>
             </div>
 
             <!-- Mobile Fixed Buttons -->
             <div class="fixed-bottom-buttons">
-                <button wire:navigate wire:click="addToCart"
+                <button wire:click="addToCart({{ $product->id }})"
                     class="flex-1 px-6 py-3 bg-gray-800 text-white rounded-full hover:bg-purple-600 transition-colors">
                     Add to Cart
                 </button>
-                <button wire:navigate wire:click="buyNow"
+                <button wire:click="buyNow"
                     class="flex-1 px-6 py-3 bg-purple-600 text-white rounded-full hover:bg-purple-800 transition-colors">
                     Buy Now
                 </button>
@@ -302,20 +321,17 @@
                 <!-- Tab Headers -->
                 <div class="flex gap-5 border-b border-gray-200 mb-6">
                     <button class="px-2 py-3 font-medium border-b-2 transition-colors"
-                        :class="activeTab === 'description' ? 'border-purple-600 text-purple-600' :
-                            'border-transparent text-gray-500 hover:text-gray-700'"
+                        :class="{ 'border-purple-600 text-purple-600': activeTab === 'description', 'border-transparent text-gray-500 hover:text-gray-700': activeTab !== 'description' }"
                         @click="activeTab = 'description'">
                         Description
                     </button>
                     <button class="px-2 py-3 font-medium border-b-2 transition-colors"
-                        :class="activeTab === 'reviews' ? 'border-purple-600 text-purple-600' :
-                            'border-transparent text-gray-500 hover:text-gray-700'"
+                        :class="{ 'border-purple-600 text-purple-600': activeTab === 'reviews', 'border-transparent text-gray-500 hover:text-gray-700': activeTab !== 'reviews' }"
                         @click="activeTab = 'reviews'">
                         Reviews
                     </button>
                     <button class="px-2 py-3 font-medium border-b-2 transition-colors"
-                        :class="activeTab === 'additional' ? 'border-purple-600 text-purple-600' :
-                            'border-transparent text-gray-500 hover:text-gray-700'"
+                        :class="{ 'border-purple-600 text-purple-600': activeTab === 'additional', 'border-transparent text-gray-500 hover:text-gray-700': activeTab !== 'additional' }"
                         @click="activeTab = 'additional'">
                         Additional Information
                     </button>
@@ -330,7 +346,7 @@
                     <div class="space-y-6">
                         <!-- Review Form -->
                         <div class="pt-6">
-                            <h3 class="text-xl font-semibold mb-4">Add a review</h3>
+                            <h3 class="text-xl font-semibold mb-4">Add a Review</h3>
                             <form class="space-y-4" wire:submit.prevent="submitReview">
                                 <div class="flex gap-2 text-2xl text-yellow-400 mb-4">
                                     <i class="far fa-star cursor-pointer hover:scale-110 transition-transform"
@@ -370,8 +386,9 @@
                                     </div>
                                 </div>
                                 <button type="submit"
-                                    class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-purple-600 transition-colors">Submit
-                                    Review</button>
+                                    class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-purple-600 transition-colors">
+                                    Submit Review
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -403,7 +420,6 @@
             @if ($relatedProducts->isNotEmpty())
                 <div class="mb-16">
                     <h2 class="text-2xl font-semibold text-center mb-8">Related Products</h2>
-
                     <div class="relative" x-data="{ currentSlide: 0 }">
                         <!-- Slider Container -->
                         <div class="overflow-hidden">
@@ -413,17 +429,20 @@
                                     <div class="w-full md:w-1/2 lg:w-1/4 flex-shrink-0 px-3">
                                         <div
                                             class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                                            <div class="relative">
-                                                <img src="{{ $relatedProduct->images->first() ? asset($relatedProduct->images->first()->image_path) : asset('images/placeholder.jpg') }}"
-                                                    alt="{{ $relatedProduct->name }}"
-                                                    class="w-full h-64 object-cover">
-                                                @if ($relatedProduct->discount_price && $relatedProduct->discount_price < $relatedProduct->price)
-                                                    <div
-                                                        class="absolute top-3 right-3 bg-red-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-full uppercase tracking-wide">
-                                                        Sale
-                                                    </div>
-                                                @endif
-                                            </div>
+                                            <a href="{{ route('view.product', $relatedProduct->slug) }}">
+
+                                                <div class="relative">
+                                                    <img src="{{ $relatedProduct->images->first() ? asset($relatedProduct->images->first()->image_path) : asset('images/placeholder.jpg') }}"
+                                                        alt="{{ $relatedProduct->name }}"
+                                                        class="w-full h-64 object-cover">
+                                                    @if ($relatedProduct->discount_price && $relatedProduct->discount_price < $relatedProduct->price)
+                                                        <div
+                                                            class="absolute top-3 right-3 bg-red-500 text-white text-xs font-semibold px-2.5 py-1.5 rounded-full uppercase tracking-wide">
+                                                            Sale
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                            </a>
                                             <div class="p-6 text-center">
                                                 <h3 class="text-xl font-semibold text-gray-800 mb-2">
                                                     {{ $relatedProduct->name }}</h3>
@@ -456,7 +475,7 @@
                         </button>
                         <button
                             class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-purple-500 hover:text-white transition-colors translate-x-2"
-                            :class="{ 'opacity-50 cursor-not-allowed': currentSlide >= {{ count($relatedProducts) - 4 }}"
+                            :class="{ 'opacity-50 cursor-not-allowed': currentSlide >= {{ count($relatedProducts) - 4 }} }"
                             :disabled="currentSlide >= {{ count($relatedProducts) - 4 }}"
                             @click="currentSlide = currentSlide < {{ count($relatedProducts) - 4 }} ? currentSlide + 1 : currentSlide">
                             <i class="fas fa-chevron-right"></i>
@@ -473,50 +492,98 @@
                     <button class="absolute top-4 right-4 text-white text-2xl z-10" @click="isFullscreen = false">
                         <i class="fas fa-times"></i>
                     </button>
-                    <img :src="images[activeImageIndex]" class="w-full max-h-screen object-contain"
+                    <img x-bind:src="images[activeImageIndex]" class="w-full max-h-screen object-contain"
                         alt="Fullscreen product image">
                 </div>
             </div>
 
+            <!-- Back to Top Button -->
+            <button class="back-to-top" :class="{ 'visible': showBackToTop }" @click="scrollToTop()">
+                <i class="fas fa-arrow-up"></i>
+            </button>
         </div>
 
         @livewireScripts
         <script>
             function productPage() {
-                console.log('Alpine.js productPage initialized');
                 return {
                     activeImageIndex: 0,
                     activeTab: 'description',
                     isFullscreen: false,
                     rating: 0,
                     showBackToTop: false,
-                    images: [
-                        @if ($product->images->isNotEmpty())
-                            @foreach ($product->images as $image)
-                                '{{ $image->image_path }}',
-                            @endforeach
-                        @else
-                            '{{ asset('images/placeholder.jpg') }}',
-                        @endif
-                    ],
-                    thumbs: [
-                        @if ($product->images->isNotEmpty())
-                            @foreach ($product->images as $image)
-                                '{{ $image->image_path }}',
-                            @endforeach
-                        @else
-                            '{{ asset('images/placeholder.jpg') }}',
-                        @endif
-                    ],
+                    images: [],
+                    thumbs: [],
+                    notification: {
+                        message: '',
+                        type: ''
+                    },
+
+                    init() {
+                        // Initialize images and thumbs
+                        this.updateImages();
+
+                        // Update images on variant change
+                        window.addEventListener('variantUpdated', () => {
+                            this.updateImages();
+                            this.activeImageIndex = 0;
+                            console.log('variantUpdated triggered, images:', this.images);
+                        });
+
+                        // Handle scroll for back-to-top button
+                        window.addEventListener('scroll', () => {
+                            this.showBackToTop = window.scrollY > 300;
+                        });
+
+                        // Listen for Livewire notifications
+                        Livewire.on('notify', (event) => {
+                            this.notification = event;
+                            setTimeout(() => {
+                                this.notification.message = '';
+                            }, 3000);
+                        });
+                    },
+
+                    updateImages() {
+                        // Prioritize variant image if available, then fallback to product images
+                        const variantImage = @json(
+                            $selectedVariantCombination && $selectedVariantCombination->image
+                                ? asset($selectedVariantCombination->image)
+                                : null);
+                        const productImages = @json($product->images->pluck('image_path')->map(fn($path) => asset($path))->toArray());
+                        const placeholder = '{{ asset('images/placeholder.jpg') }}';
+
+                        if (variantImage) {
+                            this.images = [variantImage];
+                            this.thumbs = [variantImage];
+                        } else if (productImages.length > 0) {
+                            this.images = productImages;
+                            this.thumbs = productImages;
+                        } else {
+                            this.images = [placeholder];
+                            this.thumbs = [placeholder];
+                        }
+
+                        // Ensure activeImageIndex is valid
+                        if (this.activeImageIndex >= this.images.length) {
+                            this.activeImageIndex = 0;
+                        }
+
+                        console.log('Images updated:', this.images);
+                    },
+
                     setActiveImage(index) {
                         this.activeImageIndex = index;
                     },
+
                     openFullscreen() {
                         this.isFullscreen = true;
                     },
+
                     zoomImage(event) {
                         // Placeholder for zooming functionality
                     },
+
                     setRating(stars) {
                         this.rating = stars;
                         const starIcons = event.currentTarget.parentElement.querySelectorAll('i');
@@ -530,18 +597,14 @@
                             }
                         });
                     },
+
                     scrollToTop() {
                         window.scrollTo({
                             top: 0,
                             behavior: 'smooth'
                         });
-                    },
-                    init() {
-                        window.addEventListener('scroll', () => {
-                            this.showBackToTop = window.scrollY > 300;
-                        });
                     }
-                }
+                };
             }
         </script>
     </div>
