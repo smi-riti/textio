@@ -96,7 +96,7 @@
                 </div>
             </div>
 
-            <!-- Order Summary Section -->
+          
             <!-- Order Summary Section -->
             <div class="bg-white rounded-lg p-6 border border-gray-200">
                 <div class="flex items-center mb-4">
