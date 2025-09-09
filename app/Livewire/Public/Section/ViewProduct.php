@@ -198,18 +198,6 @@ class ViewProduct extends Component
         }
     }
 
-    public function increment()
-    {
-        $this->quantity++;
-    }
-
-    public function decrement()
-    {
-        if ($this->quantity > 1) {
-            $this->quantity--;
-        }
-    }
-
     public function addToCart($productId)
     {
         if (!Auth::check()) {

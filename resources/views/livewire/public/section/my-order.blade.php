@@ -96,7 +96,7 @@
                 </div>
             </div>
 
-          
+
             <!-- Order Summary Section -->
             <div class="bg-white rounded-lg p-6 border border-gray-200">
                 <div class="flex items-center mb-4">
@@ -109,8 +109,10 @@
                     <div class="ml-11 mt-4 border border-gray-200 rounded-lg">
                         <div class="flex flex-col sm:flex-row p-4">
                             <div class="sm:w-24 h-32 bg-gray-100 flex items-center justify-center mb-4 sm:mb-0 rounded">
+
                                 @if (!empty($item['product']['image']))
                                     <img src="{{ $item['product']['image'] }}"
+
                                         alt="{{ $item['product']['name'] }}"
                                         class="w-full h-full object-cover rounded">
                                 @else
