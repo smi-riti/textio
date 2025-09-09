@@ -8,6 +8,10 @@ use Livewire\WithPagination;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
+use App\Models\ProductVariantCombination;
+use App\Services\WishlistService;
+use App\Services\CartService;
+use Illuminate\Support\Facades\Auth;
 
 class AllProduct extends Component
 {
@@ -55,40 +59,16 @@ class AllProduct extends Component
     public $tempMinPrice = 0;
     public $tempMaxPrice = 10000;
 
-    // Colors (static colors for now need to use database)
-    public $availableColors = [
-        'red' => '#ef4444',
-        'blue' => '#3b82f6', 
-        'green' => '#10b981',
-        'yellow' => '#f59e0b',
-        'purple' => '#8b5cf6',
-        'pink' => '#ec4899',
-        'black' => '#000000',
-        'white' => '#ffffff',
-        'gray' => '#6b7280',
-        'orange' => '#f97316',
-    ];
-    
+    // Colors and Sizes (dynamic from DB)
+    public $availableColors = [];
     #[Url(as: 'colors')]
     public $selectedColors = [];
-    
-    // Temporary color selections (before apply)
     public $tempSelectedColors = [];
 
-    // Sizes (static size for now need to use database )
-    public $availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+    public $availableSizes = [];
     #[Url(as: 'sizes')]
     public $selectedSizes = [];
-    
-    // Temporary size selections (before apply)
     public $tempSelectedSizes = [];
-
-    // Rating filter
-    #[Url(as: 'rating')]
-    public $minimumRating = 0;
-    
-    // Temporary rating selection (before apply)
-    public $tempMinimumRating = 0;
 
     // Sorting
     #[Url(as: 'sort')]
@@ -107,19 +87,76 @@ class AllProduct extends Component
             ->whereNull('parent_category_id')
             ->get();
         $this->brands = Brand::where('is_active', true)->get();
-        
-        // Load wishlist from session if exists
-        $this->wishlistItems = session()->get('wishlist', []);
-        
-        // Initialize temp values with current values
+
+        // Initialize subcategories if category is pre-selected
+        if ($this->selectedCategory) {
+            $this->subcategories = Category::where('parent_category_id', $this->selectedCategory)
+                ->where('is_active', true)
+                ->get();
+        }
+
+        // Initialize temporary filters with current values
         $this->tempSelectedCategory = $this->selectedCategory;
         $this->tempSelectedSubcategories = $this->selectedSubcategories;
         $this->tempSelectedBrands = $this->selectedBrands;
-        $this->tempSelectedColors = $this->selectedColors;
-        $this->tempSelectedSizes = $this->selectedSizes;
-        $this->tempMinimumRating = $this->minimumRating;
         $this->tempMinPrice = $this->minPrice;
         $this->tempMaxPrice = $this->maxPrice;
+        $this->tempSelectedColors = $this->selectedColors;
+        $this->tempSelectedSizes = $this->selectedSizes;
+
+        // Fetch available colors and sizes from database
+        $this->fetchAvailableColors();
+        $this->fetchAvailableSizes();
+    }
+
+    protected function fetchAvailableColors()
+    {
+        // Get all variant combinations and extract colors from variant_values JSON
+        $colors = ProductVariantCombination::whereNotNull('variant_values')
+            ->get()
+            ->map(function ($combination) {
+                // Decode the JSON string to array
+                $values = json_decode($combination->variant_values, true);
+                if (!is_array($values)) return null;
+                
+                // Look for Color/color keys in the variant_values array
+                return $values['Color'] ?? $values['color'] ?? null;
+            })
+            ->filter() // Remove null values
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+        
+        $this->availableColors = $colors;
+        
+        // Debug: Log the colors found
+        \Log::info('Available colors fetched:', $colors);
+    }
+
+    protected function fetchAvailableSizes()
+    {
+        // Get all variant combinations and extract sizes from variant_values JSON
+        $sizes = ProductVariantCombination::whereNotNull('variant_values')
+            ->get()
+            ->map(function ($combination) {
+                // Decode the JSON string to array
+                $values = json_decode($combination->variant_values, true);
+                if (!is_array($values)) return null;
+                
+                // Look for Size/size keys in the variant_values array
+                return $values['Size'] ?? $values['size'] ?? null;
+            })
+            ->filter() // Remove null values
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+        
+        $this->availableSizes = $sizes;
+        
+        // Debug: Log the sizes found
+        \Log::info('Available sizes fetched:', $sizes);
     }
 
     public function updated($property)
@@ -127,26 +164,38 @@ class AllProduct extends Component
         // Sync search properties
         if ($property === 'searchQuery') {
             $this->search = $this->searchQuery;
-        } elseif ($property === 'search') {
-            $this->searchQuery = $this->search;
         }
 
-        // Only search and sort trigger live updates
-        if (in_array($property, ['searchQuery', 'search', 'sortBy'])) {
-            $this->resetPage();
+        // If category is updated, reset subcategories
+        if ($property === 'tempSelectedCategory') {
+            $this->tempSelectedSubcategories = [];
         }
+        // Do NOT auto-apply filters on every change. Only apply on Apply Filters button.
     }
 
     public function updatedTempSelectedCategory($value)
     {
+        // When a parent category is selected, fetch its subcategories
         if ($value) {
-            $this->subcategories = Category::where('is_active', true)
-                ->where('parent_category_id', $value)
+            $this->subcategories = Category::where('parent_category_id', $value)
+                ->where('is_active', true)
                 ->get();
         } else {
-            $this->subcategories = [];
+            $this->subcategories = collect(); // Use empty collection
         }
+        
+        // Reset subcategory selection when parent category changes
         $this->tempSelectedSubcategories = [];
+        
+        // Refresh available colors and sizes based on new category
+        $this->refreshVariantFilters();
+    }
+
+    protected function refreshVariantFilters()
+    {
+        // Re-fetch colors and sizes based on current filter selections
+        $this->fetchAvailableColors();
+        $this->fetchAvailableSizes();
     }
 
     public function toggleShowAllCategories()
@@ -195,10 +244,7 @@ class AllProduct extends Component
         }
     }
 
-    public function setTempRating($rating)
-    {
-        $this->tempMinimumRating = $rating;
-    }
+
 
     public function resetFilters()
     {
@@ -211,50 +257,101 @@ class AllProduct extends Component
         $this->maxPrice = 10000;
         $this->selectedColors = [];
         $this->selectedSizes = [];
-        $this->minimumRating = 0;
         $this->sortBy = 'popularity';
-        $this->subcategories = [];
-        
+        $this->subcategories = collect();
+
         // Reset temp values
         $this->tempSelectedCategory = null;
         $this->tempSelectedSubcategories = [];
         $this->tempSelectedBrands = [];
         $this->tempSelectedColors = [];
         $this->tempSelectedSizes = [];
-        $this->tempMinimumRating = 0;
         $this->tempMinPrice = 0;
         $this->tempMaxPrice = 10000;
+
+        // Refresh variant filters
+        $this->refreshVariantFilters();
         
         $this->resetPage();
+        $this->dispatch('close-mobile-filters');
     }
 
     public function addToWishlist($productId)
     {
-        // Logic for Wishlist
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $wishlistService = app(WishlistService::class);
+        $result = $wishlistService->addToWishlist($productId);
+
+        if ($result['success']) {
+            $this->dispatch('wishlistUpdated');
+            session()->flash('wishlist_message', $result['message']);
+            
+            // Update local wishlist items for UI
+            if (!in_array($productId, $this->wishlistItems)) {
+                $this->wishlistItems[] = $productId;
+            }
+        } else {
+            if (isset($result['redirect'])) {
+                return redirect()->to($result['redirect']);
+            }
+            session()->flash('wishlist_error', $result['message']);
+        }
     }
 
     public function removeFromWishlist($productId)
     {
-        // Logic for Remove Wishlist
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $wishlistService = app(WishlistService::class);
+        $result = $wishlistService->removeFromWishlist($productId);
+
+        if ($result['success']) {
+            $this->dispatch('wishlistUpdated');
+            session()->flash('wishlist_message', $result['message']);
+            
+            // Update local wishlist items for UI
+            $this->wishlistItems = array_diff($this->wishlistItems, [$productId]);
+        } else {
+            session()->flash('wishlist_error', $result['message']);
+        }
     }
 
     public function addToCart($productId)
     {
-        // Logic for Cart
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $product = Product::find($productId);
+        if (!$product) {
+            session()->flash('error', 'Product not found.');
+            return;
+        }
+
+        $cartService = app(CartService::class);
+        $result = $cartService->addToCart($productId, 1); // Default quantity 1
+
+        if ($result['success']) {
+            $this->dispatch('cartUpdated');
+            session()->flash('message', $result['message']);
+        } else {
+            if (isset($result['redirect'])) {
+                return redirect()->to($result['redirect']);
+            }
+            session()->flash('error', $result['message']);
+        }
     }
 
     public function getHasActiveFiltersProperty()
     {
-        return $this->searchQuery || 
-               $this->search ||
-               $this->selectedCategory || 
-               !empty($this->selectedSubcategories) ||
-               !empty($this->selectedBrands) ||
-               $this->minPrice > 0 || 
-               $this->maxPrice < 10000 ||
-               !empty($this->selectedColors) ||
-               !empty($this->selectedSizes) ||
-               $this->minimumRating > 0;
+        return $this->searchQuery ||
+            !empty($this->selectedSubcategories) || !empty($this->selectedBrands) ||
+            ($this->minPrice > 0 || $this->maxPrice < 10000) || !empty($this->selectedColors) || !empty($this->selectedSizes) || $this->selectedCategory;
     }
 
     public function applyPriceFilter($minPrice, $maxPrice)
@@ -271,42 +368,39 @@ class AllProduct extends Component
         $this->selectedBrands = $this->tempSelectedBrands;
         $this->selectedColors = $this->tempSelectedColors;
         $this->selectedSizes = $this->tempSelectedSizes;
-        $this->minimumRating = $this->tempMinimumRating;
         $this->minPrice = $this->tempMinPrice;
         $this->maxPrice = $this->tempMaxPrice;
+        
+        // Update subcategories for the selected category
+        if ($this->selectedCategory) {
+            $this->subcategories = Category::where('parent_category_id', $this->selectedCategory)
+                ->where('is_active', true)
+                ->get();
+        } else {
+            $this->subcategories = collect();
+        }
+        
         $this->resetPage();
         $this->dispatch('close-mobile-filters');
     }
 
     public function render()
     {
-        $query = Product::query()
-            ->where('status', true)
-            ->with(['category', 'brand', 'images', 'variants']);
+        $query = Product::query()->where('status', true)->with(['images', 'category', 'brand', 'variantCombinations']);
 
-        // Apply search filter
-        if ($this->searchQuery || $this->search) {
-            $searchTerm = $this->searchQuery ?: $this->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('sku', 'like', '%' . $searchTerm . '%')
-                  ->orWhereHas('category', function ($subq) use ($searchTerm) {
-                      $subq->where('title', 'like', '%' . $searchTerm . '%');
-                  })
-                  ->orWhereHas('brand', function ($subq) use ($searchTerm) {
-                      $subq->where('name', 'like', '%' . $searchTerm . '%');
-                  });
-            });
-        }
-
-        // Apply category filter
-        if ($this->selectedCategory) {
-            $query->where('category_id', $this->selectedCategory);
-        }
-
-        // Apply subcategory filter
+        // Apply category/subcategory filters
         if (!empty($this->selectedSubcategories)) {
+            // If subcategories are selected, filter by subcategories
             $query->whereIn('category_id', $this->selectedSubcategories);
+        } elseif ($this->selectedCategory) {
+            // If only parent category is selected, include both parent and its subcategories
+            $categoryIds = [$this->selectedCategory];
+            $subcategoryIds = Category::where('parent_category_id', $this->selectedCategory)
+                ->where('is_active', true)
+                ->pluck('id')
+                ->toArray();
+            $categoryIds = array_merge($categoryIds, $subcategoryIds);
+            $query->whereIn('category_id', $categoryIds);
         }
 
         // Apply brand filter
@@ -314,60 +408,91 @@ class AllProduct extends Component
             $query->whereIn('brand_id', $this->selectedBrands);
         }
 
+        // Filter by color and size using ProductVariantCombination
+        // Note: Using LIKE patterns because variant_values is stored as longtext, not JSON column
+        if (!empty($this->selectedColors)) {
+            $query->whereHas('variantCombinations', function($q) {
+                $q->where(function($subQ) {
+                    foreach ($this->selectedColors as $color) {
+                        $subQ->orWhere('variant_values', 'LIKE', "%{$color}%");
+                    }
+                });
+            });
+        }
+        
+        if (!empty($this->selectedSizes)) {
+            $query->whereHas('variantCombinations', function($q) {
+                $q->where(function($subQ) {
+                    foreach ($this->selectedSizes as $size) {
+                        $subQ->orWhere('variant_values', 'LIKE', "%{$size}%");
+                    }
+                });
+            });
+        }
+
         // Apply price filter
         if ($this->minPrice > 0 || $this->maxPrice < 10000) {
-            $query->where(function ($q) {
-                $q->whereBetween('discount_price', [$this->minPrice, $this->maxPrice])
-                  ->orWhere(function ($subq) {
-                      $subq->whereNull('discount_price')
-                           ->whereBetween('price', [$this->minPrice, $this->maxPrice]);
+            $query->where(function($q) {
+                $q->whereBetween('price', [$this->minPrice, $this->maxPrice])
+                  ->orWhereBetween('discount_price', [$this->minPrice, $this->maxPrice]);
+            });
+        }
+
+        // Apply search filter
+        if ($this->searchQuery) {
+            $query->where(function($q) {
+                $q->where('name', 'like', '%'.$this->searchQuery.'%')
+                  ->orWhere('description', 'like', '%'.$this->searchQuery.'%')
+                  ->orWhereHas('category', function($categoryQuery) {
+                      $categoryQuery->where('title', 'like', '%'.$this->searchQuery.'%');
+                  })
+                  ->orWhereHas('brand', function($brandQuery) {
+                      $brandQuery->where('name', 'like', '%'.$this->searchQuery.'%');
                   });
-            });
-        }
-
-        // Apply color filter (assuming you have color variants or color field)
-        if (!empty($this->selectedColors)) {
-            $query->whereHas('variants', function ($q) {
-                $q->whereIn('variant_name', $this->selectedColors);
-            });
-        }
-
-        // Apply size filter (assuming you have size variants)
-        if (!empty($this->selectedSizes)) {
-            $query->whereHas('variants', function ($q) {
-                $q->whereIn('variant_name', $this->selectedSizes);
             });
         }
 
         // Apply sorting
         switch ($this->sortBy) {
-            case 'price_low':
+            case 'price_asc':
                 $query->orderByRaw('COALESCE(discount_price, price) ASC');
                 break;
-            case 'price_high':
+            case 'price_desc':
                 $query->orderByRaw('COALESCE(discount_price, price) DESC');
                 break;
-            case 'name':
+            case 'name_asc':
                 $query->orderBy('name', 'asc');
                 break;
-            case 'discount':
-                $query->orderByRaw('((price - COALESCE(discount_price, price)) / price) DESC');
-                break;
-            case 'latest':
-                $query->orderBy('created_at', 'desc');
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
                 break;
             case 'popularity':
             default:
-                // For popularity, you might want to order by number of orders or reviews
-                $query->withCount('orderItems')->orderBy('order_items_count', 'desc');
+                $query->orderBy('featured', 'desc')
+                      ->orderBy('created_at', 'desc');
                 break;
         }
 
         $products = $query->paginate(12);
 
+        // Load wishlist items for authenticated users
+        $wishlistItems = [];
+        if (Auth::check()) {
+            $wishlistService = app(WishlistService::class);
+            $wishlistItems = $wishlistService->getWishlistItems()->pluck('product_id')->toArray();
+            $this->wishlistItems = $wishlistItems;
+        }
+
         return view('livewire.public.all-product', [
             'products' => $products,
-            'hasActiveFilters' => $this->hasActiveFilters,
+            'parentCategories' => $this->parentCategories,
+            'brands' => $this->brands,
+            'showAllCategories' => $this->showAllCategories,
+            'showAllBrands' => $this->showAllBrands,
+            'subcategories' => $this->subcategories,
+            'availableColors' => $this->availableColors,
+            'availableSizes' => $this->availableSizes,
+            'wishlistItems' => $wishlistItems,
         ]);
     }
 }
