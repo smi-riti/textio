@@ -56,6 +56,12 @@ class MyOrder extends Component
             if (!isset($item['product']['price'])) {
                 $item['product']['price'] = $item['product']['discount_price'] ?? 0;
             }
+            
+            // Calculate unit price (use discount price if available, otherwise regular price)
+            $item['unit_price'] = $item['product']['discount_price'] > 0 
+                ? $item['product']['discount_price'] 
+                : $item['product']['price'];
+                
             return $item;
         });
 
@@ -115,32 +121,38 @@ class MyOrder extends Component
         ]);
 
         foreach ($this->cartItems as $item) {
+            // Calculate unit price for each item
+            $unitPrice = $item['product']['discount_price'] > 0 
+                ? $item['product']['discount_price'] 
+                : $item['product']['price'];
+            
             $orderItemData = [
                 'user_id' => Auth::id(),
                 'order_id' => $order->id,
                 'product_id' => $item['product_id'],
+                'product_variant_combination_id' => $item['product_variant_combination_id'] ?? null,
+                'unit_price' => $unitPrice,
                 'quantity' => $item['quantity'],
             ];
 
             // Handle variant details if available
-           if (!empty($item['variant_details'])) {
-    if (is_array($item['variant_details']) || is_object($item['variant_details'])) {
-        foreach ($item['variant_details'] as $variant) {
-            if (is_array($variant) || is_object($variant)) {
-                foreach ($variant as $type => $value) {
-                    if ($type === 'Color') {
-                        $orderItemData['color'] = $value;
-                    } elseif ($type === 'Size') {
-                        $orderItemData['size'] = $value;
+            if (!empty($item['variant_details'])) {
+                if (is_array($item['variant_details']) || is_object($item['variant_details'])) {
+                    foreach ($item['variant_details'] as $variant) {
+                        if (is_array($variant) || is_object($variant)) {
+                            foreach ($variant as $type => $value) {
+                                if ($type === 'Color') {
+                                    $orderItemData['color'] = $value;
+                                } elseif ($type === 'Size') {
+                                    $orderItemData['size'] = $value;
+                                }
+                            }
+                        }
                     }
+                } else {
+                    \Log::error("variant_details is not an array or object: " . json_encode($item['variant_details']));
                 }
             }
-        }
-    } else {
-        \Log::error("variant_details is not an array or object: " . json_encode($item['variant_details']));
-    }
-}
-
 
             OrderItem::create($orderItemData);
         }
