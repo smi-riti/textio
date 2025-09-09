@@ -34,12 +34,7 @@
                             <button type="submit" class="w-full lg:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">Sign Up</button>
                         </div>
                     </form>
-                    <!-- Social Links -->
-                    <div class="flex justify-center">
-                        <a href="#" class="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
-                            <i class="ti-google mr-2"></i> Sign in with Google
-                        </a>
-                    </div>
+                   
                     <!-- Mobile Sign In Link -->
                     <p class="text-center block lg:hidden mt-8 text-gray-600">
                         Already have an account? <a href="{{ route('login') }}" class="text-blue-600 hover:underline">Sign In</a>.
