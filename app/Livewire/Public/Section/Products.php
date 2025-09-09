@@ -51,36 +51,7 @@ class Products extends Component
         
     }
 
-    // public function toggleWishlist($productId)
-    // {
-    //     if (!Auth::check()) {
-    //         return redirect()->route('login')->with('error', 'Please log in to manage your wishlist.');
-    //     }
-
-    //     $userId = Auth::id();
-
-    //     // Check if product is in wishlist
-    //     $wishlistItem = Wishlist::where('product_id', $productId)
-    //         ->where('user_id', $userId)
-    //         ->first();
-
-    //     if ($wishlistItem) {
-    //         // Remove from wishlist
-    //         $wishlistItem->delete();
-    //         $this->dispatch('notify', ['message' => 'Removed from wishlist', 'type' => 'success']);
-    //     } else {
-    //         // Add to wishlist
-    //         Wishlist::create([
-    //             'user_id' => $userId,
-    //             'product_id' => $productId,
-    //         ]);
-    //         $this->dispatch('notify', ['message' => 'Added to wishlist', 'type' => 'success']);
-    //     }
-
-    //     // Reload wishlist status
-    //     $this->loadWishlist();
-    // }
-
+   
     protected function loadWishlist()
     {
         if (Auth::check()) {
