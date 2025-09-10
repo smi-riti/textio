@@ -1,102 +1,51 @@
-<section class="py-12 bg-white">
-    <div class="container mx-auto px-4">
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         @if ($categories->isNotEmpty())
-            <h2 class="text-3xl font-bold text-center mb-10 text-gray-800">Popular Categories</h2>
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-semibold text-[#171717] mb-4">Product Categories</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Find exactly what you're looking for</p>
+            </div>
 
-            <div x-data="categoriesScroller()" x-init="init()">
-                <div class="relative">
-                    <!-- Carousel Container -->
-                    <div class="overflow-hidden">
-                        <div x-ref="container"
-                            class="flex transition-transform duration-500 ease-in-out scrollbar-hide snap-x snap-mandatory scroll-smooth"
-                            style="overflow-x: auto;">
-                            @foreach ($categories as $category)
-                                <div class="category-card group flex-shrink-0 w-32 md:w-40 px-2 snap-center">
-                                    {{-- <a href="{{ route('categories.view', $category->slug) }}"> --}}
-                                        <a href="">
-                                        <div class="relative overflow-hidden rounded-md bg-purple-100 h-24 md:h-28">
-                                            <img src="{{ $category->image_url ?? 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=1480&q=80' }}"
-                                                alt="{{ $category->title }}"
-                                                class="w-full h-full object-cover group-hover:brightness-110 transition duration-300">
-                                            <div class="absolute inset-0 mt-5  bg-opacity-50 flex items-center justify-center">
-                                                <h3 class="text-gray-800 text-base md:text-lg font-semibold text-center">{{ $category->title }}</h3>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            @endforeach
-                        </div>
+            <!-- Rounded Icon Cards - Show only 3 categories -->
+            <div class="grid grid-cols-3 gap-4 md:gap-8 justify-center">
+                @foreach ($categories as $category)
+                    <div class="group text-center">
+                        <a href="#" class="block">
+                            <div class="relative mx-auto mb-4 w-20 h-20 sm:w-24 sm:h-24 md:w-52 md:h-52 rounded-full bg-[#f5f0ff] flex items-center justify-center transition-all duration-300 group-hover:bg-[#8f4da7] group-hover:shadow-lg group-hover:scale-110 overflow-hidden">
+                                <img src="{{  $category->image}}"
+                                     alt="{{ $category->title }}"
+                                     class="h-full w-full object-cover transition-all duration-300 group-hover:brightness-75"
+                                     loading="lazy">
+                                <span class="absolute -top-1 -right-1 bg-[#8f4da7] text-white text-xs font-semibold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center shadow-md">
+                                    {{ $category->products_count ?? '0' }}
+                                </span>
+                            </div>
+                            <h3 class="text-[#171717] text-sm font-sans sm:text-base md:text-sm  group-hover:text-[#8f4da7] transition-colors duration-300 line-clamp-2 px-2">
+                                {{ $category->title }}
+                            </h3>
+                        </a>
                     </div>
-                    <!-- Navigation Buttons (Hidden on Mobile) -->
-                    <div class="hidden md:block" x-show="scrollMax > 0">
-                        <button @click="scrollPrev" :disabled="scroll <= 0"
-                            :class="{
-                                'bg-gray-400 cursor-not-allowed': scroll <= 0,
-                                'bg-purple-900 hover:bg-purple-800': scroll > 0
-                            }"
-                            class="absolute left-0 top-1/2 transform -translate-y-1/2 text-white p-2 rounded-full transition duration-300"
-                            aria-label="Previous slide">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button @click="scrollNext" :disabled="scroll >= scrollMax"
-                            :class="{
-                                'bg-gray-400 cursor-not-allowed': scroll >= scrollMax,
-                                'bg-purple-900 hover:bg-purple-800': scroll < scrollMax
-                            }"
-                            class="absolute right-0 top-1/2 transform -translate-y-1/2 text-white p-2 rounded-full transition duration-300"
-                            aria-label="Next slide">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
+                @endforeach
+            </div>
+            
+            <!-- View All Button -->
+            <div class="text-center mt-12">
+                <a wire:navigate href="{{route('public.product.all')}}" class="inline-flex items-center bg-[#171717] hover:bg-[#8f4da7] text-white font-medium py-3 px-8 rounded-full transition-all duration-300">
+                    <span>Explore All Categories</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </a>
             </div>
         @endif
     </div>
 
     <style>
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
     </style>
-
-    <script>
-        window.categoriesScroller = window.categoriesScroller || function() {
-            return {
-                scroll: 0,
-                scrollMax: 0,
-                itemWidth: 0,
-                containerWidth: 0,
-                init() {
-                    queueMicrotask(() => this.calculateWidths());
-                    window.addEventListener('resize', () => queueMicrotask(() => this.calculateWidths()));
-                },
-                calculateWidths() {
-                    if (!this.$refs.container) return;
-                    this.containerWidth = this.$refs.container.clientWidth;
-                    const first = this.$refs.container.children[0];
-                    this.itemWidth = (first ? first.offsetWidth : 0) + 4; // Adjust for px-2 (4px total padding)
-                    this.scrollMax = Math.max(0, this.$refs.container.scrollWidth - this.containerWidth);
-                },
-                scrollNext() {
-                    this.scroll = Math.min(this.scroll + this.itemWidth, this.scrollMax);
-                    this.$refs.container.scrollTo({
-                        left: this.scroll,
-                        behavior: 'smooth'
-                    });
-                },
-                scrollPrev() {
-                    this.scroll = Math.max(this.scroll - this.itemWidth, 0);
-                    this.$refs.container.scrollTo({
-                        left: this.scroll,
-                        behavior: 'smooth'
-                    });
-                },
-            };
-        };
-    </script>
 </section>

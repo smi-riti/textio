@@ -12,10 +12,11 @@ class Categories extends Component
 
     public function mount()
     {
-$this->categories = Category::select('id', 'title', 'slug')
+$this->categories = Category::select('id', 'title', 'slug','image')
     ->where('is_active', true)
-    ->limit(12)
+    ->limit(3)
     ->get();
+    
 
 //$categories = Category::select('id', 'title', 'slug', 'image_url')->get();
 

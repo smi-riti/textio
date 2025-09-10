@@ -1,52 +1,82 @@
- <section class="relative h-96 md:h-[500px] bg-gray-900 text-white overflow-hidden">
-        <!-- Slide 1 -->
-        <div class="hero-slide" :class="{ 'active': currentSlide === 0 }" 
-            style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80'); background-size: cover; background-position: center;">
-            <div class="container mx-auto px-4 h-full flex items-center">
-                <div class="max-w-2xl">
-                    <h1 class="text-4xl md:text-5xl font-semibold mb-4">Custom Printed T-Shirts</h1>
-                    <p class="text-xl mb-8">Design your own t-shirts with your logo, art, or text. High quality printing with fast turnaround.</p>
-                    <a href="#" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg inline-block">Shop Now</a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Slide 2 -->
-        <div class="hero-slide" :class="{ 'active': currentSlide === 1 }" 
-            style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1588200908342-23b585c03e26?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80'); background-size: cover; background-position: center;">
-            <div class="container mx-auto px-4 h-full flex items-center">
-                <div class="max-w-2xl">
-                    <h1 class="text-4xl md:text-5xl font-semibold mb-4">Personalized Mugs & Drinkware</h1>
-                    <p class="text-xl mb-8">Create custom mugs for your business, event, or as gifts. Dishwasher safe and vibrant prints.</p>
-                    <a href="#" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg inline-block">Create Now</a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Slide 3 -->
-        <div class="hero-slide" :class="{ 'active': currentSlide === 2 }" 
-            style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1611010344444-5f9e4d86a6e1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1632&q=80'); background-size: cover; background-position: center;">
-            <div class="container mx-auto px-4 h-full flex items-center">
-                <div class="max-w-2xl">
-                    <h1 class="text-4xl md:text-5xl font-semibold mb-4">Custom Branded Merchandise</h1>
-                    <p class="text-xl mb-8">Elevate your brand with custom printed merchandise. Perfect for corporate gifts and promotions.</p>
-                    <a href="#" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-lg inline-block">Explore</a>
-                </div>
-            </div>
-        </div>
-    
-        <!-- Carousel Controls -->
-        <button @click="currentSlide = (currentSlide - 1 + 3) % 3" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full">
-            <i class="fas fa-chevron-left"></i>
-        </button>
-        <button @click="currentSlide = (currentSlide + 1) % 3" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full">
-            <i class="fas fa-chevron-right"></i>
-        </button>
-        
-        <!-- Indicators -->
-        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-            <button @click="currentSlide = 0" class="w-3 h-3 rounded-full" :class="currentSlide === 0 ? 'bg-white' : 'bg-white bg-opacity-50'"></button>
-            <button @click="currentSlide = 1" class="w-3 h-3 rounded-full" :class="currentSlide === 1 ? 'bg-white' : 'bg-white bg-opacity-50'"></button>
-            <button @click="currentSlide = 2" class="w-3 h-3 rounded-full" :class="currentSlide === 2 ? 'bg-white' : 'bg-white bg-opacity-50'"></button>
-        </div>
-    </section>
+ <section class="relative h-96 md:h-[500px] bg-primary text-white overflow-hidden">
+     
+             <!-- Background pattern -->
+             <div
+                 class="absolute inset-0 bg-[radial-gradient(#8f4da755_1px,transparent_2px)] [background-size:24px_24px]">
+             </div>
+
+             <!-- Content container -->
+             <div class="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
+                 <!-- Main heading -->
+                 <h1 class="text-4xl md:text-6xl font-bold mb-4 animate-fade-in">
+                     Premium <span class="text-accent">Printing</span> Services
+                 </h1>
+
+                 <!-- Subheading -->
+                 <p class="text-lg md:text-xl max-w-2xl mb-8 animate-fade-in-delay">
+                     Custom printing on t-shirts, mugs, caps and more. Bring your ideas to life with our high-quality
+                     printing solutions.
+                 </p>
+
+                 <!-- CTA buttons -->
+                 <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-delay-2">
+                     <a wire:navigate href="{{route('public.product.all')}}"
+                         class="bg-accent hover:bg-[#7c4190] text-white font-semibold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105">
+                         Explore Mores
+                     </a>
+                     <a href="#quote"
+                         class="border-2 border-white hover:border-accent hover:bg-accent/10 font-semibold py-3 px-8 rounded-lg transition duration-300">
+                         Get a Quote
+                     </a>
+                 </div>
+             </div>
+
+             <!-- Decorative elements -->
+             <div class="absolute bottom-0 left-0 w-full flex justify-between items-end px-10 opacity-70">
+                 <!-- Left graphic - T-shirt -->
+                 <div class="transform translate-y-6 hidden md:block">
+                     <svg width="120" height="120" viewBox="0 0 512 512" class="fill-accent">
+                         <path
+                             d="M256 96c-13.25 0-24 10.75-24 24s10.75 24 24 24 24-10.75 24-24-10.75-24-24-24zm80 144c0-26.5-21.5-48-48-48h-64c-26.5 0-48 21.5-48 48v192h160V240zM336 96h-32.9c-7.52-17.05-24.66-28.57-43.82-28.13-21.02.5-38.25 17.78-39.28 38.72C219.5 128.2 237.8 148 262 148h32.9c8.02 0 14.31-7.1 13.93-15.1-.38-8.01-6.99-14.9-14.93-14.9h-1.8c-13.25 0-24-10.75-24-24s10.75-24 24-24 24 10.75 24 24c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16 0-26.51-21.49-48-48-48z" />
+                     </svg>
+                 </div>
+
+                 <!-- Right graphic - Printing machine -->
+                 <div class="transform translate-y-4 scale-90 hidden md:block">
+                     <svg width="140" height="140" viewBox="0 0 512 512" class="fill-accent">
+                         <path
+                             d="M128 192h256v64H128v-64zM448 64H64C28.65 64 0 92.65 0 128v192c0 35.35 28.65 64 64 64h48v80c0 4.25 2.75 8 6.75 9.38C121.4 453.4 123.2 453.8 125 453.8c3 0 6-1.25 8.25-3.5L224 368h224c35.35 0 64-28.65 64-64V128C512 92.65 483.3 64 448 64zM464 304c0 8.822-7.178 16-16 16H113.2l-40.8 40.8V352H64c-8.822 0-16-7.178-16-16V128c0-8.822 7.178-16 16-16h384c8.822 0 16 7.178 16 16V304z" />
+                     </svg>
+                 </div>
+             </div>
+
+         <style>
+             /* Custom animations */
+             @keyframes fadeIn {
+                 from {
+                     opacity: 0;
+                     transform: translateY(20px);
+                 }
+
+                 to {
+                     opacity: 1;
+                     transform: translateY(0);
+                 }
+             }
+
+             .animate-fade-in {
+                 animation: fadeIn 1s ease-out forwards;
+             }
+
+             .animate-fade-in-delay {
+                 opacity: 0;
+                 animation: fadeIn 1s ease-out 0.3s forwards;
+             }
+
+             .animate-fade-in-delay-2 {
+                 opacity: 0;
+                 animation: fadeIn 1s ease-out 0.6s forwards;
+             }
+         </style>
+     
+ </section>

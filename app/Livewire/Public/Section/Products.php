@@ -31,25 +31,25 @@ class Products extends Component
         // Removed incorrect dispatch: $this->dispatch("add-to-cart", productId: $product->id);
     }
 
-    public function addToCart($productId, CartService $cartService)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Please log in to add items to your cart.');
-        }
+    // public function addToCart($productId, CartService $cartService)
+    // {
+    //     if (!Auth::check()) {
+    //         return redirect()->route('login')->with('error', 'Please log in to add items to your cart.');
+    //     }
 
-        $result = $cartService->addToCart($productId, 1, null); // Default quantity=1, no variant
+    //     $result = $cartService->addToCart($productId, 1, null); // Default quantity=1, no variant
 
-        if ($result['success']) {
-            $this->dispatch('notify', ['message' => $result['message'], 'type' => 'success']);
-            $this->dispatch('cartUpdated'); // Optional: If other components need this
-        } else {
-            return redirect()->to($result['redirect'])->with('error', $result['message']);
-        }
+    //     if ($result['success']) {
+    //         $this->dispatch('notify', ['message' => $result['message'], 'type' => 'success']);
+    //         $this->dispatch('cartUpdated'); // Optional: If other components need this
+    //     } else {
+    //         return redirect()->to($result['redirect'])->with('error', $result['message']);
+    //     }
 
-        return redirect()->route('myCart')
-        ->with('success', $result['message']);
+    //     return redirect()->route('myCart')
+    //     ->with('success', $result['message']);
         
-    }
+    // }
 
    
     protected function loadWishlist()

@@ -3,34 +3,48 @@
 namespace App\Livewire\Public\Section;
 
 use App\Models\Cart;
+use App\Models\Wishlist;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Header extends Component
 {
-    public $cartCount;
+    public $cartCount = 0;
+    public $wishlistCount = 0;
     public $mobileMenuOpen = false;
 
     public function mount()
     {
-        $this->cartCount = Auth::check() ? Cart::where('user_id', Auth::id())->count() : 0;
-        $this->mobileMenuOpen = false; // Explicitly reset on mount
+        $this->updateCounts();
+        $this->mobileMenuOpen = false;
     }
 
     public function toggleMobileMenu()
     {
         $this->mobileMenuOpen = !$this->mobileMenuOpen;
-        $this->dispatch('mobile-menu-toggled', ['mobileMenuOpen' => $this->mobileMenuOpen]);
+        $this->dispatch('mobile-menu-toggled', mobileMenuOpen: $this->mobileMenuOpen);
     }
 
     public function resetMobileMenu()
     {
         $this->mobileMenuOpen = false;
-        $this->dispatch('mobile-menu-toggled', ['mobileMenuOpen' => $this->mobileMenuOpen]);
+        $this->dispatch('mobile-menu-toggled', mobileMenuOpen: $this->mobileMenuOpen);
+    }
+
+    protected function updateCounts()
+    {
+        if (Auth::check()) {
+            $this->cartCount = Cart::where('user_id', Auth::id())->count();
+            $this->wishlistCount = Wishlist::where('user_id', Auth::id())->count();
+        } else {
+            $this->cartCount = 0;
+            $this->wishlistCount = 0;
+        }
     }
 
     public function render()
     {
+        $this->updateCounts();
         return view('livewire.public.section.header');
     }
 }
