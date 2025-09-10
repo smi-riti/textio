@@ -7,6 +7,18 @@
     <title>Textio - Custom Printing</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+             tailwind.config = {
+                 theme: {
+                     extend: {
+                         colors: {
+                             primary: '#171717',
+                             accent: '#8f4da7',
+                         }
+                     }
+                 }
+             }
+         </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -103,7 +115,7 @@
     <livewire:public.section.header />
 
     <!-- Main Content -->
-    <main class="pb-16 lg:pb-0">
+    <main class=" lg:pb-0">
         {{ $slot }}
     </main>
 
@@ -154,8 +166,9 @@
 </div>
 
     <!-- Footer -->
-    <livewire:public.section.footer />
-
+@if (!in_array(Route::currentRouteName(), ['myCart', 'myOrder','view.product']))
+        <livewire:public.section.footer />
+    @endif
     @livewireScripts
     <script>
         function handleNewsletterSubmit() {
