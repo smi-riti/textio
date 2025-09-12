@@ -16,10 +16,11 @@ class ViewProduct extends Component
     public $quantity = 1;
     public $selectedVariants = [];
     public $availableVariants = [];
+    public $disabledVariants = [];
     public $selectedVariantCombination = null;
     public $whatsappNumber;
     public $customizationMessage;
-    public $VariantSize = [];
+    public $variantCombinations = [];
     public $colorImages = [];
 
     public function mount($slug)
@@ -39,10 +40,11 @@ class ViewProduct extends Component
             ->get();
 
         // Load variant combinations
-        $this->VariantSize = ProductVariantCombination::where('product_id', $this->product->id)->get();
+        $this->variantCombinations = ProductVariantCombination::where('product_id', $this->product->id)->get();
 
         // Extract available variant types and values
         $this->availableVariants = $this->extractVariantOptions();
+        $this->disabledVariants = $this->initializeDisabledVariants();
 
         // Initialize colorImages
         $this->colorImages = $this->extractColorImages();
@@ -57,7 +59,8 @@ class ViewProduct extends Component
         \Log::info('Mounted ViewProduct', [
             'slug' => $slug,
             'colorImages' => $this->colorImages,
-            'availableVariants' => $this->availableVariants
+            'availableVariants' => $this->availableVariants,
+            'disabledVariants' => $this->disabledVariants
         ]);
 
         // Dispatch initial event to set up images
@@ -67,11 +70,8 @@ class ViewProduct extends Component
     private function extractVariantOptions()
     {
         $variants = [];
-        foreach ($this->VariantSize as $combination) {
-            $values = is_string($combination->variant_values)
-                ? json_decode($combination->variant_values, true) ?? []
-                : $combination->variant_values;
-
+        foreach ($this->variantCombinations as $combination) {
+            $values = $this->parseVariantValues($combination->variant_values);
             if (!is_array($values)) {
                 \Log::warning('Invalid variant_values:', ['combination_id' => $combination->id]);
                 continue;
@@ -91,110 +91,151 @@ class ViewProduct extends Component
             sort($values);
         }
 
-        \Log::info('Extracted variant options:', $variants);
         return $variants;
     }
 
     private function extractColorImages()
     {
         $colorImages = [];
-        foreach ($this->VariantSize as $combination) {
-            $values = is_string($combination->variant_values)
-                ? json_decode($combination->variant_values, true) ?? []
-                : $combination->variant_values;
-
+        foreach ($this->variantCombinations as $combination) {
+            $values = $this->parseVariantValues($combination->variant_values);
             if (!is_array($values)) {
-                \Log::warning('Invalid variant_values in extractColorImages:', ['combination_id' => $combination->id]);
                 continue;
             }
 
             if (isset($values['Color']) && !empty($combination->image)) {
+                // Don't use asset() on already full URLs
                 $colorImages[$values['Color']] = $combination->image;
             }
         }
 
-        \Log::info('Extracted color images:', $colorImages);
         return $colorImages;
     }
 
-    public function getAvailableValuesForType($type)
+
+    private function ensureImageUrl($imagePath)
     {
-        $available = [];
-        foreach ($this->VariantSize as $combination) {
-            $values = is_string($combination->variant_values)
-                ? json_decode($combination->variant_values, true) ?? []
-                : $combination->variant_values;
-
-            if (!is_array($values)) {
-                \Log::warning('Invalid variant_values in getAvailableValuesForType:', ['combination_id' => $combination->id]);
-                continue;
-            }
-
-            if (isset($values[$type])) {
-                $isValid = true;
-                foreach ($this->selectedVariants as $selType => $selValue) {
-                    if ($selType !== $type && (!isset($values[$selType]) || $values[$selType] !== $selValue)) {
-                        $isValid = false;
-                        break;
-                    }
-                }
-                if ($isValid && !in_array($values[$type], $available)) {
-                    $available[] = $values[$type];
-                }
-            }
+        if (!$imagePath) {
+            return null;
         }
 
-        sort($available);
-        return $available;
+        // If it's already a full URL, return as is
+        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            return $imagePath;
+        }
+
+        // If it's a local path, use asset()
+        return asset($imagePath);
     }
 
-    public function selectVariant($type, $value)
+    private function initializeDisabledVariants()
     {
-        if (json_decode($value, true) !== null) {
-            \Log::error('Invalid variant value received:', ['type' => $type, 'value' => $value]);
-            $this->dispatch('notify', ['message' => 'Invalid variant selected.', 'type' => 'error']);
-            return;
+        $disabled = [];
+        foreach ($this->availableVariants as $type => $values) {
+            $disabled[$type] = array_fill_keys($values, false);
+        }
+        return $disabled;
+    }
+
+    private function parseVariantValues($variantValues)
+    {
+        if (is_string($variantValues)) {
+            $decoded = json_decode($variantValues, true);
+            return is_array($decoded) ? $decoded : [];
+        }
+        return is_array($variantValues) ? $variantValues : [];
+    }
+
+   public function selectVariant($type, $value)
+{
+    if (json_decode($value, true) !== null) {
+        \Log::error('Invalid variant value received:', ['type' => $type, 'value' => $value]);
+        $this->dispatch('notify', ['message' => 'Invalid variant selected.', 'type' => 'error']);
+        return;
+    }
+
+    // Update selected variant
+    $this->selectedVariants[$type] = $value;
+    $this->selectedVariantCombination = null;
+
+    // Find matching combination
+    foreach ($this->variantCombinations as $combination) {
+        $values = $this->parseVariantValues($combination->variant_values);
+        if (!is_array($values)) {
+            continue;
         }
 
-        $this->selectedVariants[$type] = $value;
-        $this->selectedVariantCombination = null;
-
-        foreach ($this->VariantSize as $combination) {
-            $values = is_string($combination->variant_values)
-                ? json_decode($combination->variant_values, true) ?? []
-                : $combination->variant_values;
-
-            if (!is_array($values)) {
-                \Log::warning('Invalid variant_values in selectVariant:', ['combination_id' => $combination->id]);
-                continue;
-            }
-
-            $matches = true;
-            foreach ($this->selectedVariants as $selType => $selValue) {
-                if (!isset($values[$selType]) || $values[$selType] !== $selValue) {
-                    $matches = false;
-                    break;
-                }
-            }
-
-            if ($matches) {
-                $this->selectedVariantCombination = $combination;
+        $matches = true;
+        foreach ($this->selectedVariants as $selType => $selValue) {
+            if (!isset($values[$selType]) || $values[$selType] !== $selValue) {
+                $matches = false;
                 break;
             }
         }
 
-        \Log::info('Selected variant:', [
-            'type' => $type,
-            'value' => $value,
-            'selectedVariants' => $this->selectedVariants,
-            'selectedVariantCombination' => $this->selectedVariantCombination ? $this->selectedVariantCombination->toArray() : null
-        ]);
+        if ($matches) {
+            $this->selectedVariantCombination = $combination;
+            break;
+        }
+    }
 
-        if ($this->selectedVariantCombination) {
-            $this->dispatch('variantUpdated', ['image' => $this->selectedVariantCombination->image ? asset($this->selectedVariantCombination->image) : null]);
-        } else {
-            $this->dispatch('notify', ['message' => 'Selected variant combination not available.', 'type' => 'warning']);
-            $this->dispatch('variantUpdated', ['image' => null]);
+    // Update disabled variants
+    $this->updateDisabledVariants();
+
+    \Log::info('Selected variant:', [
+        'type' => $type,
+        'value' => $value,
+        'selectedVariants' => $this->selectedVariants,
+        'selectedVariantCombination' => $this->selectedVariantCombination ? $this->selectedVariantCombination->toArray() : null,
+        'disabledVariants' => $this->disabledVariants
+    ]);
+
+    if ($this->selectedVariantCombination) {
+        $variantImage = $this->selectedVariantCombination->image;
+
+        $this->dispatch('variantUpdated', [
+            'image' => $variantImage,
+            'variantId' => $this->selectedVariantCombination->id
+        ]);
+    } else {
+        $this->dispatch('notify', ['message' => 'Selected variant combination not available.', 'type' => 'warning']);
+        $this->dispatch('variantUpdated', ['image' => null, 'variantId' => null]);
+    }
+
+    // Force Livewire to re-render the component
+    $this->dispatch('$refresh');
+}
+
+    private function updateDisabledVariants()
+    {
+        // Reset disabled variants
+        $this->disabledVariants = $this->initializeDisabledVariants();
+
+        foreach ($this->availableVariants as $type => $values) {
+            foreach ($values as $value) {
+                $isAvailable = false;
+                foreach ($this->variantCombinations as $combination) {
+                    $variantValues = $this->parseVariantValues($combination->variant_values);
+                    if (!is_array($variantValues)) {
+                        continue;
+                    }
+
+                    if (isset($variantValues[$type]) && $variantValues[$type] === $value) {
+                        $isValid = true;
+                        foreach ($this->selectedVariants as $selType => $selValue) {
+                            if ($selType !== $type && (!isset($variantValues[$selType]) || $variantValues[$selType] !== $selValue)) {
+                                $isValid = false;
+                                break;
+                            }
+                        }
+                        if ($isValid) {
+                            $isAvailable = true;
+                            break;
+                        }
+                    }
+                }
+                $this->disabledVariants[$type][$value] = !$isAvailable;
+            }
         }
     }
 
@@ -257,10 +298,7 @@ class ViewProduct extends Component
 
         $variantDetails = [];
         if ($this->selectedVariantCombination) {
-            $variantValues = is_string($this->selectedVariantCombination->variant_values)
-                ? json_decode($this->selectedVariantCombination->variant_values, true)
-                : $this->selectedVariantCombination->variant_values;
-
+            $variantValues = $this->parseVariantValues($this->selectedVariantCombination->variant_values);
             if (is_array($variantValues)) {
                 foreach ($variantValues as $type => $value) {
                     $variantDetails[] = [
@@ -306,41 +344,68 @@ class ViewProduct extends Component
         $encodedMessage = urlencode($message);
         return "https://wa.me/" . str_replace(['+', ' ', '-'], '', $this->whatsappNumber) . "?text=" . $encodedMessage;
     }
+    // In your Livewire component class (not in the JavaScript)
+public function debugVariantImage()
+{
+    \Log::debug('Debug variant image:', [
+        'selectedVariantCombination' => $this->selectedVariantCombination ? $this->selectedVariantCombination->toArray() : null,
+        'variantImage' => $this->selectedVariantCombination ? $this->selectedVariantCombination->image : null,
+        'ensureImageUrlResult' => $this->selectedVariantCombination ? $this->ensureImageUrl($this->selectedVariantCombination->image) : null,
+    ]);
+    
+    return $this->selectedVariantCombination 
+        ? $this->ensureImageUrl($this->selectedVariantCombination->image)
+        : 'No variant selected';
+}
 
     public function render()
-    {
-        $price = $this->product->price;
-        $discountPrice = $this->product->discount_price;
-        $regularPrice = $this->product->price;
+{
+    $price = $this->product->price;
+    $discountPrice = $this->product->discount_price;
+    $regularPrice = $this->product->price;
 
-        if ($this->selectedVariantCombination) {
-            $price = $this->selectedVariantCombination->price ?? $this->product->price;
-            $discountPrice = $this->selectedVariantCombination->price ?? $this->product->discount_price;
-            if ($this->selectedVariantCombination->price) {
-                $regularPrice = $this->product->price;
-            }
+    if ($this->selectedVariantCombination) {
+        $price = $this->selectedVariantCombination->price ?? $this->product->price;
+        $discountPrice = $this->selectedVariantCombination->price ?? $this->product->discount_price;
+        if ($this->selectedVariantCombination->price) {
+            $regularPrice = $this->product->price;
         }
-
-        $hasDiscount = $discountPrice && $discountPrice < $regularPrice;
-        $savingAmount = $hasDiscount ? $regularPrice - $discountPrice : 0;
-        $savingPercentage = $hasDiscount ? round(($savingAmount / $regularPrice) * 100) : 0;
-        $finalPrice = $hasDiscount ? $discountPrice : $price;
-
-        return view('livewire.public.section.view-product', [
-            'price' => $finalPrice,
-            'hasDiscount' => $hasDiscount,
-            'savingAmount' => $savingAmount,
-            'savingPercentage' => $savingPercentage,
-            'regularPrice' => $regularPrice,
-            'sku' => $this->selectedVariantCombination
-                ? ($this->selectedVariantCombination->sku ?? $this->product->sku)
-                : $this->product->sku,
-            'deliveryCharge' => $this->product->delivery_charge ?? 0,
-            'quantity' => $this->quantity,
-            'availableVariants' => is_array($this->availableVariants) ? $this->availableVariants : [],
-            'selectedVariants' => $this->selectedVariants,
-            'selectedVariantCombination' => $this->selectedVariantCombination,
-            'colorImages' => $this->colorImages,
-        ]);
     }
+
+    $hasDiscount = $discountPrice && $discountPrice < $regularPrice;
+    $savingAmount = $hasDiscount ? $regularPrice - $discountPrice : 0;
+    $savingPercentage = $hasDiscount ? round(($savingAmount / $regularPrice) * 100) : 0;
+    $finalPrice = $hasDiscount ? $discountPrice : $price;
+
+    // Ensure variant image URL is proper
+    $variantImage = null;
+    if ($this->selectedVariantCombination && $this->selectedVariantCombination->image) {
+        $variantImage = $this->ensureImageUrl($this->selectedVariantCombination->image);
+    }
+
+    // Ensure all product images have proper URLs
+    $formattedProductImages = $this->product->images->map(function($image) {
+        return $this->ensureImageUrl($image->image_path);
+    })->toArray();
+
+    return view('livewire.public.section.view-product', [
+        'price' => $finalPrice,
+        'hasDiscount' => $hasDiscount,
+        'savingAmount' => $savingAmount,
+        'savingPercentage' => $savingPercentage,
+        'regularPrice' => $regularPrice,
+        'sku' => $this->selectedVariantCombination
+            ? ($this->selectedVariantCombination->sku ?? $this->product->sku)
+            : $this->product->sku,
+        'deliveryCharge' => $this->product->delivery_charge ?? 0,
+        'quantity' => $this->quantity,
+        'availableVariants' => is_array($this->availableVariants) ? $this->availableVariants : [],
+        'selectedVariants' => $this->selectedVariants,
+        'selectedVariantCombination' => $this->selectedVariantCombination,
+        'colorImages' => $this->colorImages,
+        'disabledVariants' => $this->disabledVariants,
+        'variantImage' => $variantImage,
+        'formattedProductImages' => $formattedProductImages,
+    ]);
+}
 }

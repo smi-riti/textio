@@ -96,7 +96,6 @@
                 </div>
             </div>
 
-
             <!-- Order Summary Section -->
             <div class="bg-white rounded-lg p-6 border border-gray-200">
                 <div class="flex items-center mb-4">
@@ -109,10 +108,8 @@
                     <div class="ml-11 mt-4 border border-gray-200 rounded-lg">
                         <div class="flex flex-col sm:flex-row p-4">
                             <div class="sm:w-24 h-32 bg-gray-100 flex items-center justify-center mb-4 sm:mb-0 rounded">
-
                                 @if (!empty($item['product']['image']))
                                     <img src="{{ $item['product']['image'] }}"
-
                                         alt="{{ $item['product']['name'] }}"
                                         class="w-full h-full object-cover rounded">
                                 @else
@@ -123,15 +120,14 @@
                                 <h3 class="text-lg text-gray-900">
                                     {{ $item['product']['name'] ?? 'Unknown Product' }}
                                 </h3>
-                                @if (!empty($item['variant_details']))
+                                @if (!empty($item['variant_details']) && (is_array($item['variant_details']) || is_object($item['variant_details'])))
                                     @php
                                         $variants = is_string($item['variant_details'])
                                             ? json_decode($item['variant_details'], true)
                                             : $item['variant_details'];
                                     @endphp
-
                                     @foreach ($variants as $type => $value)
-                                        {{ $type }}: {{ $value }}
+                                        {{ $type }}: {{ is_array($value) ? implode(', ', $value) : $value }}
                                         @if (!$loop->last)
                                             |
                                         @endif
@@ -139,7 +135,6 @@
                                 @else
                                     Free Size
                                 @endif
-
 
                                 <!-- FIXED PRICE DISPLAY SECTION -->
                                 <div class="flex items-center mt-2 flex-wrap gap-2">
@@ -176,6 +171,7 @@
                     </div>
                 @endforeach
             </div>
+
             <!-- Payment Section -->
             <div class="bg-white rounded-lg p-6 border border-gray-200">
                 <div class="flex items-center mb-4">
@@ -205,7 +201,6 @@
             </div>
         </div>
 
-        <!-- Right Section - Price Summary -->
         <!-- Right Section - Price Summary -->
         <div class="w-full lg:w-4/12">
             <div class="sticky top-6 bg-white rounded-lg p-6 border border-gray-200">
@@ -292,4 +287,5 @@
             }
         }
     }
+</script>    
 </script>

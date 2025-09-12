@@ -18,8 +18,6 @@ return new class extends Migration
             $table->longText('description')->nullable();
             $table->decimal('price', 10, 2)->nullable();
             $table->decimal('discount_price', 10, 2)->nullable();
-            $table->integer('quantity')->default(0)->nullable();
-            $table->string('sku')->nullable();
             $table->foreignId('category_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('brand_id')->nullable()->constrained()->onDelete('cascade');
             $table->boolean('status')->default(false);
