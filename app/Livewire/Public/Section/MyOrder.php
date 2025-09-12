@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantValue;
+use App\Models\ProductVariantCombination;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
@@ -151,29 +152,12 @@ class MyOrder extends Component
                 'quantity' => $item['quantity'],
             ];
 
-            // Handle variant details
-            // if (!empty($item['variant_details'])) {
-            //     $variants = is_string($item['variant_details'])
-            //         ? json_decode($item['variant_details'], true)
-            //         : $item['variant_details'];
-
-            //     if (is_array($variants) || is_object($variants)) {
-            //         foreach ($variants as $type => $value) {
-            //             if (is_array($value)) {
-            //                 $value = implode(', ', $value); // Convert array to string
-            //             }
-            //             if ($type === 'Color') {
-            //                 $orderItemData['color'] = $value;
-            //             } elseif ($type === 'Size') {
-            //                 $orderItemData['size'] = $value;
-            //             }
-            //         }
-            //     } else {
-            //         \Log::error("Invalid variant_details format for item {$item['product_id']}: " . json_encode($item['variant_details']));
-            //     }
-            // }
-
             OrderItem::create($orderItemData);
+
+            // Decrease stock in product_variant_combinations table
+            if ($combinationId = $item['product_variant_combination_id']) {
+                ProductVariantCombination::where('id', $combinationId)->decrement('stock', $item['quantity']);
+            }
         }
 
         Cart::where('user_id', Auth::id())->delete();

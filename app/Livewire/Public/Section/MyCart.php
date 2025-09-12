@@ -3,6 +3,7 @@
 namespace App\Livewire\Public\Section;
 
 use App\Models\Cart;
+use App\Models\ProductVariantCombination;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -26,10 +27,34 @@ class MyCart extends Component
         }
     }
 
+    public function getAvailableStockProperty()
+    {
+        // This is a computed property that returns an array of available stock for each cart item
+        // Keyed by cart item ID
+        return $this->cartItems->mapWithKeys(function ($item) {
+            $stock = 0;
+            if ($item->product_variant_combination_id) {
+                // Use the already loaded relationship to avoid N+1 queries
+                $combination = $item->variantCombination;
+                $stock = $combination ? $combination->stock : 0;
+            } else {
+                $stock = $item->product->stock ?? 0; // Fallback to product stock; adjust if no 'stock' field
+            }
+            $remaining = $stock - $item->quantity;
+            \Log::info("Stock check for item {$item->id}: Total stock={$stock}, Quantity={$item->quantity}, Remaining={$remaining}");
+            return [$item->id => $remaining];
+        })->toArray();
+    }
+
     public function increaseQuantity($cartItemId)
     {
         $cartItem = Cart::find($cartItemId);
         if ($cartItem && $cartItem->user_id === Auth::id()) {
+            $availableStock = $this->availableStock[$cartItemId] ?? 0;  // Access as property
+            if ($availableStock <= 0) {
+                $this->dispatch('notify', ['message' => 'Stock not available for this item.', 'type' => 'error']);
+                return;
+            }
             $cartItem->increment('quantity');
             $this->loadCartItems();
         }
@@ -83,7 +108,6 @@ class MyCart extends Component
                                 ? json_decode($item->variantCombination->variant_values, true)
                                 : $item->variantCombination->variant_values)
                             : null,
-// dd($variant_details);
                     ];
                 })->toArray(),
                 'total_amount' => $totalAmount,
@@ -110,18 +134,28 @@ class MyCart extends Component
     // Helper method to get the regular price for discount calculation
     private function getItemRegularPrice($item)
     {
-
         if ($item->variantCombination) {
             // If variant has a regular price, use it, otherwise use product price
             return $item->variantCombination->regular_price ?? $item->product->price;
         }
 
         return $item->product->price;
-
     }
 
+    public function getAvailableStock($itemId)
+{
+    $item = $this->cartItems->find($itemId);
+    if (!$item) return 0;
 
-
+    $stock = 0;
+    if ($item->product_variant_combination_id) {
+        $combination = $item->variantCombination;
+        $stock = $combination ? $combination->stock : 0;
+    } else {
+        $stock = $item->product->stock ?? 0;
+    }
+    return $stock - $item->quantity;
+}   
     // Calculate discount percentage for an item
     private function getItemDiscountPercentage($item)
     {

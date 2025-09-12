@@ -296,14 +296,6 @@
                                     @else
                                         <p class="text-red-500">Invalid variant values for {{ $type }}</p>
                                     @endif
-
-                                    <div wire:ignore class="hidden">
-                                        <div>Variant Image: {{ $variantImage ?? 'NULL' }}</div>
-                                        <div>Selected Variant:
-                                            {{ $selectedVariantCombination ? $selectedVariantCombination->id : 'NONE' }}
-                                        </div>
-                                        <div>Product Images Count: {{ count($formattedProductImages) }}</div>
-                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -337,16 +329,34 @@
                     @endif
 
                     <!-- Desktop Buttons -->
+                    @if($hasStock)
                     <div class="desktop-buttons mb-5">
-                        <button wire:click="addToCart({{ $product->id }})"
-                            class="flex-1 px-6 py-3.5 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium">
+                        <button wire:navigate wire:click="addToCart({{ $product->id }})"
+                            class="flex-1 px-6 py-3.5 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
+                            wire:loading.attr="disabled" wire:target="addToCart">
                             Add to Cart
                         </button>
-                        <button wire:click="buyNow"
-                            class="flex-1 px-6 py-3.5 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium">
+                        <button wire:navigate wire:click="buyNow"
+                            class="flex-1 px-6 py-3.5 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
+                            wire:loading.attr="disabled" wire:target="buyNow">
                             Buy Now
                         </button>
                     </div>
+                    @else
+                        <div class="desktop-buttons mb-5">
+                            <button disabled
+                                class="flex-1 px-6 py-3.5 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+                                Add to Cart
+                            </button>
+                            <button disabled
+                                class="flex-1 px-6 py-3.5 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+                                Buy Now
+                            </button>
+                        </div>
+                        <div class="mb-5 text-center">
+                            <p class="text-red-600 font-medium">This product is currently unavailable</p>
+                        </div>
+                    @endif
 
                     <!-- Product Meta -->
                     <div class="space-y-3 text-sm text-gray-700">
@@ -367,16 +377,32 @@
             </div>
 
             <!-- Mobile Fixed Buttons -->
+            @if($hasStock)
             <div class="fixed-bottom-buttons">
                 <button wire:click="addToCart({{ $product->id }})"
-                    class="flex-1 px-4 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium">
+                    class="flex-1 px-4 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
+                    wire:loading.attr="disabled" wire:target="addToCart">
                     Add to Cart
                 </button>
                 <button wire:click="buyNow"
-                    class="flex-1 px-4 py-3 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium">
+                    class="flex-1 px-4 py-3 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
+                    wire:loading.attr="disabled" wire:target="buyNow">
                     Buy Now
                 </button>
             </div>
+            @else
+            <div class="fixed-bottom-buttons">
+                <button disabled
+                    class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+                    Add to Cart
+                </button>
+                <button disabled
+                    class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+                    Buy Now
+                </button>
+            </div>
+            
+            @endif
 
             <!-- Tabs Section -->
             <div class="mb-16">
@@ -545,137 +571,137 @@
 
         @livewireScripts
         <script>
-    function productPage() {
-        return {
-            activeImageIndex: 0,
-            activeTab: 'description',
-            isFullscreen: false,
-            rating: 0,
-            showBackToTop: false,
-            images: [],
-            thumbs: [],
-            notification: {
-                message: '',
-                type: ''
-            },
+            function productPage() {
+                return {
+                    activeImageIndex: 0,
+                    activeTab: 'description',
+                    isFullscreen: false,
+                    rating: 0,
+                    showBackToTop: false,
+                    images: [],
+                    thumbs: [],
+                    notification: {
+                        message: '',
+                        type: ''
+                    },
 
-            init() {
-                this.updateImages();
-                
-                // Listen for custom events
-                window.addEventListener('variantUpdated', (event) => {
-                    console.log('Variant updated event:', event);
-                    this.updateImages();
-                    this.activeImageIndex = 0;
-                });
+                    init() {
+                        this.updateImages();
 
-                window.addEventListener('scroll', () => {
-                    this.showBackToTop = window.scrollY > 300;
-                });
+                        // Listen for custom events
+                        window.addEventListener('variantUpdated', (event) => {
+                            console.log('Variant updated event:', event);
+                            this.updateImages();
+                            this.activeImageIndex = 0;
+                        });
 
-                Livewire.on('notify', (event) => {
-                    this.notification = event;
-                    setTimeout(() => {
-                        this.notification.message = '';
-                    }, 3000);
-                });
+                        window.addEventListener('scroll', () => {
+                            this.showBackToTop = window.scrollY > 300;
+                        });
 
-                // Listen for Livewire updates to force refresh
-                Livewire.on('$refresh', () => {
-                    console.log('Livewire refreshing, updating images');
-                    this.updateImages();
-                });
+                        Livewire.on('notify', (event) => {
+                            this.notification = event;
+                            setTimeout(() => {
+                                this.notification.message = '';
+                            }, 3000);
+                        });
 
-                // Initial debug log
-                console.log('Alpine.js initialized');
-            },
+                        // Listen for Livewire updates to force refresh
+                        Livewire.on('$refresh', () => {
+                            console.log('Livewire refreshing, updating images');
+                            this.updateImages();
+                        });
 
-            updateImages() {
-                console.log('updateImages called');
+                        // Initial debug log
+                        console.log('Alpine.js initialized');
+                    },
 
-                // Use the data passed from Livewire through Blade templates
-                const variantImage = @json($variantImage);
-                console.log('Variant image from Blade:', variantImage);
+                    updateImages() {
+                        console.log('updateImages called');
 
-                // Get pre-formatted product images from Blade
-                const productImages = @json($formattedProductImages);
-                console.log('Product images from Blade:', productImages);
+                        // Use the data passed from Livewire through Blade templates
+                        const variantImage = @json($variantImage);
+                        console.log('Variant image from Blade:', variantImage);
 
-                const placeholder = '{{ asset('images/placeholder.jpg') }}';
+                        // Get pre-formatted product images from Blade
+                        const productImages = @json($formattedProductImages);
+                        console.log('Product images from Blade:', productImages);
 
-                // If variant has its own image, use it as the primary image
-                if (variantImage) {
-                    this.images = [variantImage, ...productImages];
-                    this.thumbs = [variantImage, ...productImages];
-                    console.log('Using variant image as primary');
-                } else if (productImages && productImages.length > 0) {
-                    this.images = productImages;
-                    this.thumbs = productImages;
-                    console.log('Using product images only');
-                } else {
-                    this.images = [placeholder];
-                    this.thumbs = [placeholder];
-                    console.log('Using placeholder image');
-                }
+                        const placeholder = '{{ asset('images/placeholder.jpg') }}';
 
-                // Always reset to the first image when variants change
-                this.activeImageIndex = 0;
+                        // If variant has its own image, use it as the primary image
+                        if (variantImage) {
+                            this.images = [variantImage, ...productImages];
+                            this.thumbs = [variantImage, ...productImages];
+                            console.log('Using variant image as primary');
+                        } else if (productImages && productImages.length > 0) {
+                            this.images = productImages;
+                            this.thumbs = productImages;
+                            console.log('Using product images only');
+                        } else {
+                            this.images = [placeholder];
+                            this.thumbs = [placeholder];
+                            console.log('Using placeholder image');
+                        }
 
-                console.log('Updated images:', this.images);
-                console.log('Active image index:', this.activeImageIndex);
-            },
+                        // Always reset to the first image when variants change
+                        this.activeImageIndex = 0;
 
-            setActiveImage(index) {
-                this.activeImageIndex = index;
-                console.log('Set active image index:', index);
-            },
+                        console.log('Updated images:', this.images);
+                        console.log('Active image index:', this.activeImageIndex);
+                    },
 
-            openFullscreen() {
-                this.isFullscreen = true;
-                console.log('Opening fullscreen');
-            },
+                    setActiveImage(index) {
+                        this.activeImageIndex = index;
+                        console.log('Set active image index:', index);
+                    },
 
-            zoomImage(event) {
-                // Placeholder for zooming functionality
-            },
+                    openFullscreen() {
+                        this.isFullscreen = true;
+                        console.log('Opening fullscreen');
+                    },
 
-            setRating(stars) {
-                this.rating = stars;
-                const starIcons = event.currentTarget.parentElement.querySelectorAll('i');
-                starIcons.forEach((icon, index) => {
-                    if (index < stars) {
-                        icon.classList.remove('far');
-                        icon.classList.add('fas');
-                    } else {
-                        icon.classList.remove('fas');
-                        icon.classList.add('far');
+                    zoomImage(event) {
+                        // Placeholder for zooming functionality
+                    },
+
+                    setRating(stars) {
+                        this.rating = stars;
+                        const starIcons = event.currentTarget.parentElement.querySelectorAll('i');
+                        starIcons.forEach((icon, index) => {
+                            if (index < stars) {
+                                icon.classList.remove('far');
+                                icon.classList.add('fas');
+                            } else {
+                                icon.classList.remove('fas');
+                                icon.classList.add('far');
+                            }
+                        });
+                        console.log('Rating set to:', stars);
+                    },
+
+                    scrollToTop() {
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                        console.log('Scrolling to top');
                     }
-                });
-                console.log('Rating set to:', stars);
-            },
-
-            scrollToTop() {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-                console.log('Scrolling to top');
+                };
             }
-        };
-    }
 
-    // Additional debug script to monitor Livewire updates
-    document.addEventListener('livewire:init', () => {
-        console.log('Livewire initialized');
-    });
+            // Additional debug script to monitor Livewire updates
+            document.addEventListener('livewire:init', () => {
+                console.log('Livewire initialized');
+            });
 
-    document.addEventListener('livewire:update', () => {
-        console.log('Livewire updating DOM');
-    });
+            document.addEventListener('livewire:update', () => {
+                console.log('Livewire updating DOM');
+            });
 
-    document.addEventListener('livewire:updated', () => {
-        console.log('Livewire DOM updated');
-    });
-</script>
+            document.addEventListener('livewire:updated', () => {
+                console.log('Livewire DOM updated');
+            });
+        </script>
     </div>
 </div>
