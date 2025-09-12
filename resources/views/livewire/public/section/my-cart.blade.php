@@ -12,6 +12,7 @@
                             $itemRegularPrice = $this->getItemRegularPrice($item);
                             $discountPercentage = $this->getItemDiscountPercentage($item);
                             $hasDiscount = $discountPercentage > 0;
+                            $availableStock = $this->getAvailableStock($item->id);
                         @endphp
 
                         <div class="flex flex-col sm:flex-row gap-4 sm:gap-6  pb-4 border-b last:border-b-0">
@@ -86,14 +87,17 @@
                                 <div class="flex justify-between items-center">
                                     <div class="flex items-center bg-gray-100 rounded-lg p-1">
                                         <button wire:click="decreaseQuantity({{ $item->id }})"
-                                            class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-[#8f4da7] transition rounded-lg">
+                                            class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-[#8f4da7] transition rounded-lg"
+                                            @if($item->quantity <= 1) disabled @endif>
                                             <i class="fas fa-minus text-sm"></i>
                                         </button>
                                         <span class="mx-3 text-gray-800 font-medium text-sm min-w-[20px] text-center">
                                             {{ $item->quantity }}
                                         </span>
                                         <button wire:click="increaseQuantity({{ $item->id }})"
-                                            class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-[#8f4da7] transition rounded-lg">
+                                            class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-[#8f4da7] transition rounded-lg {{ $availableStock <= 0 ? 'opacity-50 cursor-not-allowed text-gray-300' : '' }}"
+                                            {{ $availableStock <= 0 ? 'disabled' : '' }}
+                                            title="{{ $availableStock <= 0 ? 'Stock not available' : '' }}">
                                             <i class="fas fa-plus text-sm"></i>
                                         </button>
                                     </div>
@@ -102,6 +106,13 @@
                                         <i class="fas fa-trash text-sm"></i>
                                     </button>
                                 </div>
+
+                                <!-- Stock Warning Message -->
+                                @if($availableStock <= 0)
+                                    <p class="text-red-600 text-xs mt-1">Stock not available - Cannot increase quantity</p>
+                                @elseif($availableStock < 5)
+                                    <p class="text-yellow-600 text-xs mt-1">Only {{ $availableStock }} left in stock</p>
+                                @endif
                             </div>
                         </div>
                     @empty

@@ -23,7 +23,7 @@
                             <span class="text-lg font-bold text-[#8f4da7]">₹{{ $product->discount_price }}</span>
                             <span class="text-sm text-gray-400 line-through">₹{{ $product->price }}</span>
                         </div>
-                        <a href="{{ route('view.product', $product->slug) }}">
+                        <a wire:navigate href="{{ route('view.product', $product->slug) }}">
                             <button
                                 class="add-to-cart-btn w-full bg-[#171717] text-white py-3 px-6 rounded-full text-sm font-medium hover:bg-[#8f4da7] focus:outline-none focus:ring-2 focus:ring-[#8f4da7] focus:ring-offset-2 transition-all duration-300 transform hover:scale-105">
                                  <i class="fas fa-arrow-right mr-2"></i>  check it out
