@@ -67,7 +67,7 @@
             .back-to-top {
                 display: none;
             }
-            
+
             .desktop-buttons {
                 display: none;
             }
@@ -92,13 +92,20 @@
             background: white;
         }
 
-        .variant-button:hover {
+        .variant-button:hover:not(:disabled) {
             border-color: #8f4da7;
         }
 
         .variant-button.selected {
             border-color: #8f4da7;
             background-color: #f5f0ff;
+        }
+
+        .variant-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #E5E7EB;
+            background-color: #F9FAFB;
         }
 
         .tab-button {
@@ -122,16 +129,11 @@
             width: 100%;
         }
 
-        /* Mobile optimizations */
         @media (max-width: 767px) {
-            /* .container {
-                padding-bottom: 100px;
-            } */
-            
             .product-images {
                 flex-direction: column;
             }
-            
+
             .thumbnails {
                 flex-direction: row;
                 order: 2;
@@ -139,21 +141,21 @@
                 overflow-x: auto;
                 padding-bottom: 8px;
             }
-            
+
             .thumbnails img {
                 min-width: 60px;
                 height: 60px;
             }
-            
+
             .main-image {
                 order: 1;
             }
-            
+
             .variant-buttons {
                 overflow-x: auto;
                 padding-bottom: 8px;
             }
-            
+
             .variant-button {
                 min-width: max-content;
             }
@@ -196,7 +198,8 @@
                                 <img x-bind:src="images[activeImageIndex]" class="w-full h-96 object-contain zoom-image"
                                     alt="{{ $product->name }}" @mousemove="zoomImage($event)">
                                 <!-- Eye icon for fullscreen -->
-                                <button class="absolute top-3 right-3 p-2 rounded-full bg-white shadow-md transition-colors hover:bg-gray-100"
+                                <button
+                                    class="absolute top-3 right-3 p-2 rounded-full bg-white shadow-md transition-colors hover:bg-gray-100"
                                     @click="openFullscreen()">
                                     <i class="fas fa-eye text-[#8f4da7]"></i>
                                 </button>
@@ -274,10 +277,16 @@
                                             <button
                                                 wire:click="selectVariant('{{ $type }}', '{{ $value }}')"
                                                 class="variant-button {{ isset($selectedVariants[$type]) && $selectedVariants[$type] === $value ? 'selected' : '' }}"
-                                                wire:loading.attr="disabled" wire:target="selectVariant">
+                                                wire:loading.attr="disabled" wire:target="selectVariant"
+                                                :disabled="$wire.disabledVariants['{{ $type }}'][
+                                                    '{{ $value }}'
+                                                ] ?? false"
+                                                :class="{
+                                                    'opacity-50 cursor-not-allowed': $wire.disabledVariants[
+                                                        '{{ $type }}']['{{ $value }}']
+                                                }">
                                                 @if ($type === 'Color' && !empty($colorImages[$value]))
-                                                    <img src="{{ asset($colorImages[$value]) }}"
-                                                        alt="{{ $value }}"
+                                                    <img src="{{ $colorImages[$value] }}" alt="{{ $value }}"
                                                         class="w-8 h-8 object-cover rounded" />
                                                 @else
                                                     {{ $value }}
@@ -287,6 +296,14 @@
                                     @else
                                         <p class="text-red-500">Invalid variant values for {{ $type }}</p>
                                     @endif
+
+                                    <div wire:ignore class="hidden">
+                                        <div>Variant Image: {{ $variantImage ?? 'NULL' }}</div>
+                                        <div>Selected Variant:
+                                            {{ $selectedVariantCombination ? $selectedVariantCombination->id : 'NONE' }}
+                                        </div>
+                                        <div>Product Images Count: {{ count($formattedProductImages) }}</div>
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -298,14 +315,16 @@
                     @if ($product->is_customizable)
                         <div class="mb-6 mt-6 p-5 bg-[#f5f0ff] rounded-lg border border-[#e9d5ff]">
                             <div class="flex items-center mb-3">
-                                <svg class="w-6 h-6 text-[#8f4da7] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-6 h-6 text-[#8f4da7] mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z">
                                     </path>
                                 </svg>
                                 <h3 class="text-lg font-medium text-[#171717]">Customization Available!</h3>
                             </div>
-                            <p class="text-[#6b21a8] mb-4">This product can be customized according to your requirements.</p>
+                            <p class="text-[#6b21a8] mb-4">This product can be customized according to your
+                                requirements.</p>
                             <a href="{{ $this->getCustomizationWhatsappUrl($product->name) }}" target="_blank"
                                 class="inline-flex items-center px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium">
                                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
@@ -315,7 +334,7 @@
                                 Contact for Customization
                             </a>
                         </div>
-                    @endif 
+                    @endif
 
                     <!-- Desktop Buttons -->
                     <div class="desktop-buttons mb-5">
@@ -369,8 +388,7 @@
                         Description
                     </button>
                     <button class="tab-button font-medium transition-colors text-[#171717]"
-                        :class="{ 'active text-[#8f4da7]': activeTab === 'reviews' }"
-                        @click="activeTab = 'reviews'">
+                        :class="{ 'active text-[#8f4da7]': activeTab === 'reviews' }" @click="activeTab = 'reviews'">
                         Reviews
                     </button>
                     <button class="tab-button font-medium transition-colors text-[#171717]"
@@ -404,7 +422,8 @@
                                         @click="setRating(5)"></i>
                                 </div>
                                 <div>
-                                    <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent"
+                                    <textarea
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent"
                                         rows="4" placeholder="Your review" wire:model="review"></textarea>
                                     @error('review')
                                         <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -465,14 +484,15 @@
                     <h2 class="text-2xl font-medium text-center mb-8 text-[#171717]">Related Products</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         @foreach ($relatedProducts as $relatedProduct)
-                            <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                            <div
+                                class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                                 <a href="{{ route('view.product', $relatedProduct->slug) }}">
                                     <div class="relative">
                                         <img src="{{ $relatedProduct->images->first() ? asset($relatedProduct->images->first()->image_path) : asset('images/placeholder.jpg') }}"
-                                            alt="{{ $relatedProduct->name }}"
-                                            class="w-full h-64 object-cover">
+                                            alt="{{ $relatedProduct->name }}" class="w-full h-64 object-cover">
                                         @if ($relatedProduct->discount_price && $relatedProduct->discount_price < $relatedProduct->price)
-                                            <div class="absolute top-3 right-3 bg-red-500 text-white text-xs font-medium px-2.5 py-1.5 rounded-full">
+                                            <div
+                                                class="absolute top-3 right-3 bg-red-500 text-white text-xs font-medium px-2.5 py-1.5 rounded-full">
                                                 Sale
                                             </div>
                                         @endif
@@ -482,13 +502,16 @@
                                     <h3 class="text-lg font-medium text-[#171717] truncate mb-2">
                                         {{ $relatedProduct->name }}</h3>
                                     <div class="flex justify-center items-center gap-3 mb-4">
-                                        <span class="text-lg font-medium text-[#8f4da7]">{{ $relatedProduct->formatted_discount_price ?? $relatedProduct->formatted_price }}</span>
+                                        <span
+                                            class="text-lg font-medium text-[#8f4da7]">{{ $relatedProduct->formatted_discount_price ?? $relatedProduct->formatted_price }}</span>
                                         @if ($relatedProduct->discount_price && $relatedProduct->discount_price < $relatedProduct->price)
-                                            <span class="text-sm text-gray-400 line-through">{{ $relatedProduct->formatted_price }}</span>
+                                            <span
+                                                class="text-sm text-gray-400 line-through">{{ $relatedProduct->formatted_price }}</span>
                                         @endif
                                     </div>
                                     <a href="{{ route('view.product', $relatedProduct->slug) }}">
-                                        <button class="w-full bg-[#171717] text-white py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-[#8f4da7] transition-colors">
+                                        <button
+                                            class="w-full bg-[#171717] text-white py-2.5 px-4 rounded-lg text-sm font-medium hover:bg-[#8f4da7] transition-colors">
                                             View Product
                                         </button>
                                     </a>
@@ -504,7 +527,8 @@
                 class="fixed inset-0 bg-black bg-opacity-95 z-50 flex items-center justify-center"
                 @click.self="isFullscreen = false">
                 <div class="relative max-w-4xl w-full p-4">
-                    <button class="absolute top-4 right-4 text-white text-2xl z-10 bg-[#8f4da7] rounded-full w-10 h-10 flex items-center justify-center"
+                    <button
+                        class="absolute top-4 right-4 text-white text-2xl z-10 bg-[#8f4da7] rounded-full w-10 h-10 flex items-center justify-center"
                         @click="isFullscreen = false">
                         <i class="fas fa-times"></i>
                     </button>
@@ -521,104 +545,137 @@
 
         @livewireScripts
         <script>
-            function productPage() {
-                return {
-                    activeImageIndex: 0,
-                    activeTab: 'description',
-                    isFullscreen: false,
-                    rating: 0,
-                    showBackToTop: false,
-                    images: [],
-                    thumbs: [],
-                    notification: {
-                        message: '',
-                        type: ''
-                    },
+    function productPage() {
+        return {
+            activeImageIndex: 0,
+            activeTab: 'description',
+            isFullscreen: false,
+            rating: 0,
+            showBackToTop: false,
+            images: [],
+            thumbs: [],
+            notification: {
+                message: '',
+                type: ''
+            },
 
-                    init() {
-                        // Initialize images and thumbs
-                        this.updateImages();
+            init() {
+                this.updateImages();
+                
+                // Listen for custom events
+                window.addEventListener('variantUpdated', (event) => {
+                    console.log('Variant updated event:', event);
+                    this.updateImages();
+                    this.activeImageIndex = 0;
+                });
 
-                        // Update images on variant change
-                        window.addEventListener('variantUpdated', () => {
-                            this.updateImages();
-                            this.activeImageIndex = 0;
-                        });
+                window.addEventListener('scroll', () => {
+                    this.showBackToTop = window.scrollY > 300;
+                });
 
-                        // Handle scroll for back-to-top button
-                        window.addEventListener('scroll', () => {
-                            this.showBackToTop = window.scrollY > 300;
-                        });
+                Livewire.on('notify', (event) => {
+                    this.notification = event;
+                    setTimeout(() => {
+                        this.notification.message = '';
+                    }, 3000);
+                });
 
-                        // Listen for Livewire notifications
-                        Livewire.on('notify', (event) => {
-                            this.notification = event;
-                            setTimeout(() => {
-                                this.notification.message = '';
-                            }, 3000);
-                        });
-                    },
+                // Listen for Livewire updates to force refresh
+                Livewire.on('$refresh', () => {
+                    console.log('Livewire refreshing, updating images');
+                    this.updateImages();
+                });
 
-                    updateImages() {
-                        // Prioritize variant image if available, then fallback to product images
-                        const variantImage = @json(
-                            $selectedVariantCombination && $selectedVariantCombination->image
-                                ? asset($selectedVariantCombination->image)
-                                : null);
-                        const productImages = @json($product->images->pluck('image_path')->map(fn($path) => asset($path))->toArray());
-                        const placeholder = '{{ asset('images/placeholder.jpg') }}';
+                // Initial debug log
+                console.log('Alpine.js initialized');
+            },
 
-                        if (variantImage) {
-                            this.images = [variantImage];
-                            this.thumbs = [variantImage];
-                        } else if (productImages.length > 0) {
-                            this.images = productImages;
-                            this.thumbs = productImages;
-                        } else {
-                            this.images = [placeholder];
-                            this.thumbs = [placeholder];
-                        }
+            updateImages() {
+                console.log('updateImages called');
 
-                        // Ensure activeImageIndex is valid
-                        if (this.activeImageIndex >= this.images.length) {
-                            this.activeImageIndex = 0;
-                        }
-                    },
+                // Use the data passed from Livewire through Blade templates
+                const variantImage = @json($variantImage);
+                console.log('Variant image from Blade:', variantImage);
 
-                    setActiveImage(index) {
-                        this.activeImageIndex = index;
-                    },
+                // Get pre-formatted product images from Blade
+                const productImages = @json($formattedProductImages);
+                console.log('Product images from Blade:', productImages);
 
-                    openFullscreen() {
-                        this.isFullscreen = true;
-                    },
+                const placeholder = '{{ asset('images/placeholder.jpg') }}';
 
-                    zoomImage(event) {
-                        // Placeholder for zooming functionality
-                    },
+                // If variant has its own image, use it as the primary image
+                if (variantImage) {
+                    this.images = [variantImage, ...productImages];
+                    this.thumbs = [variantImage, ...productImages];
+                    console.log('Using variant image as primary');
+                } else if (productImages && productImages.length > 0) {
+                    this.images = productImages;
+                    this.thumbs = productImages;
+                    console.log('Using product images only');
+                } else {
+                    this.images = [placeholder];
+                    this.thumbs = [placeholder];
+                    console.log('Using placeholder image');
+                }
 
-                    setRating(stars) {
-                        this.rating = stars;
-                        const starIcons = event.currentTarget.parentElement.querySelectorAll('i');
-                        starIcons.forEach((icon, index) => {
-                            if (index < stars) {
-                                icon.classList.remove('far');
-                                icon.classList.add('fas');
-                            } else {
-                                icon.classList.remove('fas');
-                                icon.classList.add('far');
-                            }
-                        });
-                    },
+                // Always reset to the first image when variants change
+                this.activeImageIndex = 0;
 
-                    scrollToTop() {
-                        window.scrollTo({
-                            top: 0,
-                            behavior: 'smooth'
-                        });
+                console.log('Updated images:', this.images);
+                console.log('Active image index:', this.activeImageIndex);
+            },
+
+            setActiveImage(index) {
+                this.activeImageIndex = index;
+                console.log('Set active image index:', index);
+            },
+
+            openFullscreen() {
+                this.isFullscreen = true;
+                console.log('Opening fullscreen');
+            },
+
+            zoomImage(event) {
+                // Placeholder for zooming functionality
+            },
+
+            setRating(stars) {
+                this.rating = stars;
+                const starIcons = event.currentTarget.parentElement.querySelectorAll('i');
+                starIcons.forEach((icon, index) => {
+                    if (index < stars) {
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                    } else {
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
                     }
-                };
+                });
+                console.log('Rating set to:', stars);
+            },
+
+            scrollToTop() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                console.log('Scrolling to top');
             }
-        </script>
+        };
+    }
+
+    // Additional debug script to monitor Livewire updates
+    document.addEventListener('livewire:init', () => {
+        console.log('Livewire initialized');
+    });
+
+    document.addEventListener('livewire:update', () => {
+        console.log('Livewire updating DOM');
+    });
+
+    document.addEventListener('livewire:updated', () => {
+        console.log('Livewire DOM updated');
+    });
+</script>
     </div>
 </div>

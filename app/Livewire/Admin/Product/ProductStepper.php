@@ -9,9 +9,9 @@ class ProductStepper extends Component
     public $steps = [
         1 => ['name' => 'Basic Info', 'description' => 'Product details'],
         2 => ['name' => 'Pricing', 'description' => 'Set prices'],
-        3 => ['name' => 'Images', 'description' => 'Upload photos'],
-        4 => ['name' => 'Variants', 'description' => 'Add variations'],
-        5 => ['name' => 'SEO & Review', 'description' => 'Final details'],
+        // 3 => ['name' => 'Images', 'description' => 'Upload photos'],
+        3 => ['name' => 'Variants', 'description' => 'Add variations'],
+        4 => ['name' => 'SEO & Review', 'description' => 'Final details'],
     ];
 
     public $currentStep = 1;

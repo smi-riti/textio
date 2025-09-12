@@ -12,8 +12,6 @@ class Product extends Model
         'description',
         'price',
         'discount_price',
-        'quantity',
-        'sku',
         'category_id',
         'brand_id',
         'status',
@@ -30,10 +28,12 @@ class Product extends Model
         'featured' => 'boolean',
         'status' => 'boolean',
     ];
-  public function orderItems()
+
+    public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
     }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -43,15 +43,18 @@ class Product extends Model
     {
         return $this->belongsTo(Brand::class);
     }
+
     public function getRouteKeyName()
     {
         return 'slug';
     }
+
     public function setNameAttribute($value)
     {
         $this->attributes['name'] = $value;
         $this->attributes['slug'] = \Str::slug($value);
     }
+
     public function getFormattedDiscountPriceAttribute()
     {
         return '₹' . number_format($this->discount_price, 2);
@@ -62,29 +65,24 @@ class Product extends Model
         return '₹' . number_format($this->price, 2);
     }
 
-
-    public function getSavingPercentageAttribute(){
-        if($this->price <= 0){
+    public function getSavingPercentageAttribute()
+    {
+        if ($this->price <= 0) {
             return 0;
         }
 
         $discountPrice = $this->discount_price ?? $this->price;
         $saving = $this->price - $discountPrice;
 
-        $percentage = ($saving/$this->price) * 100;
+        $percentage = ($saving / $this->price) * 100;
 
         return number_format($percentage, 2);
     }
 
-    public function images()
+    // Single hasMany for variants (removed duplicate)
+    public function variantCombinations()
     {
-        return $this->hasMany(ProductImage::class, "product_id", "id");
-    }
-
- 
-    public function variants()
-    {
-        return $this->hasMany(ProductVariantCombination::class, "product_id", "id");
+        return $this->hasMany(ProductVariantCombination::class);
     }
 
     public function highlights()
@@ -101,15 +99,12 @@ class Product extends Model
     {
         return $this->hasMany(ProductReview::class);
     }
+    public function images() {
+    return $this->hasManyThrough(ProductImage::class, ProductVariantCombination::class, 'id', 'product_variant_combination_id', 'id', 'id');
+}
 
-
-   
-    
-
-    public function variantCombinations()
+public function variants()
     {
-        return $this->hasMany(ProductVariantCombination::class);
+        return $this->hasMany(ProductVariantCombination::class, 'product_id');
     }
-
-   
 }

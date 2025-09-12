@@ -5,32 +5,24 @@ namespace App\Livewire\Admin\Product;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
-use App\Models\ProductImage;
 use App\Models\ProductHighlist;
+use App\Models\ProductImage;
 use App\Models\ProductVariantCombination;
-use App\Services\ImageKitService;
 use Livewire\Component;
-use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Log;
 
 #[Layout('components.layouts.admin')]
 class CreateProduct extends Component
 {
-    use WithFileUploads;
-
-    // Stepper
     public $currentStep = 1;
     public $completedSteps = [];
-
-    // Product Properties
     public $name = '';
     public $slug = '';
     public $description = '';
     public $price = '';
     public $discount_price = '';
-    public $quantity = '';
     public $sku = '';
     public $category_id = '';
     public $brand_id = '';
@@ -39,30 +31,11 @@ class CreateProduct extends Component
     public $featured = false;
     public $meta_title = '';
     public $meta_description = '';
-
-    // Highlights
     public $highlights = [];
     public $new_highlight = '';
-
-    // Images
-    public $featured_image;
-    public $featured_image_preview;
-    public $featured_image_file_id;
-    public $featured_image_url;
-    public $isUploadingFeaturedImage = false;
-
-    public $gallery_images = [];
-    public $gallery_images_preview = [];
-    public $gallery_images_data = [];
-    public $isUploadingGalleryImages = false;
-
-    // Variants
     public $variantCombinations = [];
-
-    // Loading States
-    public $isLoading = false;
-    public $loadingMessage = '';
     public $isSaving = false;
+    public $loadingMessage = '';
 
     protected $listeners = [
         'stepChanged' => 'handleStepChange',
@@ -79,8 +52,6 @@ class CreateProduct extends Component
             'description' => 'nullable|string|min:10',
             'price' => 'required|numeric|min:0',
             'discount_price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
-            'sku' => 'required|string|max:100|unique:products,sku',
             'category_id' => 'nullable|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'status' => 'boolean',
@@ -88,9 +59,12 @@ class CreateProduct extends Component
             'featured' => 'boolean',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
-            'featured_image' => 'required|image|max:2048',
-            'gallery_images.*' => 'nullable|image|max:2048',
             'highlights' => 'nullable|array',
+            'variantCombinations' => 'required|array|min:1', // Require at least one variant
+            'variantCombinations.*.variant_values_data' => 'required|array|min:1',
+            'variantCombinations.*.price' => 'required|numeric|min:0',
+            'variantCombinations.*.stock' => 'required|integer|min:0',
+            'variantCombinations.*.sku' => 'nullable|string|max:255',
         ];
 
         if ($this->price && is_numeric($this->price) && $this->price > 0) {
@@ -107,21 +81,15 @@ class CreateProduct extends Component
         'slug.unique' => 'This product slug already exists.',
         'price.required' => 'Product price is required.',
         'price.numeric' => 'Price must be a valid number.',
-        'discount_price.required' => 'Selling price (discount price) is required.',
+        'discount_price.required' => 'Selling price is required.',
         'discount_price.numeric' => 'Selling price must be a valid number.',
         'discount_price.lt' => 'Selling price must be less than the original price.',
-        'sku.required' => 'SKU is required.',
-        'sku.unique' => 'This SKU already exists.',
         'description.min' => 'Description must be at least 10 characters.',
-        'quantity.required' => 'Stock quantity is required.',
-        'quantity.integer' => 'Stock quantity must be a valid number.',
         'category_id.exists' => 'Please select a valid category.',
         'brand_id.exists' => 'Please select a valid brand.',
-        'featured_image.required' => 'Featured image is required.',
-        'featured_image.image' => 'Featured image must be an image.',
-        'featured_image.max' => 'Featured image must not exceed 2MB.',
-        'gallery_images.*.image' => 'Uploaded files must be images.',
-        'gallery_images.*.max' => 'Each gallery image must not exceed 2MB.',
+        'variantCombinations.required' => 'At least one variant combination is required.',
+        'variantCombinations.*.variant_values_data.required' => 'Each variant must have selected values.',
+        'variantCombinations.*.stock.required' => 'Stock is required for each variant.',
     ];
 
     public function mount()
@@ -153,85 +121,33 @@ class CreateProduct extends Component
         $this->highlights = array_values($this->highlights);
     }
 
-    public function updatedFeaturedImage()
+   public function save()
     {
-        $this->validate(['featured_image' => 'image|max:2048']);
-        $this->featured_image_preview = $this->featured_image->temporaryUrl();
-    }
-
-    public function removeFeaturedImage()
-    {
-        if ($this->featured_image_file_id) {
-            try {
-                $imageKitService = new ImageKitService();
-                $imageKitService->delete($this->featured_image_file_id);
-            } catch (\Exception $e) {
-                \Log::error('Failed to delete featured image from ImageKit: ' . $e->getMessage());
-            }
-        }
-
-        $this->reset(['featured_image', 'featured_image_preview', 'featured_image_file_id', 'featured_image_url']);
-    }
-
-    public function updatedGalleryImages()
-    {
-        $this->validate(['gallery_images.*' => 'image|max:2048']);
-
-        foreach ($this->gallery_images as $index => $image) {
-            if (!isset($this->gallery_images_preview[$index])) {
-                $this->gallery_images_preview[$index] = $image->temporaryUrl();
-            }
-        }
-    }
-
-    public function removeGalleryImage($index)
-    {
-        if (isset($this->gallery_images_data[$index]['file_id'])) {
-            try {
-                $imageKitService = new ImageKitService();
-                $imageKitService->delete($this->gallery_images_data[$index]['file_id']);
-            } catch (\Exception $e) {
-                \Log::error('Failed to delete gallery image from ImageKit: ' . $e->getMessage());
-            }
-        }
-
-        unset($this->gallery_images[$index]);
-        unset($this->gallery_images_preview[$index]);
-        unset($this->gallery_images_data[$index]);
-
-        $this->gallery_images = array_values($this->gallery_images);
-        $this->gallery_images_preview = array_values($this->gallery_images_preview);
-        $this->gallery_images_data = array_values($this->gallery_images_data);
-    }
-
-    public function save()
-    {
-        \Log::info('CreateProduct - Attempting to save product', [
+        Log::info('CreateProduct - Attempting to save product', [
+            'step' => $this->currentStep,
             'name' => $this->name,
-            'description' => $this->description,
-            'price' => $this->price,
-            'category_id' => $this->category_id,
-            'brand_id' => $this->brand_id,
-            'featured_image' => !empty($this->featured_image),
-            'gallery_images_count' => count($this->gallery_images),
-            'highlights_count' => count($this->highlights),
             'variantCombinations_count' => count($this->variantCombinations),
         ]);
 
-        $this->validate();
+        try {
+            $this->validate();
+            Log::info('Validation passed');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed in save(): ' . json_encode($e->errors()));
+            session()->flash('error', 'Validation failed: ' . implode(', ', array_merge(...array_values($e->errors()))));
+            return;
+        }
 
         $this->isSaving = true;
         $this->loadingMessage = 'Creating product, please wait...';
 
         try {
-            // Create the product
             $product = Product::create([
                 'name' => $this->name,
                 'slug' => $this->slug,
                 'description' => $this->description ?: null,
-                'price' => $this->price ?: null,
-                'discount_price' => $this->discount_price ?: null,
-                'quantity' => $this->quantity ?: 0,
+                'price' => $this->price,
+                'discount_price' => $this->discount_price,
                 'sku' => $this->sku ?: null,
                 'category_id' => $this->category_id ?: null,
                 'brand_id' => $this->brand_id ?: null,
@@ -242,19 +158,27 @@ class CreateProduct extends Component
                 'meta_description' => $this->meta_description ?: null,
             ]);
 
-            \Log::info('CreateProduct - Product created successfully', ['product_id' => $product->id]);
+            Log::info('CreateProduct - Product created', ['id' => $product->id]);
 
-            // Handle featured image upload
-            if ($this->featured_image) {
-                $this->uploadFeaturedImage($product);
+            // Save variant combinations and associate temp images
+            foreach ($this->variantCombinations as $comboData) {
+                $combo = ProductVariantCombination::create([
+                    'product_id' => $product->id,
+                    'variant_values' => json_encode($comboData['variant_values_data'] ?? []),
+                    'price' => $comboData['price'] ?? null,
+                    'stock' => $comboData['stock'],
+                    'sku' => $comboData['sku'] ?? null,
+                ]);
+                Log::info('DB combination created', ['db_id' => $combo->id, 'temp_id' => $comboData['temp_id'] ?? 'n/a']);
+
+                // FIX: Associate temp images to new DB combo
+                if (isset($comboData['temp_id'])) {
+                    $this->associateTempImages($comboData['temp_id'], $combo->id);
+                    Log::info('Temp images associated to DB combo', ['temp_id' => $comboData['temp_id'], 'db_id' => $combo->id]);
+                }
             }
+            Log::info('Variant combinations saved with images', ['count' => count($this->variantCombinations)]);
 
-            // Handle gallery images upload
-            if (!empty($this->gallery_images)) {
-                $this->uploadGalleryImages($product);
-            }
-
-            // Save highlights
             if (!empty($this->highlights)) {
                 foreach ($this->highlights as $highlight) {
                     ProductHighlist::create([
@@ -262,108 +186,18 @@ class CreateProduct extends Component
                         'highlights' => $highlight,
                     ]);
                 }
-                \Log::info('CreateProduct - Highlights saved', ['count' => count($this->highlights)]);
-            }
-
-            // Save variant combinations
-            if (!empty($this->variantCombinations)) {
-                foreach ($this->variantCombinations as $combination) {
-                    ProductVariantCombination::create([
-                        'product_id' => $product->id,
-                        'price' => $combination['price'] ?? null,
-                        'stock' => $combination['stock'],
-                        'sku' => $combination['sku'] ?? null,
-                        'image' => $combination['image'] ?? null,
-                        'variant_values' => json_encode($combination['variant_values_data'] ?? []),
-                    ]);
-                }
-                \Log::info('CreateProduct - Variant combinations saved', ['count' => count($this->variantCombinations)]);
             }
 
             session()->flash('success', 'Product created successfully!');
             return $this->redirect(route('admin.products.index'), navigate: true);
 
         } catch (\Exception $e) {
-            \Log::error('Product creation error: ' . $e->getMessage());
-            \Log::error('Product creation trace: ' . $e->getTraceAsString());
+            Log::error('Product creation error: ' . $e->getMessage());
             session()->flash('error', 'Error creating product: ' . $e->getMessage());
         } finally {
             $this->isSaving = false;
         }
     }
-
-    private function uploadFeaturedImage($product)
-    {
-        try {
-            $this->isUploadingFeaturedImage = true;
-            $imageKitService = new ImageKitService();
-            $fileName = 'featured-' . $product->slug . '-' . time() . '.' . $this->featured_image->getClientOriginalExtension();
-
-            $result = $imageKitService->upload(
-                $this->featured_image,
-                $fileName,
-                config('services.imagekit.folders.product')
-            );
-
-            ProductImage::create([
-                'product_id' => $product->id,
-                'image_path' => $result->url,
-                'image_file_id' => $result->fileId,
-                'is_primary' => true,
-            ]);
-
-            \Log::info('Featured image uploaded successfully', ['file_id' => $result->fileId]);
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to upload featured image: ' . $e->getMessage());
-            throw new \Exception('Failed to upload featured image');
-        } finally {
-            $this->isUploadingFeaturedImage = false;
-        }
-    }
-
-    private function uploadGalleryImages($product)
-    {
-        if (empty($this->gallery_images)) {
-            \Log::info('No gallery images to upload');
-            return;
-        }
-
-        try {
-            $this->isUploadingGalleryImages = true;
-            $imageKitService = new ImageKitService();
-            \Log::info('Uploading gallery images', ['count' => count($this->gallery_images)]);
-
-            foreach ($this->gallery_images as $index => $image) {
-                $fileName = 'gallery-' . $product->slug . '-' . ($index + 1) . '-' . time() . '.' . $image->getClientOriginalExtension();
-
-                \Log::info('Uploading gallery image', ['index' => $index, 'fileName' => $fileName]);
-
-                $result = $imageKitService->upload(
-                    $image,
-                    $fileName,
-                    config('services.imagekit.folders.product')
-                );
-
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'image_path' => $result->url,
-                    'image_file_id' => $result->fileId,
-                    'is_primary' => false,
-                ]);
-
-                \Log::info('Gallery image uploaded successfully', ['file_id' => $result->fileId]);
-            }
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to upload gallery images: ' . $e->getMessage());
-            throw new \Exception('Failed to upload gallery images');
-        } finally {
-            $this->isUploadingGalleryImages = false;
-        }
-    }
-
-    // Stepper methods
     public function handleStepChange($step)
     {
         $this->currentStep = $step;
@@ -375,8 +209,7 @@ class CreateProduct extends Component
             if (!in_array($this->currentStep, $this->completedSteps)) {
                 $this->completedSteps[] = $this->currentStep;
             }
-
-            if ($this->currentStep < 5) {
+            if ($this->currentStep < 4) {
                 $this->currentStep++;
             }
         }
@@ -396,60 +229,110 @@ class CreateProduct extends Component
         }
     }
 
+    private function associateTempImages($tempId, $dbId)
+    {
+        // Featured
+        $tempFeatured = session("temp_image_{$tempId}_featured");
+        if ($tempFeatured) {
+            ProductImage::create([
+                'product_variant_combination_id' => $dbId,
+                'image_path' => $tempFeatured['path'],
+                'image_file_id' => $tempFeatured['file_id'],
+                'is_primary' => true,
+            ]);
+            session()->forget("temp_image_{$tempId}_featured");
+            Log::info('Featured image associated from temp', ['db_id' => $dbId]);
+        }
+
+        // Gallery
+        $galleryKey = "temp_gallery_{$tempId}";
+        $tempGallery = session($galleryKey, []);
+        foreach ($tempGallery as $imgData) {
+            ProductImage::create([
+                'product_variant_combination_id' => $dbId,
+                'image_path' => $imgData['path'],
+                'image_file_id' => $imgData['file_id'],
+                'is_primary' => false,
+            ]);
+        }
+        session()->forget($galleryKey);
+        Log::info('Gallery images associated from temp', ['db_id' => $dbId, 'count' => count($tempGallery)]);
+    }
     private function validateCurrentStep()
     {
+        Log::info('Validating step', ['step' => $this->currentStep]);
         switch ($this->currentStep) {
             case 1:
-                return $this->validate([
-                    'name' => 'required|string|max:255',
-                    'slug' => 'required|string|max:255|unique:products,slug',
-                    'description' => 'nullable|string|min:10',
-                    'category_id' => 'nullable|exists:categories,id',
-                    'brand_id' => 'nullable|exists:brands,id',
-                    'sku' => 'required|string|max:100',
-                ]);
-
-            case 2:
-                $rules = [
-                    'price' => 'required|numeric|min:0',
-                    'discount_price' => 'required|numeric|min:0',
-                    'quantity' => 'required|integer|min:0',
-                ];
-                if ($this->price && is_numeric($this->price) && $this->price > 0) {
-                    $rules['discount_price'] .= '|lt:price';
+                try {
+                    $this->validate([
+                        'name' => 'required|string|max:255',
+                        'slug' => 'required|string|max:255|unique:products,slug',
+                        'description' => 'nullable|string|min:10',
+                        'category_id' => 'nullable|exists:categories,id',
+                        'brand_id' => 'nullable|exists:brands,id',
+                    ]);
+                    return true;
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    Log::error('Step 1 validation failed: ' . json_encode($e->errors()));
+                    return false;
                 }
-                return $this->validate($rules);
-
+            case 2:
+                try {
+                    $rules = [
+                        'price' => 'required|numeric|min:0',
+                        'discount_price' => 'required|numeric|min:0',
+                    ];
+                    if ($this->price && is_numeric($this->price) && $this->price > 0) {
+                        $rules['discount_price'] .= '|lt:price';
+                    }
+                    $this->validate($rules);
+                    return true;
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    Log::error('Step 2 validation failed: ' . json_encode($e->errors()));
+                    return false;
+                }
             case 3:
-                return $this->validate([
-                    'featured_image' => 'required|image|max:2048',
-                    'gallery_images.*' => 'nullable|image|max:2048',
-                ]);
-
+                try {
+                    $this->validate([
+                        'variantCombinations' => 'required|array|min:1',
+                        'variantCombinations.*.variant_values_data' => 'required|array|min:1',
+                        'variantCombinations.*.stock' => 'required|integer|min:0',
+                    ]);
+                    Log::info('Step 3 validation passed', ['variant_count' => count($this->variantCombinations)]);
+                    return true;
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    Log::error('Step 3 validation failed: ' . json_encode($e->errors()));
+                    session()->flash('error', 'At least one variant combination is required.');
+                    return false;
+                }
             case 4:
-                return true;
-
-            case 5:
-                return $this->validate([
-                    'meta_title' => 'nullable|string|max:255',
-                    'meta_description' => 'nullable|string|max:500',
-                ]);
-
+                try {
+                    $this->validate([
+                        'meta_title' => 'nullable|string|max:255',
+                        'meta_description' => 'nullable|string|max:500',
+                        'highlights' => 'nullable|array',
+                    ]);
+                    return true;
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    Log::error('Step 4 validation failed: ' . json_encode($e->errors()));
+                    return false;
+                }
             default:
                 return true;
         }
     }
 
-    // Variant combination handling methods
     public function handleCombinationAdded($combination)
     {
+        Log::info('Combination added event received', ['combination' => $combination]);
         $this->variantCombinations[] = $combination;
     }
 
     public function handleCombinationUpdated($combination)
     {
-        foreach ($this->variantCombinations as $index => $existingCombination) {
-            if ($existingCombination['temp_id'] === $combination['temp_id']) {
+        Log::info('Combination updated event received');
+        foreach ($this->variantCombinations as $index => $existing) {
+            if (($existing['temp_id'] ?? $existing['id']) === ($combination['temp_id'] ?? $combination['id'])) {
                 $this->variantCombinations[$index] = $combination;
                 break;
             }
@@ -458,6 +341,7 @@ class CreateProduct extends Component
 
     public function handleCombinationDeleted($index)
     {
+        Log::info('Combination deleted event received');
         unset($this->variantCombinations[$index]);
         $this->variantCombinations = array_values($this->variantCombinations);
     }

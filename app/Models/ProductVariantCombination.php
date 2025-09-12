@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductVariantCombination extends Model
 {
-    protected $fillable = ['product_id', 'price', 'stock', 'sku', 'image', 'variant_values'];
+    protected $fillable = ['product_id', 'price', 'stock', 'sku', 'variant_values'];
 
     protected $casts = [
         'variant_values' => 'array',
@@ -18,5 +18,9 @@ class ProductVariantCombination extends Model
         return $this->belongsTo(Product::class);
     }
 
-  
+    // Fixed: Correct foreign key (was 'product_varaint_combination_id')
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class, "product_variant_combination_id", "id");
+    }
 }

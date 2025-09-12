@@ -56,12 +56,29 @@ class MyOrder extends Component
             if (!isset($item['product']['price'])) {
                 $item['product']['price'] = $item['product']['discount_price'] ?? 0;
             }
-            
-            // Calculate unit price (use discount price if available, otherwise regular price)
-            $item['unit_price'] = $item['product']['discount_price'] > 0 
-                ? $item['product']['discount_price'] 
+
+            // Calculate unit price
+            $item['unit_price'] = $item['product']['discount_price'] > 0
+                ? $item['product']['discount_price']
                 : $item['product']['price'];
-                
+
+            // Ensure variant_details is an array or object
+            if (isset($item['variant_details'])) {
+                if (is_string($item['variant_details'])) {
+                    $decoded = json_decode($item['variant_details'], true);
+                    $item['variant_details'] = is_array($decoded) ? $decoded : [];
+                } elseif (!is_array($item['variant_details']) && !is_object($item['variant_details'])) {
+                    \Log::warning("Invalid variant_details format for item {$item['product_id']}: " . json_encode($item['variant_details']));
+                    $item['variant_details'] = [];
+                }
+            }
+
+
+            // Log variant_details for debugging
+            if (isset($item['variant_details'])) {
+                \Log::info("Variant details for item {$item['product_id']}: " . json_encode($item['variant_details']));
+            }
+
             return $item;
         });
 
@@ -121,11 +138,10 @@ class MyOrder extends Component
         ]);
 
         foreach ($this->cartItems as $item) {
-            // Calculate unit price for each item
-            $unitPrice = $item['product']['discount_price'] > 0 
-                ? $item['product']['discount_price'] 
+            $unitPrice = $item['product']['discount_price'] > 0
+                ? $item['product']['discount_price']
                 : $item['product']['price'];
-            
+
             $orderItemData = [
                 'user_id' => Auth::id(),
                 'order_id' => $order->id,
@@ -135,24 +151,27 @@ class MyOrder extends Component
                 'quantity' => $item['quantity'],
             ];
 
-            // Handle variant details if available
-            if (!empty($item['variant_details'])) {
-                if (is_array($item['variant_details']) || is_object($item['variant_details'])) {
-                    foreach ($item['variant_details'] as $variant) {
-                        if (is_array($variant) || is_object($variant)) {
-                            foreach ($variant as $type => $value) {
-                                if ($type === 'Color') {
-                                    $orderItemData['color'] = $value;
-                                } elseif ($type === 'Size') {
-                                    $orderItemData['size'] = $value;
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    \Log::error("variant_details is not an array or object: " . json_encode($item['variant_details']));
-                }
-            }
+            // Handle variant details
+            // if (!empty($item['variant_details'])) {
+            //     $variants = is_string($item['variant_details'])
+            //         ? json_decode($item['variant_details'], true)
+            //         : $item['variant_details'];
+
+            //     if (is_array($variants) || is_object($variants)) {
+            //         foreach ($variants as $type => $value) {
+            //             if (is_array($value)) {
+            //                 $value = implode(', ', $value); // Convert array to string
+            //             }
+            //             if ($type === 'Color') {
+            //                 $orderItemData['color'] = $value;
+            //             } elseif ($type === 'Size') {
+            //                 $orderItemData['size'] = $value;
+            //             }
+            //         }
+            //     } else {
+            //         \Log::error("Invalid variant_details format for item {$item['product_id']}: " . json_encode($item['variant_details']));
+            //     }
+            // }
 
             OrderItem::create($orderItemData);
         }
