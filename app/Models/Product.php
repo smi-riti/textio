@@ -100,7 +100,7 @@ class Product extends Model
         return $this->hasMany(ProductReview::class);
     }
     public function images() {
-    return $this->hasManyThrough(ProductImage::class, ProductVariantCombination::class, 'id', 'product_variant_combination_id', 'id', 'id');
+    return $this->hasManyThrough(ProductImage::class, ProductVariantCombination::class, 'id', 'product_variant_combination_id', 'id');
 }
 
 public function variants()

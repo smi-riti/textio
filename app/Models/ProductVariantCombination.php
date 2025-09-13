@@ -23,4 +23,16 @@ class ProductVariantCombination extends Model
     {
         return $this->hasMany(ProductImage::class, "product_variant_combination_id", "id");
     }
+
+    // Helper to get primary image
+    public function getPrimaryImageAttribute()
+    {
+        return $this->images()->where('is_primary', true)->first()?->image_path;
+    }
+
+    // Helper to get gallery images
+    public function getGalleryImagesAttribute()
+    {
+        return $this->images()->where('is_primary', false)->get(['image_path']);
+    }
 }

@@ -28,4 +28,9 @@ class ProductImage extends Model
     {
         return $this->image_path;
     }
+
+    public function variantCombination()
+    {
+        return $this->belongsTo(ProductVariantCombination::class, 'product_variant_combination_id');
+    }
 }
