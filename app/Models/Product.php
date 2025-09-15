@@ -20,6 +20,8 @@ class Product extends Model
         'meta_title',
         'meta_description',
         'featured',
+                 'weight','length','breadth','height'
+        
     ];
 
     protected $casts = [

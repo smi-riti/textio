@@ -1,0 +1,373 @@
+<?php
+
+namespace App\Livewire\Public\Section;
+
+use App\Models\Address;
+use App\Models\Cart;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Payment;
+use App\Models\ProductVariantCombination;
+use App\Services\ShiprocketService;
+use App\Services\PaymentService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Livewire\Attributes\On;
+use Livewire\Component;
+
+class CheckOut extends Component
+{
+    public $pendingOrder;
+    public $cartItems;
+    public $totalAmount;
+    public $userEmail;
+    public $addressId;
+    public $addresses;
+    public $paymentMethod = 'Cash on Delivery';
+    public $whatsappNumber;
+    public $customizationMessage;
+    public $couponCode = '';
+    public $discountAmount = 0;
+    public $isProcessing = false;
+
+    // Razorpay key (public, for JS)
+    public $razorpayKey;
+
+    public function rules()
+    {
+        return [
+            'addressId' => 'required|exists:addresses,id,user_id,' . Auth::id(),
+            'paymentMethod' => 'required|in:Cash on Delivery,UPI',
+        ];
+    }
+
+    public function mount()
+    {
+        $this->razorpayKey = config('services.razorpay.key', env('RAZORPAY_KEY'));
+
+        $this->whatsappNumber = env('WHATSAPP_NUMBER', '+1234567890');
+        $this->customizationMessage = env('WHATSAPP_CUSTOMIZATION_MESSAGE', 'Hi! I\'m interested in customizing this product:');
+
+        $this->pendingOrder = session()->get('pending_order', []);
+        if (empty($this->pendingOrder)) {
+            session()->flash('error', 'No order data found.');
+            return redirect()->route('myCart');
+        }
+
+        $this->cartItems = collect($this->pendingOrder['cartItems'])->map(function ($item) {
+            if (!isset($item['product']['discount_price'])) {
+                $item['product']['discount_price'] = $item['product']['price'] ?? 0;
+            }
+            if (!isset($item['product']['price'])) {
+                $item['product']['price'] = $item['product']['discount_price'] ?? 0;
+            }
+            $item['unit_price'] = $item['product']['discount_price'] > 0
+                ? $item['product']['discount_price']
+                : $item['product']['price'];
+
+            if (isset($item['variant_details'])) {
+                if (is_string($item['variant_details'])) {
+                    $decoded = json_decode($item['variant_details'], true);
+                    $item['variant_details'] = is_array($decoded) ? $decoded : [];
+                } elseif (!is_array($item['variant_details']) && !is_object($item['variant_details'])) {
+                    Log::warning("Invalid variant_details format for item {$item['product_id']}: " . json_encode($item['variant_details']));
+                    $item['variant_details'] = [];
+                }
+            }
+            return $item;
+        });
+
+        $this->totalAmount = $this->pendingOrder['total_amount'];
+        $this->userEmail = $this->pendingOrder['user_email'];
+        $this->addressId = $this->pendingOrder['address_id'] ?? null;
+
+        $this->loadUserAddresses();
+    }
+
+    private function loadUserAddresses()
+    {
+        $this->addresses = Address::where('user_id', Auth::id())->get();
+        $latestOrder = Order::where('user_id', Auth::id())->latest()->first();
+        $this->addressId = $latestOrder?->address_id ?? $this->addresses->first()->id ?? null;
+    }
+
+    #[On('address-updated')]
+    public function refreshAddresses()
+    {
+        $this->loadUserAddresses();
+    }
+
+    #[On('coupon-applied')]
+    public function updateCoupon($couponCode, $discount)
+    {
+        $this->discountAmount = $discount;
+        $this->couponCode = $couponCode;
+        $this->totalAmount = max(0, $this->pendingOrder['total_amount'] - $this->discountAmount);
+    }
+
+    public function confirmOrder()
+    {
+        if ($this->isProcessing) {
+            return;
+        }
+
+        if (!Auth::check()) {
+            session()->flash('error', 'You must be logged in to place an order.');
+            return redirect()->route('login');
+        }
+
+        if ($this->cartItems->isEmpty()) {
+            session()->flash('error', 'Cart is empty.');
+            return redirect()->route('myCart');
+        }
+
+        $this->validate();
+        $this->isProcessing = true;
+
+        try {
+            DB::transaction(function () {
+                $order = $this->createOrder();
+                $this->createOrderItems($order);
+                $payment = $this->createPayment($order);
+
+                if ($this->paymentMethod === 'Cash on Delivery') {
+                    $this->processCodOrder($order);
+                } else {
+                    $this->processOnlinePayment($order, $payment);
+                }
+            });
+        } catch (\Exception $e) {
+            Log::error('Order confirmation failed', [
+                'user_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            session()->flash('error', 'Failed to process order: ' . $e->getMessage());
+            $this->isProcessing = false;
+        }
+    }
+
+    private function createOrder(): Order
+    {
+        return Order::create([
+            'user_id' => Auth::id(),
+            'address_id' => $this->addressId,
+            'order_number' => 'ORD-' . now()->format('YmdHis') . '-' . Str::random(6),
+            'isOrdered' => true,
+            'status' => 'pending',
+            'total_amount' => number_format($this->totalAmount, 2, '.', ''),
+            'coupon_code' => $this->couponCode ?: null,
+            'shipping_charge' => 0.00,
+        ]);
+    }
+
+    private function createOrderItems(Order $order): void
+    {
+        foreach ($this->cartItems as $item) {
+            $unitPrice = $item['product']['discount_price'] > 0
+                ? $item['product']['discount_price']
+                : $item['product']['price'];
+
+            OrderItem::create([
+                'user_id' => Auth::id(),
+                'order_id' => $order->id,
+                'product_id' => $item['product_id'],
+                'product_variant_combination_id' => $item['product_variant_combination_id'] ?? null,
+                'unit_price' => $unitPrice,
+                'quantity' => $item['quantity'],
+            ]);
+
+            // Update stock
+            if ($combinationId = $item['product_variant_combination_id']) {
+                ProductVariantCombination::where('id', $combinationId)
+                    ->decrement('stock', $item['quantity']);
+            }
+        }
+    }
+
+    private function createPayment(Order $order): Payment
+    {
+        return Payment::create([
+            'order_id' => $order->id,
+            'payment_method' => ($this->paymentMethod === 'Cash on Delivery') ? Payment::METHOD_COD : Payment::METHOD_RAZORPAY,
+            'currency' => 'INR',
+            'amount' => $this->totalAmount,
+            'payment_status' => Payment::STATUS_PENDING,
+        ]);
+    }
+
+    private function processCodOrder(Order $order): void
+    {
+        try {
+            (new ShiprocketService())->createShipment($order);
+            $order->update(['status' => 'processing']);
+            
+            // Update payment status for COD
+            $order->payment->update(['payment_status' => Payment::STATUS_PAID]);
+
+            $this->clearCartAndSession();
+            
+            session()->flash('message', 'Order placed successfully! Order Number: ' . $order->order_number);
+            $this->redirect(route('myOrders'));
+            
+        } catch (\Exception $e) {
+            Log::error('COD order processing failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            session()->flash('error', 'Order created, but shipping setup failed: ' . $e->getMessage());
+            $this->isProcessing = false;
+        }
+    }
+
+    private function processOnlinePayment(Order $order, Payment $payment): void
+    {
+        try {
+            $paymentService = app(PaymentService::class);
+            $razorpayOrder = $paymentService->createRazorpayOrder($order, $this->totalAmount);
+            
+            $payment->update(['razorpay_order_id' => $razorpayOrder['id']]);
+            $address = Address::find($this->addressId);
+
+            $amountInPaise = (int) ($this->totalAmount * 100);
+            
+            Log::info('Dispatching Razorpay payment', [
+                'order_id' => $order->id,
+                'total_amount_rupees' => $this->totalAmount,
+                'amount_in_paise' => $amountInPaise,
+                'razorpay_order_id' => $razorpayOrder['id']
+            ]);
+
+            $this->dispatch('init-razorpay', [
+                'razorpay_order_id' => $razorpayOrder['id'],
+                'amount' => $amountInPaise, // Ensure integer conversion to paise
+                'name' => config('app.name', 'Your Company Name'),
+                'description' => 'Payment for Order #' . $order->order_number,
+                'prefill' => [
+                    'name' => Auth::user()->name ?? ($address->name ?? ''),
+                    'email' => Auth::user()->email ?? $this->userEmail,
+                    'contact' => $address->phone ?? '',
+                ],
+                'order_number' => $order->order_number,
+            ]);
+
+            $this->isProcessing = false;
+            
+        } catch (\Exception $e) {
+            Log::error('Online payment initialization failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            session()->flash('error', 'Failed to initiate payment: ' . $e->getMessage());
+            $this->isProcessing = false;
+        }
+    }
+
+    #[On('verify-payment')]
+    public function verifyPayment($data)
+    {
+        try {
+            Log::info('Payment verification started', ['data' => $data]);
+
+            // Validate input data
+            if (!is_array($data) || !isset($data['razorpay_order_id']) || 
+                !isset($data['razorpay_payment_id']) || !isset($data['razorpay_signature'])) {
+                throw new \Exception('Invalid payment verification data');
+            }
+
+            $paymentService = app(PaymentService::class);
+            
+            // Verify payment signature
+            if (!$paymentService->verifyPayment($data)) {
+                throw new \Exception('Payment signature verification failed');
+            }
+
+            DB::transaction(function () use ($data, $paymentService) {
+                // Update payment status
+                $payment = $paymentService->updatePaymentStatus($data['razorpay_order_id'], $data);
+                $order = $payment->order;
+
+                // Update order status
+                $order->update(['status' => 'processing']);
+
+                // Create shipment
+                try {
+                    (new ShiprocketService())->createShipment($order);
+                } catch (\Exception $e) {
+                    Log::warning('Shipment creation failed for paid order', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Don't fail the payment process if shipment creation fails
+                }
+
+                $this->clearCartAndSession();
+
+                session()->flash('message', 'Payment successful! Order Number: ' . $order->order_number);
+            });
+
+            $this->redirect(route('myOrders'));
+
+        } catch (\Exception $e) {
+            Log::error('Payment verification failed', [
+                'data' => $data,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Handle payment failure
+            if (isset($data['razorpay_order_id'])) {
+                $paymentService = app(PaymentService::class);
+                $paymentService->handlePaymentFailure($data['razorpay_order_id'], $e->getMessage());
+            }
+
+            session()->flash('error', 'Payment verification failed: ' . $e->getMessage());
+        }
+    }
+
+    #[On('payment-failed')]
+    public function handlePaymentFailure($data)
+    {
+        Log::warning('Payment failed', ['data' => $data]);
+        
+        if (isset($data['razorpay_order_id'])) {
+            $paymentService = app(PaymentService::class);
+            $paymentService->handlePaymentFailure(
+                $data['razorpay_order_id'], 
+                $data['error'] ?? 'Payment cancelled by user'
+            );
+        }
+
+        session()->flash('error', 'Payment was cancelled or failed. Please try again.');
+        $this->isProcessing = false;
+    }
+
+    private function clearCartAndSession(): void
+    {
+        Cart::where('user_id', Auth::id())->delete();
+        session()->forget('pending_order');
+    }
+
+    public function getCustomizationWhatsappUrl($productName, $orderNumber = null)
+    {
+        $message = $this->customizationMessage . ' ' . $productName;
+        if ($orderNumber) {
+            $message .= ' (Order: ' . $orderNumber . ')';
+        }
+        $message .= ' - ' . url()->current();
+        $encodedMessage = urlencode($message);
+        return 'https://wa.me/' . str_replace(['+', ' ', '-'], '', $this->whatsappNumber) . '?text=' . $encodedMessage;
+    }
+
+    public function render()
+    {
+        return view('livewire.public.section.check-out', [
+            'addresses' => $this->addresses,
+        ]);
+    }
+}
