@@ -268,84 +268,98 @@ class CheckOut extends Component
         }
     }
 
-    #[On('verify-payment')]
-    public function verifyPayment($data)
-    {
-        try {
-            Log::info('Payment verification started', ['data' => $data]);
+ #[On('verify-payment')]
+public function verifyPayment($razorpay_payment_id, $razorpay_order_id, $razorpay_signature)
+{
+    try {
+        Log::info('Received verify-payment event', [
+            'razorpay_payment_id' => $razorpay_payment_id,
+            'razorpay_order_id' => $razorpay_order_id,
+            'razorpay_signature' => $razorpay_signature
+        ]);
 
-            // Validate input data
-            if (!is_array($data) || !isset($data['razorpay_order_id']) || 
-                !isset($data['razorpay_payment_id']) || !isset($data['razorpay_signature'])) {
-                throw new \Exception('Invalid payment verification data');
-            }
-
-            $paymentService = app(PaymentService::class);
-            
-            // Verify payment signature
-            if (!$paymentService->verifyPayment($data)) {
-                throw new \Exception('Payment signature verification failed');
-            }
-
-            DB::transaction(function () use ($data, $paymentService) {
-                // Update payment status
-                $payment = $paymentService->updatePaymentStatus($data['razorpay_order_id'], $data);
-                $order = $payment->order;
-
-                // Update order status
-                $order->update(['status' => 'processing']);
-
-                // Create shipment
-                try {
-                    (new ShiprocketService())->createShipment($order);
-                } catch (\Exception $e) {
-                    Log::warning('Shipment creation failed for paid order', [
-                        'order_id' => $order->id,
-                        'error' => $e->getMessage()
-                    ]);
-                    // Don't fail the payment process if shipment creation fails
-                }
-
-                $this->clearCartAndSession();
-
-                session()->flash('message', 'Payment successful! Order Number: ' . $order->order_number);
-            });
-
-            $this->redirect(route('myOrders'));
-
-        } catch (\Exception $e) {
-            Log::error('Payment verification failed', [
-                'data' => $data,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            // Handle payment failure
-            if (isset($data['razorpay_order_id'])) {
-                $paymentService = app(PaymentService::class);
-                $paymentService->handlePaymentFailure($data['razorpay_order_id'], $e->getMessage());
-            }
-
-            session()->flash('error', 'Payment verification failed: ' . $e->getMessage());
+        // Validate input data
+        if (empty($razorpay_payment_id) || empty($razorpay_order_id) || empty($razorpay_signature)) {
+            throw new \Exception('Invalid payment verification data');
         }
-    }
 
-    #[On('payment-failed')]
-    public function handlePaymentFailure($data)
-    {
-        Log::warning('Payment failed', ['data' => $data]);
+        $data = [
+            'razorpay_payment_id' => $razorpay_payment_id,
+            'razorpay_order_id' => $razorpay_order_id,
+            'razorpay_signature' => $razorpay_signature
+        ];
+
+        $paymentService = app(PaymentService::class);
         
-        if (isset($data['razorpay_order_id'])) {
-            $paymentService = app(PaymentService::class);
-            $paymentService->handlePaymentFailure(
-                $data['razorpay_order_id'], 
-                $data['error'] ?? 'Payment cancelled by user'
-            );
+        // Verify payment signature
+        if (!$paymentService->verifyPayment($data)) {
+            throw new \Exception('Payment signature verification failed');
         }
 
-        session()->flash('error', 'Payment was cancelled or failed. Please try again.');
-        $this->isProcessing = false;
+        DB::transaction(function () use ($data, $paymentService) {
+            // Update payment status
+            $payment = $paymentService->updatePaymentStatus($data['razorpay_order_id'], $data);
+            $order = $payment->order;
+
+            // Update order status
+            $order->update(['status' => 'processing']);
+
+            // Create shipment
+            try {
+                (new ShiprocketService())->createShipment($order);
+            } catch (\Exception $e) {
+                Log::warning('Shipment creation failed for paid order', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            $this->clearCartAndSession();
+
+            session()->flash('message', 'Payment successful! Order Number: ' . $order->order_number);
+            $this->dispatch('payment-verified'); // Notify frontend
+        });
+
+        $this->redirect(route('myOrders'));
+
+    } catch (\Exception $e) {
+        Log::error('Payment verification failed', [
+            'razorpay_payment_id' => $razorpay_payment_id,
+            'razorpay_order_id' => $razorpay_order_id,
+            'razorpay_signature' => $razorpay_signature,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        if (!empty($razorpay_order_id)) {
+            $paymentService = app(PaymentService::class);
+            $paymentService->handlePaymentFailure($razorpay_order_id, $e->getMessage());
+        }
+
+        session()->flash('error', 'Payment verification failed: ' . $e->getMessage());
+        $this->dispatch('payment-failed', ['error' => $e->getMessage()]);
     }
+}
+
+#[On('payment-failed')]
+public function handlePaymentFailure($error = null, $razorpay_order_id = null)
+{
+    Log::warning('Payment failed', [
+        'razorpay_order_id' => $razorpay_order_id,
+        'error' => $error
+    ]);
+    
+    if ($razorpay_order_id) {
+        $paymentService = app(PaymentService::class);
+        $paymentService->handlePaymentFailure(
+            $razorpay_order_id, 
+            $error ?? 'Payment cancelled by user'
+        );
+    }
+
+    session()->flash('error', 'Payment was cancelled or failed. Please try again.');
+    $this->isProcessing = false;
+}
 
     private function clearCartAndSession(): void
     {

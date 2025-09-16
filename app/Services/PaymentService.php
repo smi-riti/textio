@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Razorpay\Api\Api;
 use Razorpay\Api\Errors\SignatureVerificationError;
+use Razorpay\Api\Utility;
 
 class PaymentService
 {
@@ -19,7 +20,7 @@ class PaymentService
     {
         $this->keyId = config('services.razorpay.key', env('RAZORPAY_KEY'));
         $this->keySecret = config('services.razorpay.secret', env('RAZORPAY_SECRET'));
-        
+
         if (empty($this->keyId) || empty($this->keySecret)) {
             Log::error('Razorpay credentials not configured', [
                 'key_present' => !empty($this->keyId),
@@ -27,13 +28,13 @@ class PaymentService
             ]);
             throw new \Exception('Payment gateway not configured. Please contact support.');
         }
-        
+
         // Validate key format
         if (!preg_match('/^rzp_(test_|live_)[a-zA-Z0-9]{14}$/', $this->keyId)) {
             Log::error('Invalid Razorpay key format', ['key' => $this->keyId]);
             throw new \Exception('Invalid payment gateway configuration.');
         }
-        
+
         try {
             $this->api = new Api($this->keyId, $this->keySecret);
         } catch (\Exception $e) {
@@ -67,7 +68,7 @@ class PaymentService
             ]);
 
             $orderData = $razorpayOrder->toArray();
-            
+
             Log::info('Razorpay order created successfully', [
                 'razorpay_order_id' => $orderData['id'],
                 'order_number' => $order->order_number
@@ -88,27 +89,26 @@ class PaymentService
     /**
      * Verify payment signature and update payment status
      */
-    public function verifyPayment(array $paymentData): bool
+      public function verifyPayment(array $paymentData): bool
     {
         try {
-            Log::info('Verifying payment', ['payment_data' => $paymentData]);
+            Log::info('Verifying payment signature', ['payment_data' => $paymentData]);
 
-            // Validate required fields
-            $requiredFields = ['razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature'];
-            foreach ($requiredFields as $field) {
-                if (empty($paymentData[$field])) {
-                    throw new \Exception("Missing required field: {$field}");
-                }
+            if (!isset($paymentData['razorpay_order_id']) || 
+                !isset($paymentData['razorpay_payment_id']) || 
+                !isset($paymentData['razorpay_signature'])) {
+                throw new \Exception('Missing payment verification data');
             }
 
-            // Verify signature
             $attributes = [
                 'razorpay_order_id' => $paymentData['razorpay_order_id'],
                 'razorpay_payment_id' => $paymentData['razorpay_payment_id'],
                 'razorpay_signature' => $paymentData['razorpay_signature']
             ];
 
-            \Razorpay\Api\Utility\Utility::verifyPaymentSignature($attributes);
+            // Create Utility instance and call verifyPaymentSignature
+            $utility = new Utility();
+            $utility->verifyPaymentSignature($attributes);
 
             Log::info('Payment signature verified successfully', [
                 'razorpay_order_id' => $paymentData['razorpay_order_id'],
@@ -123,6 +123,7 @@ class PaymentService
                 'error' => $e->getMessage()
             ]);
             return false;
+            
         } catch (\Exception $e) {
             Log::error('Payment verification error', [
                 'payment_data' => $paymentData,
@@ -139,8 +140,8 @@ class PaymentService
     {
         return DB::transaction(function () use ($razorpayOrderId, $paymentData) {
             $payment = Payment::where('razorpay_order_id', $razorpayOrderId)
-                             ->lockForUpdate()
-                             ->firstOrFail();
+                ->lockForUpdate()
+                ->firstOrFail();
 
             // Prevent duplicate processing
             if ($payment->payment_status === 'paid') {
@@ -179,7 +180,7 @@ class PaymentService
     {
         try {
             $payment = Payment::where('razorpay_order_id', $razorpayOrderId)->first();
-            
+
             if ($payment) {
                 $payment->update([
                     'payment_status' => 'failed',
@@ -227,13 +228,13 @@ class PaymentService
     {
         try {
             $refundData = ['payment_id' => $paymentId];
-            
+
             if ($amount !== null) {
                 $refundData['amount'] = intval($amount * 100); // Convert to paise
             }
 
             $refund = $this->api->refund->create($refundData);
-            
+
             Log::info('Refund created successfully', [
                 'payment_id' => $paymentId,
                 'refund_id' => $refund->id,

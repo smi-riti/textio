@@ -379,7 +379,7 @@
                     
                     // Show success message temporarily
                     if (confirmButton) {
-                        confirmButton.textContent = 'Verifying Payment...';
+                        confirmButton.textContent = 'erifying Payment...';
                     }
                     
                     // Dispatch verification event
