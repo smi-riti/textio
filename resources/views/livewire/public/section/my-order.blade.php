@@ -92,7 +92,7 @@
                         </button>
                     </div>
 
-                    <livewire:public.section.accounts.address-upadate />
+                    <livewire:public.section.accounts.address-update />
                 </div>
             </div>
 

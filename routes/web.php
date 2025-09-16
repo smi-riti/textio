@@ -28,7 +28,17 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
 use App\Livewire\Admin\Category\UpdateCategory;
+use App\Livewire\Admin\ManageEnquiry;
 use App\Livewire\Public\Section\MyOrders;
+use App\Livewire\Public\Page\ContactPage;
+use App\Livewire\Admin\Category\ViewCategory;
+use App\Livewire\Admin\Product\ViewProduct As AdminViewProduct;
+use App\Livewire\Admin\Product\EditProduct;
+use App\Livewire\Admin\Product\ProductVariantList;
+use App\Livewire\Admin\Product\ProductVariantEdit;
+
+
+
 Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
 Route::get('/',LandingPage::class)->name('home');
@@ -48,7 +58,7 @@ Route::get('/product/{slug}', ViewProduct::class)->name('public.product.view');
 Route::get('/wishlist', WishlistCard::class)->name('wishlist.index');
 Route::get('/account',ProfileInformation::class)->name('profile-information');
 Route::get('/account/address',ManageAddress::class)->name('Manage-address');
-
+Route::get('/contact', ContactPage::class)->name('contact');
 // Admin routes protected by middleware
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     // Dashboard
@@ -58,25 +68,35 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Categories
     Route::get('/categories/list', ListCategory::class)->name('categories.index');
     Route::get('/categories/create', CreateCategory::class)->name('categories.create');
-    Route::get('/categories/{slug}', App\Livewire\Admin\Category\ViewCategory::class)->name('categories.view');
+    Route::get('/categories/{slug}', ViewCategory::class)->name('categories.view');
     Route::get('/categories/{slug}/edit', UpdateCategory::class)->name('categories.edit');
     
     // Products
     Route::get('/products', ListProduct::class)->name('products.index');
+    Route::get('/products/list', ListProduct::class)->name('products.list');
     Route::get('/products/create', CreateProduct::class)->name('products.create');
-    Route::get('/products/{product:slug}', App\Livewire\Admin\Product\ViewProduct::class)->name('products.view');
-    Route::get('/products/{product:slug}/edit', UpdateProduct::class)->name('products.edit');
+    Route::get('/products/{product:slug}',AdminViewProduct::class)->name('products.view');
+    Route::get('/products/{product:slug}/edit', EditProduct::class)->name('products.edit');
     
+    // Product Variants
+    Route::get('/products/{product}/variants', ProductVariantList::class)->name('products.variants');
+    Route::get('/products/{product}/variants/{variant}/edit', ProductVariantEdit::class)->name('products.variants.edit');
+    
+    // contact enquiries
+    Route::get('/enquiries', ManageEnquiry::class)->name('enquiries');
     //brand
 
     Route::get('/manage-brand', ManageBrand::class)->name('brand.manage');
     Route::get('brand-add', CreateBrand::class)->name('brand-add');
+    Route::get('brand/{brandId}/edit', \App\Livewire\Admin\Brand\EditBrand::class)->name('brand.edit');
     
     Route::get('categories', ManageCategory::class)->name('categories');
     Route::get('brands', ManageBrand::class)->name('brands');
     Route::get('products-old', ManageProduct::class)->name('products');
     Route::get('productImage', MultipleImages::class)->name('product-image');
     Route::get('coupon', ManageCoupon::class)->name('coupon');
+
+
 });
 
 Route::middleware('auth')->group(function () {

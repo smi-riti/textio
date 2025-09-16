@@ -3,11 +3,12 @@
 namespace App\Livewire\Public\Section\Accounts;
 
 use App\Models\Address;
+use App\Services\PincodeService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 
-class AddressUpadate extends Component
+class AddressUpdate extends Component
 {
 #[Validate('required|min:3')]
     public $name;
@@ -25,10 +26,10 @@ class AddressUpadate extends Component
     public $area;
 
     #[Validate('required|min:3')]
-    public $city;
+   public $city = '';
 
     #[Validate('required|min:3')]
-    public $state;
+    public $state = '';
 
     #[Validate('nullable|min:3')]
     public $landmark;
@@ -41,6 +42,26 @@ class AddressUpadate extends Component
 
     public $address_id;
 
+    public function updatedPostalCode()
+    {
+        if (strlen($this->postal_code) === 6 && is_numeric($this->postal_code)) {
+            $locationData = PincodeService::getLocationByPincode($this->postal_code);
+            
+            if ($locationData['success']) {
+                $this->city = $locationData['data']['city'] ?? '';
+                $this->state = $locationData['data']['state'] ?? '';
+            } else {
+                $this->city = '';
+                $this->state = '';
+                $this->addError('postal_code', $locationData['error']);
+            }
+        } else {
+            // Clear city and state if pincode is invalid
+            $this->city = '';
+            $this->state = '';
+        }
+    }
+
     public function mount($addressId = null)
     {
         if ($addressId) {
@@ -49,7 +70,7 @@ class AddressUpadate extends Component
             $this->resetForm();
         }
     }
-
+ 
     public function save()
     {
         $this->validate();
@@ -107,6 +128,6 @@ class AddressUpadate extends Component
     }
     public function render()
     {
-        return view('livewire.public.section.accounts.address-upadate');
+        return view('livewire.public.section.accounts.address-update');
     }
 }

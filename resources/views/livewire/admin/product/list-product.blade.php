@@ -111,7 +111,7 @@
                                     @endif
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Stock</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Variants</th>
                             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Actions</th>
                         </tr>
@@ -182,11 +182,12 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
-                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
-                                        {{ $product->quantity > 10 ? 'bg-green-100 text-green-800' : 
-                                           ($product->quantity > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
-                                        {{ $product->quantity }} units
-                                    </span>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {{ $product->variant_combinations_count }} {{ $product->variant_combinations_count === 1 ? 'variant' : 'variants' }}
+                                        </span>
+                                        
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">

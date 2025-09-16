@@ -135,7 +135,8 @@ class ListProduct extends Component
     public function render()
     {
         $query = Product::query()
-            ->with(['category:id,title', 'brand:id,name'])
+            ->with(['category:id,title', 'brand:id,name', 'variantCombinations'])
+            ->withCount('variantCombinations')
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                     ->orWhere('sku', 'like', '%' . $this->search . '%');

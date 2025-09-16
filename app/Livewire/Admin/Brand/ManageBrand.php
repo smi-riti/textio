@@ -5,130 +5,148 @@ namespace App\Livewire\Admin\Brand;
 use App\Models\Brand;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 use Livewire\WithPagination;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class ManageBrand extends Component
 {
-    use WithFileUploads, WithPagination;
+    use WithPagination;
 
-    public $name = '';
-    public $slug = '';
-    public $logo;
-    public $description = '';
-    public $is_active = true;
-    public $meta_title = '';
-    public $meta_description = '';
-    public $editingBrandId = null;
     public $showDeleted = false;
+    public $search = '';
+    public $perPage = 10;
+    public $sortBy = 'created_at';
+    public $sortDirection = 'desc';
+    
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'showDeleted' => ['except' => false],
+        'sortBy' => ['except' => 'created_at'],
+        'sortDirection' => ['except' => 'desc'],
+    ];
+
+    protected $listeners = [
+        'confirmDelete' => 'confirmDelete',
+        'confirmRestore' => 'confirmRestore',
+    ];
 
     #[Layout('components.layouts.admin')]
-    protected function rules()
+    public function render()
     {
-        return [
-            'name' => 'required|string|max:100',
-            'slug' => 'required|string|max:120|unique:brands,slug,' . ($this->editingBrandId ?: 'NULL') . ',id',
-            'logo' => 'nullable|image|max:2048',
-            'description' => 'nullable|string',
-            'is_active' => 'boolean',
-            'meta_title' => 'nullable|string|max:200',
-            'meta_description' => 'nullable|string',
-        ];
-    }
+        $query = Brand::query();
 
-    public function updated($propertyName)
-    {
-        $this->validateOnly($propertyName);
-
-        if ($propertyName === 'name') {
-            $this->slug = Str::slug($this->name);
-        }
-    }
-
-    public function saveBrand()
-    {
-        $this->validate();
-
-        $data = [
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'description' => $this->description,
-            'is_active' => $this->is_active,
-            'meta_title' => $this->meta_title,
-            'meta_description' => $this->meta_description,
-        ];
-
-        if ($this->logo && $this->logo instanceof \Illuminate\Http\UploadedFile) {
-            $data['logo'] = $this->logo->store('brands', 'public');
+        // Apply search filter
+        if ($this->search) {
+            $query->where('name', 'like', '%' . $this->search . '%')
+                  ->orWhere('description', 'like', '%' . $this->search . '%');
         }
 
-        if ($this->editingBrandId) {
-            Brand::find($this->editingBrandId)->update($data);
-            session()->flash('message', 'Brand updated successfully.');
+        // Apply deleted filter
+        if ($this->showDeleted) {
+            $query->onlyTrashed();
+        }
+
+        // Apply sorting
+        $query->orderBy($this->sortBy, $this->sortDirection);
+
+        // Get paginated results
+        $brands = $query->paginate(10);
+        $brands->withPath(request()->url());
+
+        return view('livewire.admin.brand.manage-brand', [
+            'brands' => $brands
+        ])->layout('layouts.admin');
+    }
+
+    public function updatedSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function sortBy($field)
+    {
+        if ($this->sortBy === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
-            Brand::create($data);
-            session()->flash('message', 'Brand created successfully.');
+            $this->sortBy = $field;
+            $this->sortDirection = 'asc';
         }
-
-        $this->resetForm();
     }
 
-    public function editBrand($id)
-    {
-        $brand = Brand::findOrFail($id);
-        $this->editingBrandId = $id;
-        $this->name = $brand->name;
-        $this->slug = $brand->slug;
-        $this->description = $brand->description;
-        $this->is_active = $brand->is_active;
-        $this->meta_title = $brand->meta_title;
-        $this->meta_description = $brand->meta_description;
-        $this->logo = null; // reset upload
-    }
-
-    public function deleteBrand($id)
-    {
-        Brand::findOrFail($id)->delete();
-        session()->flash('message', 'Brand deleted successfully.');
-    }
-
-    public function restoreBrand($id)
-    {
-        Brand::withTrashed()->findOrFail($id)->restore();
-        session()->flash('message', 'Brand restored successfully.');
-    }
-
-    public function resetForm()
-    {
-        $this->reset([
-            'name', 'slug', 'logo', 'description',
-            'is_active', 'meta_title', 'meta_description',
-            'editingBrandId'
-        ]);
-    }
-
-     public function showTrash()
+    public function showTrash()
     {
         $this->showDeleted = true;
         $this->resetPage();
     }
     
- public function showList()
+    public function showList()
     {
         $this->showDeleted = false;
         $this->resetPage();
     }
 
-    public function render()
+    public function deleteBrand($id)
     {
-        $brands = $this->showDeleted
-            ? Brand::onlyTrashed()->paginate(10)
-            : Brand::paginate(10);
+        $brand = Brand::findOrFail($id);
+        $this->dispatch('openConfirmation', 
+            'Delete Brand',
+            'Are you sure you want to delete "' . $brand->name . '"? This action can be undone later.',
+            'Delete',
+            'confirmDelete',
+            ['id' => $id]
+        );
+    }
 
-        return view('livewire.admin.brand.manage-brand', [
-            'brands' => $brands,
-        ]);
+    public function confirmDelete($data)
+    {
+        try {
+            Brand::findOrFail($data['id'])->delete();
+            session()->flash('message', 'Brand moved to trash successfully.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to delete brand: ' . $e->getMessage());
+        }
+    }
+
+    public function restoreBrand($id)
+    {
+        $brand = Brand::withTrashed()->findOrFail($id);
+        $this->dispatch('openConfirmation',
+            'Restore Brand', 
+            'Are you sure you want to restore "' . $brand->name . '"?',
+            'Restore',
+            'confirmRestore',
+            ['id' => $id]
+        );
+    }
+
+    public function confirmRestore($data)
+    {
+        try {
+            Brand::withTrashed()->findOrFail($data['id'])->restore();
+            session()->flash('message', 'Brand restored successfully.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to restore brand: ' . $e->getMessage());
+        }
+    }
+
+    public function permanentDelete($id)
+    {
+        $brand = Brand::withTrashed()->findOrFail($id);
+        $this->dispatch('openConfirmation',
+            'Permanently Delete Brand',
+            'Are you sure you want to permanently delete "' . $brand->name . '"? This action cannot be undone!',
+            'Delete Forever',
+            'confirmPermanentDelete',
+            ['id' => $id]
+        );
+    }
+
+    public function confirmPermanentDelete($data)
+    {
+        try {
+            Brand::withTrashed()->findOrFail($data['id'])->forceDelete();
+            session()->flash('message', 'Brand permanently deleted.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to permanently delete brand: ' . $e->getMessage());
+        }
     }
 }
