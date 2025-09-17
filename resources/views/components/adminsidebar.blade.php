@@ -46,20 +46,20 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="{{ route('admin.orders.index') }}">
                         <span class="nav-link-icon">
                             <i class="bi bi-receipt"></i>
                         </span>
                         <span>Orders</span>
                     </a>
-                    <ul>
+                    {{-- <ul>
                         <li>
                             <a href="orders.html">List</a>
                         </li>
                         <li>
                             <a href="order-detail.html">Detail</a>
                         </li>
-                    </ul>
+                    </ul> --}}
                 </li>
                 <li>
                     <a wire:navigate href="{{ route('admin.categories.index') }}">

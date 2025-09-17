@@ -20,9 +20,9 @@ use App\Livewire\Public\AllProduct;
 use App\Livewire\Public\Cart;
 use App\Livewire\Public\Section\Accounts\ManageAddress;
 use App\Livewire\Public\Section\Accounts\ProfileInformation;
+use App\Livewire\Public\Section\CheckOut;
 use App\Livewire\Public\Section\LandingPage;
 use App\Livewire\Public\Section\MyCart;
-use App\Livewire\Public\Section\MyOrder;
 use App\Livewire\Public\Section\ViewProduct;
 use App\Livewire\Public\Section\WishlistCard;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +30,8 @@ use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
 use App\Livewire\Admin\Category\UpdateCategory;
 use App\Livewire\Admin\ManageEnquiry;
+use App\Livewire\Admin\Order\Index as OrderIndex;
+use App\Livewire\Admin\Order\Show as OrderShow;
 use App\Livewire\Public\Section\MyOrders;
 use App\Livewire\Public\Page\ContactPage;
 use App\Livewire\Admin\Category\ViewCategory;
@@ -40,6 +42,8 @@ use App\Livewire\Admin\Product\ProductVariantEdit;
 
 
 
+
+Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
 Route::get('/',LandingPage::class)->name('home');
 //  Route::get('/wishlist', Wishlist::class)->name('wishlist.index');
@@ -56,7 +60,6 @@ Route::get('/auth/google', [Login::class, 'redirectToGoogle'])->name('google.red
 Route::get('/auth/google/callback', [Login::class, 'handleGoogleCallback'])->name('auth.google.callback');// Route::get('/cart',AddItem::class)->name('cart');
 
 Route::get('/mycart',MyCart::class)->name('myCart');
-Route::get('/myorder',MyOrder::class)->name('myOrder');
 Route::get('/myorders',MyOrders::class)->name('myOrders');
 Route::get('/product/{slug}', ViewProduct::class)->name('public.product.view');
 Route::get('/wishlist', WishlistCard::class)->name('wishlist.index');
@@ -101,12 +104,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('coupon', ManageCoupon::class)->name('coupon');
     Route::get('user', Customer::class)->name('customer');
 
+
+    //order
+    Route::get('/orders', OrderIndex::class)->name('orders.index');
+    Route::get('/orders/{order}', OrderShow::class)->name('orders.show');
 });
 
 
 
 Route::middleware('auth')->group(function () {
     Route::get('/cart', Cart::class)->name('public.cart');
+    Route::get('/myorder', CheckOut::class)->name('myOrder');
 //  Route::post('/cart/add', [ProductDetail::class, 'addToCart'])->name('cart.add');
 });
 // Route::get('/product/{slug}', ProductDetail::class)->name('public.product.detail');
