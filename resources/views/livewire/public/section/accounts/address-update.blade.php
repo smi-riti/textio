@@ -34,17 +34,28 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <input type="text" wire:model.live="postal_code" placeholder="Pincode"
-                               class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        @error('postal_code') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <input type="text" wire:model.live="address_line" placeholder="Locality"
-                               class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        @error('address_line') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-                </div>
+    <div>
+        <input type="text" 
+               wire:model.live="postal_code" 
+               placeholder="Pincode (6 digits)" 
+               maxlength="6"
+               class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+        @error('postal_code') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+        @if(strlen($postal_code) === 6 && is_numeric($postal_code) && empty($city))
+            <p class="text-blue-600 text-xs mt-1">🔍 Fetching location details...</p>
+        @elseif(strlen($postal_code) === 6 && is_numeric($postal_code) && !empty($city))
+            <p class="text-green-600 text-xs mt-1">✓ Location found: {{ $city }}, {{ $state }}</p>
+        @endif
+    </div>
+    <div>
+        <input type="text" 
+               wire:model.live="address_line" 
+               placeholder="Locality"
+               class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500">
+        @error('address_line') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+    </div>
+</div>
+
 
                 <div class="mb-4">
                     <textarea wire:model.live="area" placeholder="Area" rows="3"
@@ -52,18 +63,38 @@
                     @error('area') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <input type="text" wire:model.live="city" placeholder="City"
-                               class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        @error('city') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <input type="text" wire:model.live="state" placeholder="State"
-                               class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        @error('state') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
-                    </div>
-                </div>
+               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+    <div>
+        <input type="text" 
+               wire:model.live="city" 
+               placeholder="City"
+               @if(strlen($postal_code) === 6 && is_numeric($postal_code) && !empty($city))
+                   readonly
+                   class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-100"
+               @else
+                   class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
+               @endif>
+        @error('city') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+        @if(strlen($postal_code) === 6 && is_numeric($postal_code) && !empty($city))
+            <p class="text-green-600 text-xs mt-1">✓ Auto-filled from pincode</p>
+        @endif
+    </div>
+    <div>
+        <input type="text" 
+               wire:model.live="state" 
+               placeholder="State"
+               @if(strlen($postal_code) === 6 && is_numeric($postal_code) && !empty($state))
+                   readonly
+                   class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-100"
+               @else
+                   class="border border-purple-300 rounded-md px-3 py-2 text-gray-700 w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
+               @endif>
+        @error('state') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+        @if(strlen($postal_code) === 6 && is_numeric($postal_code) && !empty($state))
+            <p class="text-green-600 text-xs mt-1">✓ Auto-filled from pincode</p>
+        @endif
+    </div>
+</div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>

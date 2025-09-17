@@ -2,27 +2,25 @@
 
 namespace App\Livewire\Admin\Product;
 
+use Livewire\Component;
+use Livewire\Attributes\Layout;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
-use App\Models\ProductVariantCombination;
-use Livewire\Component;
-use Livewire\Attributes\Layout;
 use Illuminate\Support\Str;
+use Livewire\WithFileUploads;
 
 #[Layout('components.layouts.admin')]
-class ViewProduct extends Component
+class EditProduct extends Component
 {
+    use WithFileUploads;
+
     public Product $product;
     public $categories;
     public $brands;
     
-    // For inline editing
+    // Fields for editing
     public $editingField = null;
-    public $tempValue = '';
-    public $tempArray = [];
-    
-    // Product properties for editing
     public $name;
     public $description;
     public $price;
@@ -35,17 +33,10 @@ class ViewProduct extends Component
     public $meta_title;
     public $meta_description;
     public $featured;
-    
-    // Computed properties
-    public $variantImage;
-    public $formattedProductImages = [];
-    public $availableVariants = [];
-    public $relatedProducts;
-    public $hasStock = true;
-    public $deliveryCharge = 0;
-    public $currentVariant = null;
-    public $sku;
-    public $quantity = 1; // Added for compatibility even though not used in admin view
+
+    // Temporary values while editing
+    public $tempValue = '';
+    public $tempArray = [];
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -64,27 +55,12 @@ class ViewProduct extends Component
 
     public function mount(Product $product)
     {
-        $this->product = $product->load([
-            'category:id,title', 
-            'brand:id,name', 
-            'variantCombinations' => function($query) {
-                $query->select('product_variant_combinations.id', 'product_id', 'price', 'stock', 'sku', 'variant_values')
-                      ->with(['images' => function($imgQuery) {
-                          $imgQuery->select('product_images.id', 'product_variant_combination_id', 'image_path', 'is_primary')
-                                  ->orderBy('is_primary', 'desc')
-                                  ->orderBy('created_at', 'asc');
-                      }])
-                      ->orderBy('created_at', 'desc');
-            },
-            'highlights:id,product_id,highlights'
-        ]);
-        
+        $this->product = $product;
         $this->categories = Category::where('is_active', true)->orderBy('title')->get();
         $this->brands = Brand::where('is_active', true)->orderBy('name')->get();
         $this->initializeFields();
-        $this->loadProductData();
     }
-    
+
     public function initializeFields()
     {
         $this->name = $this->product->name;
@@ -100,79 +76,12 @@ class ViewProduct extends Component
         $this->meta_description = $this->product->meta_description;
         $this->featured = $this->product->featured;
     }
-    
-    public function loadProductData()
-    {
-        // Get primary variant image
-        $primaryVariant = $this->product->variantCombinations->first();
-        $this->variantImage = $primaryVariant ? $primaryVariant->primary_image : null;
-        
-        // Format product images
-        $this->formattedProductImages = [];
-        foreach ($this->product->variantCombinations as $variant) {
-            foreach ($variant->images as $image) {
-                $this->formattedProductImages[] = [
-                    'id' => $image->id,
-                    'path' => $image->image_path,
-                    'is_primary' => $image->is_primary,
-                    'variant_id' => $variant->id
-                ];
-            }
-        }
-        
-        // Load available variants for display
-        $this->availableVariants = $this->product->variantCombinations->map(function($variant) {
-            return [
-                'id' => $variant->id,
-                'price' => $variant->price,
-                'stock' => $variant->stock,
-                'sku' => $variant->sku,
-                'variant_values' => $variant->variant_values,
-                'images' => $variant->images
-            ];
-        });
-        
-        // Calculate stock status
-        $this->hasStock = $this->product->variantCombinations->sum('stock') > 0;
-        
-        // Set current variant (first variant or null)
-        $this->currentVariant = $this->product->variantCombinations->first();
-        
-        // Set SKU (from first variant or product)
-        $this->sku = $this->currentVariant ? $this->currentVariant->sku : ($this->product->sku ?? 'N/A');
-        
-        // Load related products (same category, different product)
-        $this->relatedProducts = Product::where('category_id', $this->product->category_id)
-            ->where('id', '!=', $this->product->id)
-            ->where('status', true)
-            ->limit(4)
-            ->get();
-    }
-    
-    // Parse variant values for display
-    public function parseVariantValues($variantValues)
-    {
-        if (!$variantValues || !is_array($variantValues)) {
-            return [];
-        }
-        
-        $parsed = [];
-        foreach ($variantValues as $key => $value) {
-            if (is_string($key)) {
-                $parsed[$key] = $value;
-            } else {
-                $parsed['Variant ' . ($key + 1)] = $value;
-            }
-        }
-        
-        return $parsed;
-    }
-    
-    // Inline editing methods
+
     public function startEdit($field)
     {
         $this->editingField = $field;
         
+        // Set temporary value based on field type
         switch ($field) {
             case 'print_area':
                 $this->tempArray = $this->product->print_area ?? [];
@@ -201,11 +110,13 @@ class ViewProduct extends Component
 
     public function saveField($field)
     {
+        // Validate specific field
         $this->validateField($field);
 
         try {
             $value = $this->prepareValueForSaving($field);
             
+            // Special handling for name field (auto-generate slug)
             if ($field === 'name') {
                 $this->product->update([
                     'name' => $value,
@@ -215,7 +126,10 @@ class ViewProduct extends Component
                 $this->product->update([$field => $value]);
             }
 
+            // Refresh the product model
             $this->product = $this->product->fresh();
+
+            // Update component property
             $this->{$field} = $value;
 
             $this->editingField = null;
@@ -228,7 +142,7 @@ class ViewProduct extends Component
             session()->flash('error', 'Failed to update ' . str_replace('_', ' ', $field) . ': ' . $e->getMessage());
         }
     }
-    
+
     private function validateField($field)
     {
         $rules = [];
@@ -295,39 +209,8 @@ class ViewProduct extends Component
         $this->tempArray = array_values($this->tempArray);
     }
 
-    public function createVariant()
-    {
-        // Redirect to create variant page
-        return redirect()->route('admin.products.variants.create', $this->product);
-    }
-
-    public function editVariant($variantId)
-    {
-        $variant = $this->product->variantCombinations()->findOrFail($variantId);
-        return redirect()->route('admin.products.variants.edit', [$this->product, $variant]);
-    }
-
-    public function deleteVariant($variantId)
-    {
-        try {
-            $variant = $this->product->variantCombinations()->findOrFail($variantId);
-            $variant->delete();
-            
-            $this->product = $this->product->fresh(['variantCombinations']);
-            session()->flash('message', 'Variant deleted successfully!');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Failed to delete variant: ' . $e->getMessage());
-        }
-    }
-
     public function render()
     {
-        return view('livewire.admin.product.view-product');
-    }
-    
-    public function refreshVariants()
-    {
-        // Refresh variant data when needed
-        $this->product = $this->product->fresh(['variantCombinations.images']);
+        return view('livewire.admin.product.edit-product');
     }
 }

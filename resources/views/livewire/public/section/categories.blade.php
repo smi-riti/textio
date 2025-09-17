@@ -10,9 +10,12 @@
             <div class="grid grid-cols-3 gap-4 md:gap-8 justify-center">
                 @foreach ($categories as $category)
                     <div class="group text-center">
-                        <a href="#" class="block">
+                        <a wire:navigate 
+                           href="{{ route('public.product.all') }}?category_slug={{ $category->slug }}" 
+                           class="block">
+                            <!-- CHANGE: Updated href to append ?category_slug=SLUG for auto-filtering via slug resolution -->
                             <div class="relative mx-auto mb-4 w-20 h-20 sm:w-24 sm:h-24 md:w-52 md:h-52 rounded-full bg-[#f5f0ff] flex items-center justify-center transition-all duration-300 group-hover:bg-[#8f4da7] group-hover:shadow-lg group-hover:scale-110 overflow-hidden">
-                                <img src="{{  $category->image}}"
+                                <img src="{{ $category->image }}"
                                      alt="{{ $category->title }}"
                                      class="h-full w-full object-cover transition-all duration-300 group-hover:brightness-75"
                                      loading="lazy">

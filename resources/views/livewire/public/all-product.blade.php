@@ -296,10 +296,10 @@
                         <div class="flex flex-col sm:flex-row">
                             <!-- Product Image -->
                             <div class="relative group sm:w-64 w-full">
-                                @if($product->images->first())
+                                @if($product->firstVariantImage)
                                 <a href="{{ route('public.product.view', $product->slug) }}" >
                                     <img 
-                                        src="{{ $product->images->first()->image_path }}" 
+                                        src="{{ $product->firstVariantImage->image_path ?? asset('images/placeholder.jpg') }}"
                                         alt="{{ $product->name }}"
                                         class="w-full h-48 sm:h-64 object-cover"
                                     >

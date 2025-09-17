@@ -591,8 +591,28 @@
                         // Listen for custom events
                         window.addEventListener('variantUpdated', (event) => {
                             console.log('Variant updated event:', event);
-                            this.updateImages();
-                            this.activeImageIndex = 0;
+                            if (event.detail && event.detail.image) {
+                                // Get the main image and gallery
+                                let mainImage = event.detail.image;
+                                let gallery = event.detail.galleryImages || [];
+                                
+                                // Remove duplicates
+                                gallery = gallery.filter(img => img !== mainImage);
+                                
+                                // Update the images array
+                                this.images = [mainImage, ...gallery];
+                                this.thumbs = [mainImage, ...gallery];
+                                
+                                // Force reset active image to show the new main image
+                                this.activeImageIndex = 0;
+                                
+                                console.log('Images updated:', {
+                                    mainImage,
+                                    gallery,
+                                    allImages: this.images,
+                                    activeIndex: this.activeImageIndex
+                                });
+                            }
                         });
 
                         window.addEventListener('scroll', () => {
@@ -618,18 +638,10 @@
 
                     updateImages() {
                         console.log('updateImages called');
-
-                        // Use the data passed from Livewire through Blade templates
                         const variantImage = @json($variantImage);
-                        console.log('Variant image from Blade:', variantImage);
-
-                        // Get pre-formatted product images from Blade
                         const productImages = @json($formattedProductImages);
-                        console.log('Product images from Blade:', productImages);
-
                         const placeholder = '{{ asset('images/placeholder.jpg') }}';
 
-                        // If variant has its own image, use it as the primary image
                         if (variantImage) {
                             this.images = [variantImage, ...productImages];
                             this.thumbs = [variantImage, ...productImages];
@@ -643,12 +655,7 @@
                             this.thumbs = [placeholder];
                             console.log('Using placeholder image');
                         }
-
-                        // Always reset to the first image when variants change
-                        this.activeImageIndex = 0;
-
                         console.log('Updated images:', this.images);
-                        console.log('Active image index:', this.activeImageIndex);
                     },
 
                     setActiveImage(index) {

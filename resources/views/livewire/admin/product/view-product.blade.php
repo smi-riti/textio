@@ -1,25 +1,33 @@
-<div class="min-h-screen bg-gray-50 p-4 lg:p-8">
-    <div class="mx-auto max-w-7xl">
+<div x-data="productView()" class="min-h-screen bg-gray-50 p-4 lg:p-8">
+    <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <div class="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div>
                 <h1 class="text-3xl font-bold tracking-tight text-gray-900">{{ $product->name }}</h1>
-                <p class="mt-2 text-gray-600">Product Details & Management</p>
+                <p class="mt-2 text-gray-600">
+                    @if($product->category)
+                        <a class="hover:text-blue-600">
+                            {{ $product->category->title }}
+                        </a>
+                    @else
+                        <span>Not assigned to a category</span>
+                    @endif
+                </p>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('admin.products.index') }}" 
-                   class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                    </svg>
-                    Back to Products
-                </a>
-                <a href="{{ route('admin.products.edit', $product) }}" 
+                <a href="{{ route('admin.products.edit', $product->slug) }}" 
                    class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
                     <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                     </svg>
                     Edit Product
+                </a>
+                <a href="{{ route('admin.products.list') }}" 
+                   class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Back to Products
                 </a>
             </div>
         </div>
@@ -30,44 +38,52 @@
                 <div class="rounded-lg bg-white p-6 shadow-sm">
                     <h2 class="mb-4 text-lg font-medium text-gray-900">Product Images</h2>
                     
-                    @if($product->images->count() > 0)
-                        <!-- Featured Image -->
-                        @php $featuredImage = $product->images->where('is_primary', true)->first() @endphp
-                        @if($featuredImage)
-                            <div class="mb-6">
-                                <div class="relative">
-                                    <img src="{{ $featuredImage->image_path }}" 
-                                         alt="{{ $product->name }}" 
-                                         class="h-64 w-full rounded-lg object-cover border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-zoom-in"
-                                         >
-                                    <div class="absolute top-2 left-2">
-                                        <span class="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white shadow-sm">
-                                            Featured
-                                        </span>
-                                    </div>
-                                    
+                    <!-- Main Image -->
+                    <div class="mb-6 relative" x-data="{ isLoading: false }">
+                        @if($variantImage)
+                            <img id="mainProductImage" 
+                                 src="{{ $variantImage }}"
+                                 alt="{{ $product->name }}" 
+                                 class="h-64 w-full rounded-lg object-cover border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-zoom-in"
+                                 @click="openLightbox($event.target.src)"
+                                 x-bind:class="{ 'opacity-50': isLoading }">
+                        @else
+                            <div class="h-64 w-full rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center">
+                                <div class="text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-500">No product image</p>
                                 </div>
                             </div>
                         @endif
+                        <div x-show="isLoading" class="absolute inset-0 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        </div>
+                        @if($variantImage)
+                            <div class="absolute top-2 left-2">
+                                <span class="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white shadow-sm">
+                                    Featured
+                                </span>
+                            </div>  
+                        @endif
+                    </div>
 
-                        <!-- Gallery Images -->
-                        @php $galleryImages = $product->images->where('is_primary', false) @endphp
-                        @if($galleryImages->count() > 0)
-                            <div>
-                                <h3 class="mb-3 text-sm font-medium text-gray-700">Gallery Images ({{ $galleryImages->count() }})</h3>
-                                <div class="grid grid-cols-2 gap-2">
-                                    @foreach($galleryImages as $image)
-                                        <div class="relative group">
-                                            <img src="{{ $image->image_path }}" 
-                                                 alt="{{ $product->name }}" 
-                                                 class="h-20 w-full rounded object-cover border border-gray-200 hover:border-blue-300 transition-all cursor-zoom-in"
-                                                 >
-                                            
-                                        </div>
-                                    @endforeach
-                                </div>
+                    <!-- Gallery Images -->
+                    @if(!empty($formattedProductImages))
+                        <div>
+                            <h3 class="mb-3 text-sm font-medium text-gray-700">Gallery Images ({{ count($formattedProductImages) }})</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                @foreach($formattedProductImages as $galleryImage)
+                                    <div class="relative group">
+                                        <img src="{{ $galleryImage['path'] }}" 
+                                             alt="Gallery image" 
+                                             class="h-20 w-full rounded-md object-cover border border-gray-200 cursor-pointer hover:opacity-75 transition-opacity"
+                                             @click="updateMainImage('{{ $galleryImage['path'] }}')">
+                                    </div>
+                                @endforeach
                             </div>
-                        @endif
+                        </div>
                     @else
                         <div class="text-center text-gray-500 py-8">
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,16 +141,16 @@
                         
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
                             <dt class="text-sm font-medium text-gray-500">SKU</dt>
-                            <dd class="mt-1 text-sm font-mono text-gray-900 bg-white px-2 py-1 rounded border">{{ $product->sku }}</dd>
+                            <dd class="mt-1 text-sm font-mono text-gray-900 bg-white px-2 py-1 rounded border">{{ $product->sku ?? 'N/A' }}</dd>
                         </div>
 
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
                             <dt class="text-sm font-medium text-gray-500">Stock Quantity</dt>
                             <dd class="mt-1 text-sm text-gray-900">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                    {{ $product->quantity > 10 ? 'bg-green-100 text-green-800' : 
-                                       ($product->quantity > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
-                                    {{ $product->quantity }} units
+                                    {{ $product->variantCombinations->sum('stock') > 10 ? 'bg-green-100 text-green-800' : 
+                                       ($product->variantCombinations->sum('stock') > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
+                                    {{ $product->variantCombinations->sum('stock') }} units
                                 </span>
                             </dd>
                         </div>
@@ -148,7 +164,7 @@
                     @if($product->description)
                         <div class="mt-6">
                             <dt class="text-sm font-medium text-gray-700 mb-2">Description</dt>
-                            <dd class="text-sm text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-100">{{ $product->description }}</dd>
+                            <dd class="text-sm text-gray-900 bg-gray-50 p-4 rounded-lg border border-gray-100 prose">{!! nl2br(e($product->description)) !!}</dd>
                         </div>
                     @endif
                 </div>
@@ -165,27 +181,39 @@
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
                         <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
                             <dt class="text-sm font-medium text-blue-700">Regular Price (MRP)</dt>
-                            <dd class="mt-1 text-2xl font-bold text-blue-900">{{ $product->formatted_price }}</dd>
+                            <dd class="mt-1 text-2xl font-bold text-blue-900">₹{{ number_format($product->price ?? 0, 2) }}</dd>
                         </div>
                         
                         <div class="bg-green-50 p-4 rounded-lg border border-green-200">
                             <dt class="text-sm font-medium text-green-700">Selling Price</dt>
-                            <dd class="mt-1 text-2xl font-bold text-green-900">{{ $product->formatted_discount_price }}</dd>
+                            <dd class="mt-1 text-2xl font-bold text-green-900">₹{{ number_format($product->discount_price ?? $product->price ?? 0, 2) }}</dd>
                         </div>
                         
-                        @if($product->price > $product->discount_price)
+                        @if($product->discount_price && $product->discount_price < $product->price)
                             <div class="bg-red-50 p-4 rounded-lg border border-red-200">
                                 <dt class="text-sm font-medium text-red-700">You Save</dt>
                                 <dd class="mt-1 text-2xl font-bold text-red-900">
-                                    ₹{{ number_format($product->price - $product->discount_price, 2) }}
+                                    ₹{{ number_format(($product->price ?? 0) - ($product->discount_price ?? 0), 2) }}
                                     <span class="text-sm font-normal">({{ $product->saving_percentage }}% off)</span>
                                 </dd>
                             </div>
                         @endif
                     </div>
+
+                    @if($deliveryCharge > 0)
+                        <div class="mt-4 text-sm text-gray-600">
+                            + ₹{{ number_format($deliveryCharge, 2) }} delivery charge
+                        </div>
+                    @endif
                 </div>
 
-                <!-- Features & Customization -->
+
+
+
+
+
+
+                <!-- Features & Status -->
                 <div class="rounded-lg bg-white p-6 shadow-sm">
                     <h2 class="mb-6 text-lg font-medium text-gray-900 flex items-center">
                         <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -276,88 +304,9 @@
                 </div>
 
                 <!-- Product Variants -->
-                @if($product->variants->count() > 0)
-                    <div class="rounded-lg bg-white p-6 shadow-sm">
-                        <h2 class="mb-6 text-lg font-medium text-gray-900 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                            </svg>
-                            Product Variants 
-                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                {{ $product->variants->count() }} variants
-                            </span>
-                        </h2>
-                        
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Variant Details</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($product->variants as $variant)
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                @if($variant->variant_image)
-                                                    <img src="{{ $variant->variant_image }}" 
-                                                         alt="{{ $variant->variant_type }}" 
-                                                         class="h-12 w-12 rounded-lg object-cover border border-gray-200">
-                                                @else
-                                                    <div class="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                                                        <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                        </svg>
-                                                    </div>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ $variant->variant_type }}</div>
-                                                <div class="text-sm text-gray-500">{{ $variant->variant_name }}</div>
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-900">
-                                                <span class="font-medium text-green-600">₹{{ number_format($variant->price, 2) }}</span>
-                                            </td>
-                                            <td class="px-6 py-4">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                    {{ $variant->stock > 10 ? 'bg-green-100 text-green-800' : 
-                                                       ($variant->stock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
-                                                    {{ $variant->stock }} units
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 text-sm font-mono text-gray-900">
-                                                {{ $variant->sku ?? 'N/A' }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Variants Summary -->
-                        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                                <dt class="text-sm font-medium text-blue-700">Total Variants</dt>
-                                <dd class="mt-1 text-2xl font-semibold text-blue-900">{{ $product->variants->count() }}</dd>
-                            </div>
-                            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                                <dt class="text-sm font-medium text-green-700">Total Stock</dt>
-                                <dd class="mt-1 text-2xl font-semibold text-green-900">{{ $product->variants->sum('stock') }} units</dd>
-                            </div>
-                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                                <dt class="text-sm font-medium text-purple-700">Price Range</dt>
-                                <dd class="mt-1 text-lg font-semibold text-purple-900">
-                                    ₹{{ number_format($product->variants->min('price'), 2) }} - 
-                                    ₹{{ number_format($product->variants->max('price'), 2) }}
-                                </dd>
-                            </div>
-                        </div>
-                    </div>
-                @endif
+                <div class="rounded-lg bg-white p-6 shadow-sm">
+                    @livewire('admin.product.product-variants', ['product' => $product, 'isEdit' => true], key($product->id . '-variants'))
+                </div>
 
                 <!-- Product Highlights -->
                 @if($product->highlights->count() > 0)
@@ -409,9 +358,103 @@
                         @endif
                     </div>
                 @endif
+
+                <!-- Related Products -->
+                @if($relatedProducts->count() > 0)
+                    <div class="rounded-lg bg-white p-6 shadow-sm">
+                        <h2 class="mb-6 text-lg font-medium text-gray-900 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10m-10 10h10m-7-7v10m7-13v10"/>
+                            </svg>
+                            Related Products
+                        </h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @foreach($relatedProducts as $related)
+                                <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
+                                    <div class="relative h-48">
+                                        <img src="{{ $related->images->first()?->image_path ?? asset('images/placeholder.jpg') }}" 
+                                             alt="{{ $related->name }}" 
+                                             class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="text-sm font-medium text-gray-900 truncate">{{ $related->name }}</h3>
+                                        <p class="text-sm text-gray-500 mt-1 truncate">{{ $related->formatted_discount_price ?? $related->formatted_price }}</p>
+                                        <a 
+                                           class="mt-2 inline-block text-blue-600 text-sm hover:underline">View Details</a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Lightbox Modal -->
+        <div x-show="showLightbox" 
+             x-transition:enter="transition ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="transition ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4" 
+             @click.away="showLightbox = false">
+            <div class="relative max-w-4xl max-h-full">
+                <img x-ref="lightboxImage" :src="lightboxImageSrc" alt="Product Image" class="max-w-full max-h-full object-contain rounded-lg">
+                <button @click="showLightbox = false" class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300">&times;</button>
             </div>
         </div>
     </div>
 
-</div>
+    <script>
+        function productView() {
+            return {
+                showLightbox: false,
+                lightboxImageSrc: '',
+                isLoading: false,
 
+                updateMainImage(src) {
+                    this.isLoading = true;
+                    const mainImg = document.getElementById('mainProductImage');
+                    mainImg.src = src;
+                    setTimeout(() => {
+                        this.isLoading = false;
+                    }, 300);
+                },
+
+                openLightbox(src) {
+                    this.lightboxImageSrc = src;
+                    this.showLightbox = true;
+                },
+
+                init() {
+                    // Listen for variant updates from Livewire
+                    this.$wire.on('variantUpdated', (event) => {
+                        if (event.detail.image) {
+                            this.updateMainImage(event.detail.image);
+                        }
+                        // Note: Gallery updates are handled via Livewire re-render
+                    });
+                }
+            }
+        }
+
+        // Handle notifications
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('notify', (event) => {
+                // Replace with your preferred toast library (e.g., Toastify, SweetAlert)
+                alert(`${event.detail.message} (${event.detail.type})`);
+            });
+        });
+    </script>
+
+    <style>
+        .prose {
+            @apply text-gray-700 leading-relaxed;
+        }
+        .prose p {
+            @apply mb-3;
+        }
+    </style>
+</div>

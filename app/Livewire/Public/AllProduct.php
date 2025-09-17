@@ -80,7 +80,7 @@ class AllProduct extends Component
     // Wishlist storage (you can enhance this with database)
     public $wishlistItems = [];
 
-    public function mount()
+   public function mount()
     {
         $this->categories = Category::where('is_active', true)->get();
         $this->parentCategories = Category::where('is_active', true)
@@ -88,7 +88,17 @@ class AllProduct extends Component
             ->get();
         $this->brands = Brand::where('is_active', true)->get();
 
-        // Initialize subcategories if category is pre-selected
+        // NEW: Resolve category_slug from URL to category ID
+        if (request()->has('category_slug')) {
+            $category = Category::where('slug', request('category_slug'))
+                ->where('is_active', true)
+                ->first();
+            if ($category) {
+                $this->selectedCategory = $category->id;
+            }
+        }
+
+        // Initialize subcategories if category is pre-selected (now handles resolved ID)
         if ($this->selectedCategory) {
             $this->subcategories = Category::where('parent_category_id', $this->selectedCategory)
                 ->where('is_active', true)
@@ -386,7 +396,7 @@ class AllProduct extends Component
 
     public function render()
     {
-        $query = Product::query()->where('status', true)->with(['images', 'category', 'brand', 'variantCombinations']);
+        $query = Product::query()->where('status', true)->with(['firstVariantImage', 'category', 'brand', 'variantCombinations']);
 
         // Apply category/subcategory filters
         if (!empty($this->selectedSubcategories)) {

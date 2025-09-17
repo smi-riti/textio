@@ -32,11 +32,11 @@
                         </div>
                     </form>
                     <!-- Social Links -->
-                    {{-- <div class="flex justify-center">
-                        <a href="#" class="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+                    <div class="flex justify-center">
+                        <a href="{{route('google.redirect')}}" class="flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
                             <i class="ti-google mr-2"></i> Sign in with Google
                         </a>
-                    </div> --}}
+                    </div>
                     <!-- Mobile Sign Up Link -->
                     <p class="text-center block lg:hidden mt-8 text-gray-600">
                         Don't have an account? <a href="{{ route('register') }}" class="text-purple-600 hover:underline">Sign up</a>.

@@ -89,7 +89,8 @@
                             <i class="fas fa-plus text-sm"></i> Add New Address
                         </button>
                     </div>
-                    <livewire:public.section.accounts.address-upadate />
+
+                    <livewire:public.section.accounts.address-update />
                 </div>
             </div>
 
