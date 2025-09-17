@@ -26,6 +26,7 @@
     <!-- Main style file -->
     <link rel="stylesheet" href="{{asset('assets/dist/css/app.min.css')}}" type="text/css">
 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
 
     {{-- tailwind Scripts--}}
     <script src="https://cdn.tailwindcss.com"></script>

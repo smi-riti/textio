@@ -38,7 +38,7 @@
             <ul>
                 <li class="menu-divider">E-Commerce</li>
                 <li>
-                    <a class="active" href="index.html">
+                    <a wire:navigate class="active" href="{{route('admin.dashboard')}}">
                         <span class="nav-link-icon">
                             <i class="bi bi-bar-chart"></i>
                         </span>
@@ -129,7 +129,7 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="customers.html">
+                    <a wire:navigate href="{{route('admin.customer')}}">
                         <span class="nav-link-icon">
                             <i class="bi bi-person-badge"></i>
                         </span>
@@ -155,18 +155,15 @@
                     </a>
 
                 </li>
-                <li>
+                {{-- <li>
                     <a href="#">
                         <span class="nav-link-icon">
                             <i class="bi bi-person-circle"></i>
                         </span>
                         <span>Users</span>
                     </a>
-                    <ul>
-                        <li><a href="user-list.html">List View</a></li>
-                        <li><a href="user-grid.html">Grid View</a></li>
-                    </ul>
-                </li>
+                    
+                </li> --}}
 
 
 

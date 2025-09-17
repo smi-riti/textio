@@ -82,10 +82,27 @@ class ViewProduct extends Component
             'selectedVariantCombination' => $this->selectedVariantCombination ? $this->selectedVariantCombination->id : null
         ]);
 
-        // Dispatch initial variant image and gallery
+                // Dispatch initial variant image and gallery
+        $initialImage = null;
+        $initialGallery = [];
+
+        if ($this->selectedVariantCombination) {
+            $initialImage = $this->getPrimaryImageForVariant($this->selectedVariantCombination);
+            $initialGallery = $this->getGalleryImagesForVariant($this->selectedVariantCombination);
+        }
+
+        // Ensure images are properly formatted
+        $initialImage = $this->ensureImageUrl($initialImage);
+        $initialGallery = array_map([$this, 'ensureImageUrl'], $initialGallery);
+
+        Log::info('Initial variant images:', [
+            'primary' => $initialImage,
+            'gallery' => $initialGallery
+        ]);
+
         $this->dispatch('variantUpdated', [
-            'image' => $this->getPrimaryImageForVariant($this->selectedVariantCombination),
-            'galleryImages' => $this->getGalleryImagesForVariant($this->selectedVariantCombination),
+            'image' => $initialImage,
+            'galleryImages' => $initialGallery,
             'variantId' => $this->selectedVariantCombination ? $this->selectedVariantCombination->id : null
         ]);
     }
@@ -134,18 +151,24 @@ class ViewProduct extends Component
         $colorImages = [];
         foreach ($this->variantCombinations as $combination) {
             $values = $this->parseVariantValues($combination->variant_values);
-            if (!is_array($values) || !isset($values['Color'])) {
-                continue;
-            }
+            if (!is_array($values) || !isset($values['Color'])) continue;
 
             $color = $values['Color'];
             $primaryImage = $this->getPrimaryImageForVariant($combination);
+            
             if ($color && $primaryImage) {
+                // Ensure image URL is properly formatted
+                $primaryImage = $this->ensureImageUrl($primaryImage);
                 $colorImages[$color] = $primaryImage;
+                
+                Log::info("Found color image:", [
+                    'color' => $color,
+                    'image' => $primaryImage
+                ]);
             }
         }
 
-        Log::info('Extracted color images:', $colorImages);
+        Log::info('Extracted all color images:', $colorImages);
         return $colorImages;
     }
 
@@ -188,8 +211,17 @@ class ViewProduct extends Component
             return;
         }
 
+        Log::info('Selecting variant:', ['type' => $type, 'value' => $value]);
+        
         $this->selectedVariants[$type] = $value;
         $this->selectedVariantCombination = null;
+
+        // If it's a color variant, get the image directly from colorImages
+        $variantImage = null;
+        if ($type === 'Color' && isset($this->colorImages[$value])) {
+            $variantImage = $this->colorImages[$value];
+            Log::info('Found color variant image:', ['color' => $value, 'image' => $variantImage]);
+        }
 
         foreach ($this->variantCombinations as $combination) {
             $values = $this->parseVariantValues($combination->variant_values);
@@ -224,6 +256,21 @@ class ViewProduct extends Component
         if ($this->selectedVariantCombination) {
             $primaryImage = $this->getPrimaryImageForVariant($this->selectedVariantCombination);
             $galleryImages = $this->getGalleryImagesForVariant($this->selectedVariantCombination);
+
+            // If this is a color variant, use the color image as primary
+            if ($type === 'Color' && !empty($this->colorImages[$value])) {
+                $primaryImage = $this->colorImages[$value];
+            }
+
+            // Ensure the image URLs are properly formatted
+            $primaryImage = $this->ensureImageUrl($primaryImage);
+            $galleryImages = array_map([$this, 'ensureImageUrl'], $galleryImages);
+
+            // Log the images being dispatched
+            Log::info('Dispatching variant images:', [
+                'primary' => $primaryImage,
+                'gallery' => $galleryImages
+            ]);
 
             $this->dispatch('variantUpdated', [
                 'image' => $primaryImage,
@@ -381,6 +428,21 @@ class ViewProduct extends Component
         $price = $this->product->price;
         $discountPrice = $this->product->discount_price;
         $regularPrice = $this->product->price;
+
+        // Get variant image
+        $variantImage = null;
+        if ($this->selectedVariantCombination) {
+            // If we have a selected color variant, use that image
+            if (isset($this->selectedVariants['Color'])) {
+                $colorValue = $this->selectedVariants['Color'];
+                $variantImage = isset($this->colorImages[$colorValue]) ? $this->colorImages[$colorValue] : null;
+            }
+            
+            // If no color image, use the variant combination's primary image
+            if (!$variantImage) {
+                $variantImage = $this->getPrimaryImageForVariant($this->selectedVariantCombination);
+            }
+        }
 
         $currentVariant = $this->selectedVariantCombination;
         

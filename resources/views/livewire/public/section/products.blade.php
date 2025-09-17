@@ -9,8 +9,12 @@
                     class="product-card  rounded-xl overflow-hidden  transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl max-w-sm">
                     <div class="relative">
                         <a wire:navigate href="{{ route('view.product', $product->slug) }}">
-                            <img src="{{ $product->images->first()?->image_path ?? asset('images/placeholder.jpg') }}"
-                                alt="{{ $product->name }}" class="w-full h-64 object-cover">
+                            @if ($product->firstVariantImage)
+                                <img src="{{ $product->firstVariantImage->image_path ?? asset('images/placeholder.jpg') }}"
+                                    alt="{{ $product->firstVariantImage->name }}" class="w-full h-64 object-cover">
+                            @else
+                            <h1>hello</h1>
+                            @endif
                         </a>
                         <div class="absolute top-3 right-3 text-xs font-semibold rounded-full uppercase tracking-wide">
                             <livewire:public.section.wishlist-button :productId="$product->id" />
@@ -26,7 +30,7 @@
                         <a wire:navigate href="{{ route('view.product', $product->slug) }}">
                             <button
                                 class="add-to-cart-btn w-full bg-[#171717] text-white py-3 px-6 rounded-full text-sm font-medium hover:bg-[#8f4da7] focus:outline-none focus:ring-2 focus:ring-[#8f4da7] focus:ring-offset-2 transition-all duration-300 transform hover:scale-105">
-                                 <i class="fas fa-arrow-right mr-2"></i>  check it out
+                                <i class="fas fa-arrow-right mr-2"></i> check it out
                             </button>
                         </a>
 

@@ -27,9 +27,9 @@
                 </div>
             </form>
             <div class="flex flex-col items-center gap-2">
-                {{-- <a href="#" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition">
-                    <i class="ti-google text-red-500"></i> <span>Sign in with Google</span>
-                </a> --}}
+                <a href="{{ route('google.redirect') }}" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition">
+                    <i class="ti-google text-red-500 "></i> <span>Sign in with Google</span>
+                </a>
                 {{-- <a href="#" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition">
                     <i class="ti-facebook text-blue-600"></i> <span>Sign in with Facebook</span>
                 </a> --}}
@@ -37,6 +37,7 @@
             <p class="text-center block lg:hidden mt-8">
                 Don't have an account? <a href="#" class="text-purple-600 hover:underline">Sign up</a>.
             </p>
+            
         </div>
         <!-- Right Side (Info) -->
         <div class="hidden lg:flex w-1/2 flex-col items-center justify-between border-l border-gray-200 bg-gray-50 py-8 px-8 text-center">

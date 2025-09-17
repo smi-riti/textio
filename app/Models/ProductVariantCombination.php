@@ -21,7 +21,7 @@ class ProductVariantCombination extends Model
     // Fixed: Correct foreign key (was 'product_varaint_combination_id')
     public function images()
     {
-        return $this->hasMany(ProductImage::class, "product_variant_combination_id", "id");
+        return $this->hasMany(ProductImage::class, "product_variant_combination_id");
     }
 
     // Helper to get primary image

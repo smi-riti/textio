@@ -396,7 +396,7 @@ class AllProduct extends Component
 
     public function render()
     {
-        $query = Product::query()->where('status', true)->with(['images', 'category', 'brand', 'variantCombinations']);
+        $query = Product::query()->where('status', true)->with(['firstVariantImage', 'category', 'brand', 'variantCombinations']);
 
         // Apply category/subcategory filters
         if (!empty($this->selectedSubcategories)) {

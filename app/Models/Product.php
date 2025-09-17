@@ -104,7 +104,20 @@ class Product extends Model
 }
 
 public function variants()
-    {
-        return $this->hasMany(ProductVariantCombination::class, 'product_id');
-    }
+{
+    return $this->hasMany(ProductVariantCombination::class);
+}
+
+public function firstVariantImage()
+{
+    return $this->hasOneThrough(
+        ProductImage::class,                // final model
+        ProductVariantCombination::class,   // intermediate model
+        'product_id',                       // FK on product_variant_combinations
+        'product_variant_combination_id',   // FK on product_images
+        'id',                               // local key on products
+        'id'                                // local key on product_variant_combinations
+    )->where('is_primary', true);
+}
+
 }

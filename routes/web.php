@@ -13,6 +13,7 @@ use App\Livewire\Admin\Product\CreateProduct;
 use App\Livewire\Admin\Product\UpdateProduct;
 use App\Livewire\Admin\Product\Variant\VariantName;
 use App\Livewire\Admin\Product\Variant\VariantValus;
+use App\Livewire\Admin\Users\Customer;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Public\AllProduct;
@@ -39,7 +40,6 @@ use App\Livewire\Admin\Product\ProductVariantEdit;
 
 
 
-Route::get('login', Login::class)->name('login');
 Route::get('register', Register::class)->name('register');
 Route::get('/',LandingPage::class)->name('home');
 //  Route::get('/wishlist', Wishlist::class)->name('wishlist.index');
@@ -49,7 +49,11 @@ Route::post('/logout',function(){
     return redirect('/login');
 })->name('logout');
 
-// Route::get('/cart',AddItem::class)->name('cart');
+//google login 
+
+Route::get('/login', Login::class)->name('login');
+Route::get('/auth/google', [Login::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('/auth/google/callback', [Login::class, 'handleGoogleCallback'])->name('auth.google.callback');// Route::get('/cart',AddItem::class)->name('cart');
 
 Route::get('/mycart',MyCart::class)->name('myCart');
 Route::get('/myorder',MyOrder::class)->name('myOrder');
@@ -95,9 +99,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('products-old', ManageProduct::class)->name('products');
     Route::get('productImage', MultipleImages::class)->name('product-image');
     Route::get('coupon', ManageCoupon::class)->name('coupon');
-
+    Route::get('user', Customer::class)->name('customer');
 
 });
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/cart', Cart::class)->name('public.cart');
