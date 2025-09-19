@@ -1,15 +1,14 @@
-
-<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <div class="border border-purple-200 rounded-2xl bg-white shadow-sm">
+<div class="max-w-7xl mx-auto  sm:px-6 lg:px-8">
+    <div class="border border-gray-200 rounded-xl bg-white shadow-sm">
 
         <!-- Header -->
-        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center px-6 py-5 border-b border-purple-200 bg-purple-50">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center px-6 py-5 border-b border-gray-200 bg-gray-50">
             <div>
-                <h2 class="text-xl font-bold text-purple-800">Brand Management</h2>
-                <p class="text-sm text-purple-600 mt-1">Manage your brands and their settings</p>
+                <h2 class="text-xl font-medium text-[#171717]">Brand Management</h2>
+                <p class="text-sm text-gray-600 mt-1">Manage your brands and their settings</p>
             </div>
 
-            <div class="flex items-center space-x-4 mt-4 lg:mt-0">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4 lg:mt-0">
                 <!-- Search -->
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -19,16 +18,16 @@
                     </div>
                     <input type="text" 
                            wire:model.live.debounce.300ms="search"
-                           class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm w-64"
+                           class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-[#8f4da7] text-sm w-full sm:w-64 transition-colors"
                            placeholder="Search brands...">
                 </div>
 
                 <!-- Tabs -->
-                <div class="flex space-x-1 bg-white rounded-lg p-1 border border-purple-200">
+                <div class="flex space-x-1 bg-white rounded-lg p-1 border border-gray-200 shadow-sm">
                     <button 
                         wire:click="showList" 
                         class="px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
-                               {{ !$showDeleted ? 'bg-purple-600 text-white shadow-sm' : 'text-purple-700 hover:bg-purple-100' }}">
+                               {{ !$showDeleted ? 'bg-[#8f4da7] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
                         <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
                         </svg>
@@ -37,7 +36,7 @@
                     <button 
                         wire:click="showTrash" 
                         class="px-3 py-2 text-sm font-medium rounded-md transition-all duration-200
-                               {{ $showDeleted ? 'bg-purple-600 text-white shadow-sm' : 'text-purple-700 hover:bg-purple-100' }}">
+                               {{ $showDeleted ? 'bg-[#8f4da7] text-white shadow-sm' : 'text-gray-700 hover:bg-gray-100' }}">
                         <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"/>
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
@@ -49,7 +48,7 @@
                 <!-- Create button -->
                 @if(!$showDeleted)
                     <a href="{{ route('admin.brand-add') }}" 
-                       class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 shadow-sm">
+                       class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-[#8f4da7] text-white hover:bg-[#7a3d92] focus:ring-2 focus:ring-[#8f4da7] focus:ring-offset-2 transition-all duration-200 shadow-sm">
                         <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
                         </svg>
@@ -61,7 +60,7 @@
 
         <!-- Flash Messages -->
         @if(session('message'))
-            <div class="mx-6 mt-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl">
+            <div class="mx-6 mt-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg shadow-sm">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -72,7 +71,7 @@
         @endif
         
         @if(session('error'))
-            <div class="mx-6 mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+            <div class="mx-6 mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg shadow-sm">
                 <div class="flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -91,7 +90,7 @@
                             <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Logo</span>
                         </th>
                         <th class="px-3 py-4 text-left">
-                            <button wire:click="sortBy('name')" class="flex items-center space-x-1 text-xs font-medium text-gray-500 uppercase tracking-wide hover:text-gray-700">
+                            <button wire:click="sortBy('name')" class="flex items-center space-x-1 text-xs font-medium text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
                                 <span>Name</span>
                                 @if($sortBy === 'name')
                                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -108,7 +107,7 @@
                             <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</span>
                         </th>
                         <th class="px-3 py-4 text-left">
-                            <button wire:click="sortBy('created_at')" class="flex items-center space-x-1 text-xs font-medium text-gray-500 uppercase tracking-wide hover:text-gray-700">
+                            <button wire:click="sortBy('created_at')" class="flex items-center space-x-1 text-xs font-medium text-gray-500 uppercase tracking-wide hover:text-gray-700 transition-colors">
                                 <span>Created</span>
                                 @if($sortBy === 'created_at')
                                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -128,16 +127,16 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     @forelse($brands as $brand)
-                        <tr class="hover:bg-gray-50 {{ $brand->trashed() ? 'bg-red-50' : '' }}">
+                        <tr class="hover:bg-gray-50 transition-colors {{ $brand->trashed() ? 'bg-red-50' : '' }}">
                             <!-- Logo -->
                             <td class="pl-6 pr-3 py-4">
                                 @if ($brand->logo)
                                     <img src="{{ $brand->logo }}" 
                                          alt="{{ $brand->name }}" 
-                                         class="w-12 h-12 rounded-lg object-contain bg-white p-1 border border-purple-200 shadow-sm">
+                                         class="w-12 h-12 rounded-lg object-contain bg-white p-1 border border-gray-200 shadow-sm">
                                 @else
-                                    <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center border border-purple-200">
-                                        <svg class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200">
+                                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
                                         </svg>
                                     </div>
@@ -146,7 +145,7 @@
                             
                             <!-- Name -->
                             <td class="px-3 py-4">
-                                <div class="font-medium text-gray-900">{{ $brand->name }}</div>
+                                <div class="font-medium text-[#171717]">{{ $brand->name }}</div>
                                 @if($brand->description)
                                     <div class="text-gray-500 text-xs mt-1">{{ Str::limit($brand->description, 50) }}</div>
                                 @endif
@@ -204,7 +203,7 @@
                                         </button>
                                     @else
                                         <a href="{{ route('admin.brand.edit', $brand->id) }}"
-                                           class="inline-flex items-center justify-center w-8 h-8 text-purple-600 hover:text-purple-800 rounded-lg hover:bg-purple-100 transition-colors"
+                                           class="inline-flex items-center justify-center w-8 h-8 text-[#8f4da7] hover:text-[#7a3d92] rounded-lg hover:bg-purple-100 transition-colors"
                                            title="Edit">
                                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z"/>
@@ -228,7 +227,7 @@
                                     <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V9a4 4 0 01-4 4H9a4 4 0 01-4-4V5"/>
                                     </svg>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-1">
+                                    <h3 class="text-lg font-medium text-[#171717] mb-1">
                                         @if($showDeleted)
                                             No deleted brands
                                         @else
@@ -246,7 +245,7 @@
                                     </p>
                                     @if(!$showDeleted && !$search)
                                         <a href="{{ route('admin.brand-add') }}" 
-                                           class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors">
+                                           class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg bg-[#8f4da7] text-white hover:bg-[#7a3d92] transition-colors shadow-sm">
                                             <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
                                             </svg>
@@ -263,7 +262,7 @@
         
         <!-- Pagination -->
         @if($brands->hasPages())
-            <div class="px-6 py-4 border-t border-purple-200 bg-purple-25">
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
                 {{ $brands->links('pagination.custom') }}
             </div>
         @endif

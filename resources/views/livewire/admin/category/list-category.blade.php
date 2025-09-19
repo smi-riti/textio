@@ -1,15 +1,33 @@
-<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto  sm:px-6 lg:px-8">
+    <!-- Success Message -->
+    @if (session()->has('message'))
+        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <p class="text-green-800 font-medium">{{ session('message') }}</p>
+                </div>
+                <button type="button" class="text-green-600 hover:text-green-800">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    @endif
 
-    <div class="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-semibold text-gray-900">Categories Management</h2>
+            <h2 class="text-2xl font-medium text-[#171717]">Categories Management</h2>
             <div class="mt-3 sm:mt-0 flex space-x-4">
                 <button wire:click="setTab('active')" 
-                        class="px-3 py-2 text-sm font-medium {{ $tab === 'active' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700' }} transition-colors">
+                        class="px-3 py-2 text-sm font-medium {{ $tab === 'active' ? 'text-[#8f4da7] border-b-2 border-[#8f4da7]' : 'text-gray-500 hover:text-gray-700' }} transition-colors">
                     Active Categories
                 </button>
                 <button wire:click="setTab('trash')" 
-                        class="px-3 py-2 text-sm font-medium {{ $tab === 'trash' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700' }} transition-colors">
+                        class="px-3 py-2 text-sm font-medium {{ $tab === 'trash' ? 'text-[#8f4da7] border-b-2 border-[#8f4da7]' : 'text-gray-500 hover:text-gray-700' }} transition-colors">
                     Trash
                 </button>
             </div>
@@ -24,13 +42,13 @@
                         </svg>
                     </div>
                     <input wire:model.live.debounce.300ms="search" type="search" id="search" 
-                           class="block w-full rounded-md border-0 py-1.5 pl-10 pr-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 transition-colors"
+                           class="block w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-[#8f4da7] focus:border-[#8f4da7] sm:text-sm transition-colors"
                            placeholder="Search categories...">
                 </div>
             </div>
             @if($tab !== 'trash')
             <a href="{{ route('admin.categories.create') }}" 
-               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-[#8f4da7] hover:bg-[#7a3d92] focus:ring-2 focus:ring-offset-2 focus:ring-[#8f4da7] transition-colors shadow-sm">
                 <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
@@ -39,22 +57,11 @@
             @endif
         </div>
     </div>
-
-    @if(session('message'))
-        <div class="mb-4 p-4 bg-green-50 border border-green-200 text-green-700 rounded-md">
-            <div class="flex">
-                <svg class="h-5 w-5 text-green-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-                {{ session('message') }}
-            </div>
-        </div>
-    @endif
     
     @if(session('error'))
-        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-md">
-            <div class="flex">
-                <svg class="h-5 w-5 text-red-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg shadow-sm">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 text-red-600 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
                 </svg>
                 {{ session('error') }}
@@ -63,9 +70,9 @@
     @endif
 
     <div class="mt-4 flex flex-col">
-        <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                <div class="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+            <div class="inline-block min-w-full align-middle">
+                <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -82,11 +89,10 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="h-16 w-16 flex-shrink-0 relative group">
                                             @if($category->image)
-                                                <img class="h-16 w-16 rounded-lg object-cover border border-gray-200 hover:shadow-md transition-shadow " 
+                                                <img class="h-16 w-16 rounded-lg object-cover border border-gray-200 hover:shadow-md transition-shadow" 
                                                      src="{{ $category->image }}" 
                                                      alt="{{ $category->title }}" 
-                                                     loading="lazy"
-                                                    >
+                                                     loading="lazy">
                                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all rounded-lg flex items-center justify-center">
                                                     <svg class="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
@@ -103,10 +109,10 @@
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex flex-col">
-                                            <div class="text-sm font-medium text-gray-900">{{ $category->title }}</div>
+                                            <div class="text-sm font-medium text-[#171717]">{{ $category->title }}</div>
                                             <div class="text-sm text-gray-500 font-mono">{{ $category->slug }}</div>
                                             @if($category->children_count > 0)
-                                                <div class="text-xs text-indigo-600 mt-1 flex items-center">
+                                                <div class="text-xs text-[#8f4da7] mt-1 flex items-center">
                                                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                                     </svg>
@@ -143,7 +149,7 @@
                                                        wire:loading.attr="disabled">
                                                 <div class="w-11 h-6 bg-gray-200 rounded-full peer 
                                                             peer-focus:outline-none peer-focus:ring-4 
-                                                            peer-focus:ring-indigo-300 
+                                                            peer-focus:ring-purple-300 
                                                             peer-checked:after:translate-x-full 
                                                             rtl:peer-checked:after:-translate-x-full 
                                                             peer-checked:after:border-white 
@@ -158,7 +164,7 @@
                                                             after:h-5 
                                                             after:w-5 
                                                             after:transition-all 
-                                                            peer-checked:bg-indigo-600 transition-colors">
+                                                            peer-checked:bg-[#8f4da7] transition-colors">
                                                 </div>
                                             </label>
                                             <span class="ml-3 text-sm font-medium {{ $category->is_active ? 'text-green-700' : 'text-gray-500' }}">
@@ -178,7 +184,7 @@
                                             </a>
                                             @if(!$category->trashed())
                                                 <a href="{{ route('admin.categories.edit', $category->slug) }}" 
-                                                   class="text-indigo-600 hover:text-indigo-900 transition-colors"
+                                                   class="text-[#8f4da7] hover:text-[#7a3d92] transition-colors"
                                                    title="Edit category">
                                                     <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -211,7 +217,7 @@
                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                                         </svg>
-                                        <h3 class="mt-2 text-sm font-medium text-gray-900">No categories found</h3>
+                                        <h3 class="mt-2 text-lg font-medium text-[#171717]">No categories found</h3>
                                         <p class="mt-1 text-sm text-gray-500">
                                             @if($tab === 'trash')
                                                 No deleted categories to restore.
@@ -222,7 +228,7 @@
                                         @if($tab !== 'trash')
                                             <div class="mt-6">
                                                 <a href="{{ route('admin.categories.create') }}" 
-                                                   class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                                   class="inline-flex items-center rounded-lg bg-[#8f4da7] px-4 py-2 text-sm font-medium text-white hover:bg-[#7a3d92] focus:ring-2 focus:ring-[#8f4da7] focus:ring-offset-2 transition-colors shadow-sm">
                                                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                                                     </svg>

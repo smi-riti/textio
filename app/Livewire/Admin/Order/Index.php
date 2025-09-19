@@ -40,6 +40,7 @@ class Index extends Component
             })
             ->latest()
             ->paginate(10);
+        // dd($orders);
 
         $statuses = ['pending', 'processing', 'shipped', 'delivered', 'canceled', 'returned']; // Based on your model
 

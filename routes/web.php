@@ -25,12 +25,13 @@ use App\Livewire\Public\Section\LandingPage;
 use App\Livewire\Public\Section\MyCart;
 use App\Livewire\Public\Section\ViewProduct;
 use App\Livewire\Public\Section\WishlistCard;
+use App\Livewire\User\Product\Show;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\Category\ListCategory;
 use App\Livewire\Admin\Category\CreateCategory;
 use App\Livewire\Admin\Category\UpdateCategory;
 use App\Livewire\Admin\ManageEnquiry;
-use App\Livewire\Admin\Order\Index as OrderIndex;
+use App\Livewire\Admin\Order\Index;
 use App\Livewire\Admin\Order\Show as OrderShow;
 use App\Livewire\Public\Section\MyOrders;
 use App\Livewire\Public\Page\ContactPage;
@@ -57,7 +58,8 @@ Route::post('/logout',function(){
 
 Route::get('/login', Login::class)->name('login');
 Route::get('/auth/google', [Login::class, 'redirectToGoogle'])->name('google.redirect');
-Route::get('/auth/google/callback', [Login::class, 'handleGoogleCallback'])->name('auth.google.callback');// Route::get('/cart',AddItem::class)->name('cart');
+Route::get('/auth/google/callback', [Login::class, 'handleGoogleCallback'])->name('auth.google.callback');
+// Route::get('/cart',AddItem::class)->name('cart');
 
 Route::get('/mycart',MyCart::class)->name('myCart');
 Route::get('/myorders',MyOrders::class)->name('myOrders');
@@ -103,11 +105,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('productImage', MultipleImages::class)->name('product-image');
     Route::get('coupon', ManageCoupon::class)->name('coupon');
     Route::get('user', Customer::class)->name('customer');
-
-
-    //order
-    Route::get('/orders', OrderIndex::class)->name('orders.index');
-    Route::get('/orders/{order}', OrderShow::class)->name('orders.show');
+    Route::get('order/index',Index::class)->name('orderindex');
+    Route::get('order/show/{id}',OrderShow::class)->name('orders.show');
 });
 
 

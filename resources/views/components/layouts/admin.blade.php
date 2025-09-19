@@ -1,110 +1,102 @@
+<!-- resources/views/layouts/admin-layout.blade.php -->
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- Favicon -->
-    <link rel="shortcut icon" href="{{asset('assets/images/favicon.png')}}">
-
-    <!-- Google fonts -->
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-
-    <!-- Bootstrap icons -->
-    <link rel="stylesheet" href="{{asset('assets/dist/icons/bootstrap-icons-1.4.0/bootstrap-icons.min.css')}}"
-        type="text/css">
-    <!-- Bootstrap Docs -->
-    <link rel="stylesheet" href="{{asset('assets/dist/css/bootstrap-docs.css')}}" type="text/css">
-
-    <!-- Slick -->
-    <link rel="stylesheet" href="{{asset('assets/libs/slick/slick.css')}}" type="text/css">
-    <link href="../../css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Main style file -->
-    <link rel="stylesheet" href="{{asset('assets/dist/css/app.min.css')}}" type="text/css">
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-
-    {{-- tailwind Scripts--}}
+    <title>{{ $title ?? 'Textio Admin Dashboard' }}</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Alpine.js CDN -->
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Poppins', 'sans-serif'],
+                        sans: ['Poppins', 'sans-serif']
+                    },
+                    colors: {
+                        primary: '#8f4da7',
+                        dark: '#171717'
                     },
                 }
             }
         }
     </script>
-
-    <!-- Add Tailwind CSS base styles -->
-    <style type="text/tailwindcss">
-        @layer base {
-            html {
-                font-family: "Poppins", system-ui, sans-serif;
-            }
-        }
-    </style>
-
-    <!-- Your existing styles -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Parisienne&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap"
-        rel="stylesheet">
     <style>
         * {
-            font-family: "Poppins", sans-serif !important;
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        .menu-item-active {
+            background-color: rgba(143, 77, 167, 0.1);
+            border-left: 4px solid #8f4da7;
+        }
+
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .submenu.open {
+            max-height: 200px;
+        }
+
+        .overlay {
+            transition: opacity 0.3s ease-in-out;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .overlay.visible {
+            opacity: 0.5;
+            pointer-events: auto;
         }
     </style>
-    <title>{{ $title ?? 'Admin Dashboard' }}</title>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
-
     @livewireStyles
 </head>
 
-<body>
+<body x-data="{ isSidebarOpen: false, toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen } }">    <!-- Mobile Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 z-20 bg-black overlay lg:hidden" :class="{ 'visible': isSidebarOpen }" x-on:click="toggleSidebar()"></div>
 
-    <div>
+    <!-- Layout wrapper -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
         <x-adminsidebar />
-    </div>
 
-    <main>
-        <x-admin-header />
-        <div class="">
-            {{ $slot }}
-        </div>
-    </main>
+        <!-- Main Content Area -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Header -->
+            <x-admin-header />
 
-    {{-- toastr --}}
-    <div class="flex justify-end items-center ">
-        <div x-data="noticesHandler()" class="fixed top-5 right-5 flex flex-col items-end space-y-3 p-4 z-50"
-            @notice.window="add($event.detail)" style="pointer-events:none">
-            <template x-for="notice in notices" :key="notice . id">
-                <div x-show="visible.includes(notice)" x-transition:enter="transition ease-in duration-200"
-                    x-transition:enter-start="transform opacity-0 translate-x-5"
-                    x-transition:enter-end="transform opacity-100 translate-x-0"
-                    x-transition:leave="transition ease-out duration-500"
-                    x-transition:leave-start="transform opacity-100 translate-x-0"
-                    x-transition:leave-end="transform opacity-0 translate-x-5" @click="remove(notice.id)"
-                    class="rounded-lg px-4 py-3 w-72 bg-gray-400  shadow-lg text-black font-medium text-sm cursor-pointer flex items-center justify-between"
-                    style="pointer-events:all">
-                    <span x-text="notice.text"></span>
-                    <button @click="remove(notice.id)" class="ml-2 text-white font-bold">×</button>
-                </div>
-            </template>
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto mt-16 p-4 bg-gray-100">
+                {{ $slot }}
+            </main>
         </div>
     </div>
 
-    <!-- Scripts -->
-    {{-- toastr --}}
+    <!-- Toastr Notifications -->
+    <div x-data="noticesHandler()">
+        <template x-for="notice in visible" :key="notice.id">
+            <div class="fixed top-4 right-4 bg-blue-500 text-white p-4 rounded shadow">
+                <span x-text="notice.message"></span>
+            </div>
+        </template>
+    </div>
 
     <script>
         function noticesHandler() {
@@ -118,9 +110,7 @@
                 },
                 fire(id) {
                     this.visible.push(this.notices.find(notice => notice.id === id));
-                    setTimeout(() => {
-                        this.remove(id);
-                    }, 1000);
+                    setTimeout(() => this.remove(id), 3000);
                 },
                 remove(id) {
                     this.visible = this.visible.filter(notice => notice.id !== id);
@@ -128,37 +118,18 @@
             };
         }
     </script>
-
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.on('success', (data) => {
-                const message = data[0].message;
-                toastr.success(message, 'Success');
-            });
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{asset('assets/libs/bundle.js')}}"></script>
-
-    <!-- Apex chart -->
-    <script src="{{asset('assets/libs/charts/apex/apexcharts.min.js')}}"></script>
-
-    <!-- Slick -->
-    <script src="{{asset('assets/libs/slick/slick.min.js')}}"></script>
-
-    <!-- Examples -->
-    <script src="{{asset('assets/dist/js/examples/dashboard.js')}}"></script>
-
-    <!-- Main Javascript file -->
-    <script src="{{asset('assets/dist/js/app.min.js')}}"></script>
+    <script src="{{ asset('assets/libs/bundle.js') }}"></script>
+    <script src="{{ asset('assets/libs/charts/apex/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/slick/slick.min.js') }}"></script>
+    <script src="{{ asset('assets/dist/js/examples/dashboard.js') }}"></script>
+    <script src="{{ asset('assets/dist/js/app.min.js') }}"></script>
     @livewireScripts
     <script>
-        // Add Livewire configuration
         window.livewire_app_url = "{{ config('app.url') }}";
         window.livewire_token = "{{ csrf_token() }}";
     </script>
     <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
     @stack('scripts')
 </body>
-
 </html>

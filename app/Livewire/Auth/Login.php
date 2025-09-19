@@ -16,7 +16,7 @@ class Login extends Component
     public $email = '';
     public $password = '';
     public $remember = false;
-    
+
 
     protected $rules = [
         'email' => 'required|email',
@@ -51,31 +51,36 @@ class Login extends Component
         session()->flash('error', 'Invalid credentials. Please try again.');
     }
 
-    public function redirectToGoogle()
-    {
-        return redirect()->to(Socialite::driver('google')->redirect()->getTargetUrl());
-    }
+   public function redirectToGoogle()
+{
+    \Log::info('Redirecting to Google OAuth');
+    return redirect()->to(Socialite::driver('google')->redirect()->getTargetUrl());
+}
 
-   public function handleGoogleCallback()
+    public function handleGoogleCallback()
 {
     try {
+        \Log::info('Google Callback URL', ['url' => request()->fullUrl()]);
         $googleUser = Socialite::driver('google')->user();
+        \Log::info('Google User Data', (array) $googleUser);
         $user = User::updateOrCreate(
             ['google_id' => $googleUser->getId()],
             [
                 'name' => $googleUser->name,
                 'email' => $googleUser->email,
                 'avatar' => $googleUser->avatar ?? null,
-                'password' => Hash::make(uniqid()), // Use uniqid for unique password
+                'password' => Hash::make(uniqid()),
                 'email_verified_at' => now(),
             ]
         );
-
-        Auth::login($user, true); // Ensure remember is set
-        return redirect('/dashboard'); // Hardcode redirect for testing
+        Auth::login($user, 1);
+        return redirect('/');
     } catch (\Exception $e) {
-        \Log::error('Google Auth Error: ' . $e->getMessage());
-        session()->flash('error', 'Failed to login with Google.');
+        \Log::error('Google Auth Error', [
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        session()->flash('error', 'Failed to login with Google: ' . $e->getMessage());
         return redirect()->route('login');
     }
 }

@@ -7,23 +7,21 @@ use App\Services\ShiprocketService;
 use Livewire\Component;
 
 use Livewire\Attributes\Layout;
- #[Layout('components.layouts.admin')]
+#[Layout('components.layouts.admin')]
 class Show extends Component
 {
     public Order $order;
-
     public $statusUpdate = '';
     public $returnStatus = '';
     public $returnReason = '';
     public $cancellationReason = '';
 
-    public function mount(Order $order)
+    public function mount($id)
     {
-        $this->order = $order->load(['user', 'address', 'orderItems.product', 'payment', 'shiprocket']);
+        $this->order = Order::with(['user', 'address', 'orderItems.product', 'payment', 'shiprocket'])->findOrFail($id);
         $this->statusUpdate = $this->order->status;
         $this->returnStatus = $this->order->return_status ?? '';
     }
-
     public function updateStatus()
     {
         $this->validate(['statusUpdate' => 'required|in:pending,processing,shipped,delivered,canceled,returned']);
@@ -111,7 +109,7 @@ class Show extends Component
     public function render()
     {
         return view('livewire.admin.order.show')
-            ;
+        ;
     }
 }
 
