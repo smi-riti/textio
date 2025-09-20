@@ -160,6 +160,14 @@
                 min-width: max-content;
             }
         }
+
+        .share-button {
+            transition: background-color 0.3s ease;
+        }
+
+        .share-button:hover {
+            background-color: #f5f0ff;
+        }
     </style>
 
     <div class="bg-gray-50 min-h-screen">
@@ -207,6 +215,13 @@
                                 <div class="absolute top-3 right-14">
                                     <livewire:public.section.wishlist-button :productId="$product->id" />
                                 </div>
+                                <!-- Share button -->
+                                <button
+                                    class="absolute top-3 right-24 p-2 rounded-full bg-white shadow-md share-button"
+                                    @click="shareProduct()"
+                                    title="Share Product">
+                                    <i class="fas fa-share-alt text-[#8f4da7]"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -217,7 +232,7 @@
                     <h1 class="text-2xl font-sans font-semibold text-[#171717] mb-3">{{ $product->name }}</h1>
 
                     <!-- Ratings -->
-                    <div class="flex items-center gap-2 mb-5">
+                    {{-- <div class="flex items-center gap-2 mb-5">
                         <div class="flex text-yellow-400">
                             <i class="fas fa-star"></i>
                             <i class="fas fa-star"></i>
@@ -226,7 +241,7 @@
                             <i class="far fa-star"></i>
                         </div>
                         <span class="text-sm text-gray-600">(4 reviews)</span>
-                    </div>
+                    </div> --}}
 
                     <!-- Price -->
                     <div class="flex items-center gap-3 mb-6" wire:loading.class="opacity-50">
@@ -693,6 +708,45 @@
                             behavior: 'smooth'
                         });
                         console.log('Scrolling to top');
+                    },
+
+                    async shareProduct() {
+                        const productName = @json($product->name);
+                        const productUrl = window.location.href;
+                        const productImage = this.images[this.activeImageIndex] || @json(asset('images/placeholder.jpg'));
+
+                        try {
+                            if (navigator.share) {
+                                // Use Web Share API if available
+                                await navigator.share({
+                                    title: productName,
+                                    text: `Check out this product: ${productName}`,
+                                    url: productUrl,
+                                });
+                                console.log('Product shared successfully');
+                                this.notification = {
+                                    message: 'Product shared successfully!',
+                                    type: 'success'
+                                };
+                            } else {
+                                // Fallback to copying link to clipboard
+                                await navigator.clipboard.writeText(productUrl);
+                                console.log('Link copied to clipboard');
+                                this.notification = {
+                                    message: 'Link copied to clipboard!',
+                                    type: 'success'
+                                };
+                            }
+                        } catch (error) {
+                            console.error('Error sharing product:', error);
+                            this.notification = {
+                                message: 'Failed to share product. Please try again.',
+                                type: 'error'
+                            };
+                        }
+                        setTimeout(() => {
+                            this.notification.message = '';
+                        }, 3000);
                     }
                 };
             }

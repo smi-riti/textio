@@ -62,7 +62,7 @@ class CreateProduct extends Component
             'highlights' => 'nullable|array',
             'variantCombinations' => 'required|array|min:1', // Require at least one variant
             'variantCombinations.*.variant_values_data' => 'required|array|min:1',
-            'variantCombinations.*.price' => 'required|numeric|min:0',
+            'variantCombinations.*.price' => 'nullable|numeric|min:0',
             'variantCombinations.*.stock' => 'required|integer|min:0',
             'variantCombinations.*.sku' => 'nullable|string|max:255',
         ];
@@ -121,7 +121,7 @@ class CreateProduct extends Component
         $this->highlights = array_values($this->highlights);
     }
 
-   public function save()
+    public function save()
     {
         Log::info('CreateProduct - Attempting to save product', [
             'step' => $this->currentStep,
@@ -165,18 +165,25 @@ class CreateProduct extends Component
                 $combo = ProductVariantCombination::create([
                     'product_id' => $product->id,
                     'variant_values' => json_encode($comboData['variant_values_data'] ?? []),
-                    'price' => $comboData['price'] ?? null,
+                    'price' => $comboData['price'] !== '' ? $comboData['price'] : null, // FIX
                     'stock' => $comboData['stock'],
-                    'sku' => $comboData['sku'] ?? null,
+                    'sku' => $comboData['sku'] ?: null,
                 ]);
-                Log::info('DB combination created', ['db_id' => $combo->id, 'temp_id' => $comboData['temp_id'] ?? 'n/a']);
 
-                // FIX: Associate temp images to new DB combo
+                Log::info('DB combination created', [
+                    'db_id' => $combo->id,
+                    'temp_id' => $comboData['temp_id'] ?? 'n/a',
+                ]);
+
                 if (isset($comboData['temp_id'])) {
                     $this->associateTempImages($comboData['temp_id'], $combo->id);
-                    Log::info('Temp images associated to DB combo', ['temp_id' => $comboData['temp_id'], 'db_id' => $combo->id]);
+                    Log::info('Temp images associated to DB combo', [
+                        'temp_id' => $comboData['temp_id'],
+                        'db_id' => $combo->id,
+                    ]);
                 }
             }
+
             Log::info('Variant combinations saved with images', ['count' => count($this->variantCombinations)]);
 
             if (!empty($this->highlights)) {

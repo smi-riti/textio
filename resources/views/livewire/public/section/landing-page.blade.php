@@ -87,20 +87,20 @@
                         </span>
                     </div>
                     <div class="p-5">
-                        <h3 class="font-semibold text-lg mb-2 text-[#171717] line-clamp-1">{{ $product->name }}</h3>
+                        <a wire:navigate href="{{ route('public.product.view', $product->slug) }}" class="font-semibold text-lg mb-2 text-[#171717] line-clamp-1">{{ $product->name }}</a>
                         <p class="text-gray-500 text-sm mb-4 line-clamp-2">{{ Str::limit($product->description, 60) }}</p>
                         <div class="flex items-center justify-between">
                             <div class="flex flex-col">
                                 <span class="font-bold text-lg text-[#8f4da7]">₹{{ number_format($product->discount_price ?? $product->price, 2) }}</span>
                                 <span class="text-sm text-gray-400 line-through">₹{{ $product->price }}</span>
                             </div>
-                            <button class="add-to-cart-btn bg-[#f5f0ff] text-[#8f4da7] hover:bg-[#8f4da7] hover:text-white py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 flex items-center"
+                            {{-- <button class="add-to-cart-btn bg-[#f5f0ff] text-[#8f4da7] hover:bg-[#8f4da7] hover:text-white py-2 px-4 rounded-lg text-sm font-medium transition-all duration-300 flex items-center"
                                     @click="cartItems++" aria-label="Add {{ $product->name }} to cart">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
                                 Add
-                            </button>
+                            </button> --}}
                         </div>
                     </div>
                 </div>

@@ -8,18 +8,14 @@
                 </a>
                 <p class="text-gray-400 mb-5 text-sm leading-relaxed">Custom printing on demand for all your needs. Create unique products with your designs.</p>
                 <div class="flex space-x-4">
-                    <a href="#" class="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400 hover:bg-[#8f4da7] hover:text-white transition-colors duration-300">
+                    <a href="https://www.facebook.com/share/1FBm4FK3Ud/" class="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400 hover:bg-[#8f4da7] hover:text-white transition-colors duration-300">
                         <i class="fab fa-facebook-f text-sm"></i>
                     </a>
-                    <a href="#" class="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400 hover:bg-[#8f4da7] hover:text-white transition-colors duration-300">
-                        <i class="fab fa-twitter text-sm"></i>
-                    </a>
-                    <a href="#" class="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400 hover:bg-[#8f4da7] hover:text-white transition-colors duration-300">
+                   
+                    <a href="https://www.instagram.com/textio_llp/" class="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400 hover:bg-[#8f4da7] hover:text-white transition-colors duration-300">
                         <i class="fab fa-instagram text-sm"></i>
                     </a>
-                    <a href="#" class="w-9 h-9 rounded-full bg-[#2a2a2a] flex items-center justify-center text-gray-400 hover:bg-[#8f4da7] hover:text-white transition-colors duration-300">
-                        <i class="fab fa-pinterest-p text-sm"></i>
-                    </a>
+                   
                 </div>
             </div>
 
@@ -35,14 +31,8 @@
                         <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                         Hoodies & Sweatshirts
                     </a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
-                        <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        Mugs
-                    </a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
-                        <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        Phone Cases
-                    </a></li>
+                    
+                    
                     <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
                         <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                         All Products
@@ -54,23 +44,20 @@
             <div>
                 <h3 class="text-lg font-semibold mb-5 pb-2 border-b border-[#8f4da7] inline-block">Company</h3>
                 <ul class="space-y-3">
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
+                    <li><a wire:navigate href="{{route('about')}}" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
                         <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                         About Us
                     </a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
+                    <li><a wire:navigate href="{{route('contact')}}" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
                         <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                         Contact Us
                     </a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
-                        <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        Sustainability
-                    </a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
+                  
+                    <li><a href="{{route('privacy')}}" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
                         <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                         Privacy Policy
                     </a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
+                    <li><a wire:navigate href="{{route('conditions')}}" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
                         <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                         Terms of Service
                     </a></li>
@@ -91,13 +78,13 @@
                         <div class="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center mr-3 flex-shrink-0">
                             <i class="fas fa-phone-alt text-[#8f4da7] text-sm"></i>
                         </div>
-                        <span class="text-gray-400 text-sm">+1 (555) 123-4567</span>
+                        <span class="text-gray-400 text-sm">+91 90605 73350  </span>
                     </li>
                     <li class="flex items-center">
                         <div class="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center mr-3 flex-shrink-0">
                             <i class="fas fa-envelope text-[#8f4da7] text-sm"></i>
                         </div>
-                        <span class="text-gray-400 text-sm">support@printmagic.com</span>
+                        <span class="text-gray-400 text-sm">textiollp@gmail.com</span>
                     </li>
                 </ul>
             </div>
@@ -105,7 +92,7 @@
 
         <!-- Copyright -->
         <div class="border-t border-gray-800 pt-6 text-center">
-            <p class="text-gray-400 text-sm">&copy; 2023 PrintMagic. All rights reserved.</p>
+            <p class="text-gray-400 text-sm">&copy; 2025 Textio. All rights reserved.</p>
         </div>
     </div>
 </footer>

@@ -83,7 +83,7 @@
             <x-admin-header />
 
             <!-- Main Content -->
-            <main class="flex-1 overflow-y-auto mt-16 p-4 bg-gray-100">
+            <main class="flex-1 overflow-y-auto mt-16 p-2 bg-gray-100">
                 {{ $slot }}
             </main>
         </div>
@@ -118,7 +118,7 @@
             };
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{{ asset('assets/libs/bundle.js') }}"></script>
     <script src="{{ asset('assets/libs/charts/apex/apexcharts.min.js') }}"></script>
     <script src="{{ asset('assets/libs/slick/slick.min.js') }}"></script>
@@ -130,6 +130,6 @@
         window.livewire_token = "{{ csrf_token() }}";
     </script>
     <script src="https://cdn.ckeditor.com/4.16.2/standard/ckeditor.js"></script>
-    @stack('scripts')
+    @stack('scripts') --}}
 </body>
 </html>

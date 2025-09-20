@@ -193,7 +193,7 @@
         </div>
 
         <!-- Right Section - Price Summary -->
-        <div class="w-full lg:w-4/12">
+        <div class="w-full mb-10 lg:mb-0 lg:w-4/12">
             <div class="sticky top-6 bg-white rounded-lg p-6 border border-gray-200">
                 <h2 class="text-lg text-gray-900 mb-4 border-b border-gray-200 pb-2">Price Details</h2>
                 <div class="space-y-3 text-sm sm:text-base">

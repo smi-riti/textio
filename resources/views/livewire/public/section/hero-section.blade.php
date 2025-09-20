@@ -24,7 +24,7 @@
                          class="bg-accent hover:bg-[#7c4190] text-white font-semibold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105">
                          Explore Mores
                      </a>
-                     <a href="#quote"
+                     <a wire:navigate href="{{route('contact')}}"
                          class="border-2 border-white hover:border-accent hover:bg-accent/10 font-semibold py-3 px-8 rounded-lg transition duration-300">
                          Get a Quote
                      </a>

@@ -87,6 +87,11 @@ class Product extends Model
         return $this->hasMany(ProductVariantCombination::class);
     }
 
+    public function isInStock()
+    {
+        return $this->variantCombinations()->where('stock', '>', 0)->exists();
+    }
+
     public function highlights()
     {
         return $this->hasMany(ProductHighlist::class, "product_id", "id");

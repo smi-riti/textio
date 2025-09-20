@@ -22,74 +22,75 @@ class ProductVariants extends Component
     public $product;
     public $variantCombinations = [];
     public $isEdit = false;
-    
-    // Form fields for variant combinations
-    public $combination = [
-        'id' => null,
+    public $new_featured_image;
+    public $new_featured_image_preview;
+    public $temp_featured_path = null;
+    public $new_gallery_images = [];
+    public $new_gallery_images_preview = [];
+    public $temp_gallery_paths = [];
+    public $isUploading = false;
+    public $editing_featured_image;
+    public $editing_featured_image_preview;
+    public $editing_gallery_images = [];
+    public $editing_gallery_images_preview = [];
+    public $showAddForm = false;
+    public $selectedVariantTypes = [];
+    public $selectedVariantValues = [];
+    public $new_combination = [
         'price' => '',
         'stock' => '',
         'sku' => '',
-        'variant_values' => [],
     ];
-    
-    // Image handling
-    public $featuredImage;
-    public $featuredImagePreview;
-    public $galleryImages = [];
-    public $galleryImagePreviews = [];
-    public $existingImages = [];
-    
-    // UI states
-    public $isUploading = false;
-    public $showForm = false;
     public $editingCombination = null;
-    
-    // Variant selection
-    public $selectedVariantTypes = [];
-    public $selectedVariantValues = [];
+    public $editing_combination = [];
     public $availableVariants = [];
     public $availableVariantValues = [];
+    public $isInitialMount = true;
+    public $existingImages = [];
 
-    protected $listeners = ['refreshVariants' => '$refresh'];
+    protected $listeners = ['refreshVariants' => '$refresh', 'reupload-images' => 'handleReupload'];
 
     protected function rules()
     {
-        $rules = [
+        return [
             'selectedVariantTypes' => 'required|array|min:1',
-            'combination.price' => 'nullable|numeric|min:0',
-            'combination.stock' => 'required|integer|min:0',
-            'combination.sku' => 'nullable|string|max:255',
-            'featuredImage' => $this->editingCombination ? 'nullable|image|max:2048' : 'required|image|max:2048',
-            'galleryImages.*' => 'nullable|image|max:2048',
+            'selectedVariantValues.*' => 'nullable|exists:product_variant_values,id',
+            'selectedVariantValues' => 'array',
+            'new_combination.price' => 'nullable|numeric|min:0',
+            'new_combination.stock' => 'required|integer|min:0',
+            'new_combination.sku' => 'nullable|string|max:255',
+            'new_featured_image' => 'required|image|max:2048',
+            'new_gallery_images.*' => 'nullable|image|max:2048',
+            'editing_combination.price' => 'nullable|numeric|min:0',
+            'editing_combination.stock' => 'required|integer|min:0',
+            'editing_combination.sku' => 'nullable|string|max:255',
+            'editing_featured_image' => 'nullable|image|max:2048',
+            'editing_gallery_images.*' => 'nullable|image|max:2048',
         ];
-        
-        foreach ($this->selectedVariantTypes as $variantId) {
-            $rules["selectedVariantValues.{$variantId}"] = 'required|exists:product_variant_values,id';
-        }
-        
-        return $rules;
     }
 
     protected $messages = [
         'selectedVariantTypes.required' => 'At least one variant type is required.',
         'selectedVariantTypes.min' => 'Select at least one variant type.',
-        'combination.stock.required' => 'Stock is required.',
-        'featuredImage.required' => 'Featured image is required for each variant.',
-        'featuredImage.image' => 'Featured image must be a valid image file.',
-        'galleryImages.*.image' => 'Invalid gallery image.',
-        'selectedVariantValues.*.required' => 'Please select a value for each variant type.',
+        'new_combination.stock.required' => 'Stock is required.',
+        'new_featured_image.required' => 'Featured image is required for each variant.',
+        'new_featured_image.image' => 'Featured image must be a valid image file.',
+        'new_gallery_images.*.image' => 'Invalid gallery image.',
         'selectedVariantValues.*.exists' => 'Selected value does not exist.',
+        'editing_combination.stock.required' => 'Stock is required for editing.',
+        'editing_featured_image.required' => 'A featured image is required.',
     ];
 
-    public function mount($product = null, $isEdit = false)
+    public function mount($product = null, $variantCombinations = [], $isEdit = false)
     {
         $this->product = $product;
+        $this->variantCombinations = $variantCombinations;
         $this->isEdit = $isEdit;
         $this->availableVariants = ProductVariant::with('values')->get();
-        
         if ($this->product && $this->isEdit) {
             $this->loadVariantCombinations();
         }
+        $this->isInitialMount = false;
     }
 
     public function loadVariantCombinations()
@@ -100,100 +101,50 @@ class ProductVariants extends Component
                     $query->orderBy('is_primary', 'desc');
                 }])
                 ->get()
-                ->map(function ($combination) {
-                    $combinationArray = $combination->toArray();
-                    // Ensure variant_values is properly decoded
-                    if (isset($combinationArray['variant_values']) && is_string($combinationArray['variant_values'])) {
-                        $combinationArray['variant_values'] = json_decode($combinationArray['variant_values'], true) ?? [];
-                    }
-                    return $combinationArray;
+                ->map(function ($combo) {
+                    $combo->variant_values_data = $combo->variant_values;
+                    return $combo->toArray();
                 })
                 ->toArray();
         }
-    }
-
-    public function showAddForm()
-    {
-        $this->showForm = true;
-        $this->editingCombination = null;
-        $this->resetForm();
-        $this->generateSKU();
-    }
-
-    public function editCombination($combinationId)
-    {
-        $combination = collect($this->variantCombinations)->firstWhere('id', $combinationId);
-        
-        if ($combination) {
-            $this->editingCombination = $combinationId;
-            $this->showForm = true;
-            
-            // Load combination data
-            $this->combination = [
-                'id' => $combination['id'],
-                'price' => $combination['price'],
-                'stock' => $combination['stock'],
-                'sku' => $combination['sku'],
-                'variant_values' => $combination['variant_values'] ?? [],
-            ];
-            
-            // Load variant selection
-            $variantValues = $combination['variant_values'] ?? [];
-            // Ensure it's an array
-            if (is_string($variantValues)) {
-                $variantValues = json_decode($variantValues, true) ?? [];
-            }
-            
-            $this->selectedVariantTypes = [];
-            $this->selectedVariantValues = [];
-            
-            foreach ($variantValues as $variantName => $value) {
-                $variant = $this->availableVariants->firstWhere('variant_name', $variantName);
-                if ($variant) {
-                    $this->selectedVariantTypes[] = $variant->id;
-                    $variantValue = $variant->values->firstWhere('value', $value);
-                    if ($variantValue) {
-                        $this->selectedVariantValues[$variant->id] = $variantValue->id;
-                    }
-                }
-            }
-            
-            // Update available variant values
-            $this->updatedSelectedVariantTypes();
-            
-            // Load existing images
-            $this->existingImages = $combination['images'] ?? [];
-            $this->featuredImagePreview = collect($this->existingImages)->firstWhere('is_primary', true)['image_path'] ?? null;
-            $this->galleryImagePreviews = collect($this->existingImages)->where('is_primary', false)->pluck('image_path')->toArray();
+        if (!$this->isInitialMount) {
+            $this->dispatch('refreshVariants');
         }
     }
 
-    public function hideForm()
+    public function showAddVariantForm()
     {
-        $this->showForm = false;
+        $this->showAddForm = true;
+        $this->editingCombination = null;
+        $this->resetForm();
+        $this->generateCombinationSKU();
+    }
+
+    public function hideAddVariantForm()
+    {
+        $this->showAddForm = false;
         $this->editingCombination = null;
         $this->resetForm();
     }
 
-    public function generateSKU()
+    public function generateCombinationSKU()
     {
         $prefix = $this->product ? strtoupper(substr($this->product->name, 0, 3)) : 'PRD';
-        $this->combination['sku'] = $prefix . '-' . strtoupper(Str::random(6));
+        if ($this->editingCombination !== null) {
+            $this->editing_combination['sku'] = $prefix . '-COM-' . strtoupper(Str::random(6));
+        } else {
+            $this->new_combination['sku'] = $prefix . '-COM-' . strtoupper(Str::random(6));
+        }
     }
 
     public function updatedSelectedVariantTypes()
     {
-        // Reset selected values for removed types
-        $this->selectedVariantValues = array_intersect_key(
-            $this->selectedVariantValues,
-            array_flip($this->selectedVariantTypes)
-        );
-        
+        Log::info('Variant types updated', ['types' => $this->selectedVariantTypes]);
+        $this->selectedVariantValues = [];
         if (empty($this->selectedVariantTypes)) {
             $this->availableVariantValues = [];
             return;
         }
-        
         $this->availableVariantValues = ProductVariantValue::whereIn('product_variant_id', $this->selectedVariantTypes)
             ->get()
             ->groupBy('product_variant_id')
@@ -201,272 +152,621 @@ class ProductVariants extends Component
                 $variant = $this->availableVariants->find($variantId);
                 return [$variant->variant_name => $values->pluck('value', 'id')->toArray()];
             })->toArray();
+        Log::info('Available variant values loaded', ['values' => $this->availableVariantValues]);
     }
 
-    public function updatedFeaturedImage()
+    public function updatedNewFeaturedImage()
     {
-        $this->validateOnly('featuredImage');
-        if ($this->featuredImage) {
-            $this->featuredImagePreview = $this->featuredImage->temporaryUrl();
+        $this->validateOnly('new_featured_image');
+        if ($this->new_featured_image instanceof TemporaryUploadedFile) {
+            $this->new_featured_image_preview = $this->new_featured_image->temporaryUrl();
+            $this->temp_featured_path = $this->new_featured_image->getFilename();
+            Log::debug('Captured temp featured path', ['path' => $this->temp_featured_path]);
+        } else {
+            Log::warning('New featured image not a valid TemporaryUploadedFile', [
+                'type' => is_object($this->new_featured_image) ? get_class($this->new_featured_image) : gettype($this->new_featured_image),
+            ]);
+            $this->addError('new_featured_image', 'Invalid featured image selected.');
         }
     }
 
-    public function removeFeaturedImage()
+    public function removeNewFeaturedImage()
     {
-        $this->featuredImage = null;
-        $this->featuredImagePreview = null;
+        $this->new_featured_image = null;
+        $this->new_featured_image_preview = null;
+        $this->temp_featured_path = null;
     }
 
-    public function updatedGalleryImages()
+    public function updatedNewGalleryImages()
     {
-        $this->validateOnly('galleryImages.*');
-        $this->galleryImagePreviews = [];
-        
-        foreach ($this->galleryImages as $image) {
-            if ($image) {
-                $this->galleryImagePreviews[] = $image->temporaryUrl();
+        $this->validateOnly('new_gallery_images.*');
+        $this->new_gallery_images_preview = [];
+        $this->temp_gallery_paths = [];
+        foreach ($this->new_gallery_images as $index => $image) {
+            if ($image instanceof TemporaryUploadedFile) {
+                $this->new_gallery_images_preview[] = $image->temporaryUrl();
+                $this->temp_gallery_paths[$index] = $image->getFilename();
+                Log::debug('Captured temp gallery path', ['index' => $index, 'path' => $image->getFilename()]);
             }
         }
     }
 
-    public function removeGalleryImage($index)
+    public function removeNewGalleryImage($index)
     {
-        unset($this->galleryImages[$index], $this->galleryImagePreviews[$index]);
-        $this->galleryImages = array_values($this->galleryImages);
-        $this->galleryImagePreviews = array_values($this->galleryImagePreviews);
+        unset($this->new_gallery_images[$index], $this->new_gallery_images_preview[$index], $this->temp_gallery_paths[$index]);
+        $this->new_gallery_images = array_values($this->new_gallery_images);
+        $this->new_gallery_images_preview = array_values($this->new_gallery_images_preview);
+        $this->temp_gallery_paths = array_values($this->temp_gallery_paths);
     }
 
-    public function removeExistingImage($imageId)
+    public function updatedEditingFeaturedImage()
     {
-        if ($this->editingCombination) {
-            $image = ProductImage::find($imageId);
-            if ($image) {
-                // Delete from ImageKit if file_id exists
-                if ($image->image_file_id) {
-                    try {
-                        $service = new ImageKitService();
-                        $service->delete($image->image_file_id);
-                    } catch (\Exception $e) {
-                        Log::error('Failed to delete image from ImageKit: ' . $e->getMessage());
+        $this->validateOnly('editing_featured_image');
+        $this->editing_featured_image_preview = $this->editing_featured_image->temporaryUrl();
+    }
+
+    public function removeEditingFeaturedImage()
+    {
+        $this->editing_featured_image = null;
+        $this->editing_featured_image_preview = null;
+    }
+
+    public function updatedEditingGalleryImages()
+    {
+        $this->validateOnly('editing_gallery_images.*');
+        $this->editing_gallery_images_preview = array_map(fn($img) => $img->temporaryUrl(), $this->editing_gallery_images);
+    }
+
+    public function removeEditingGalleryImage($index)
+    {
+        unset($this->editing_gallery_images[$index], $this->editing_gallery_images_preview[$index]);
+        $this->editing_gallery_images = array_values($this->editing_gallery_images);
+        $this->editing_gallery_images_preview = array_values($this->editing_gallery_images_preview);
+    }
+
+    public function editCombination($index)
+    {
+        try {
+            Log::info('editCombination called', ['index' => $index]);
+
+            if (!isset($this->variantCombinations[$index])) {
+                Log::error('Invalid combination index', ['index' => $index]);
+                $this->addError('general', 'Invalid variant combination selected.');
+                return;
+            }
+
+            $this->resetForm();
+            $this->editingCombination = $index;
+            $combination = $this->variantCombinations[$index];
+
+            $this->editing_combination = [
+                'price' => $combination['price'] ?? '',
+                'stock' => $combination['stock'] ?? '',
+                'sku' => $combination['sku'] ?? '',
+            ];
+
+            $this->selectedVariantTypes = [];
+            $this->selectedVariantValues = [];
+            $variantValues = $combination['variant_values_data'] ?? [];
+            if (empty($variantValues) && !empty($combination['variant_values'])) {
+                $decoded = json_decode($combination['variant_values'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $variantValues = $decoded;
+                } else {
+                    Log::error('Invalid JSON in variant_values', ['variant_values' => $combination['variant_values']]);
+                    $this->addError('general', 'Invalid variant data format.');
+                    return;
+                }
+            }
+
+            foreach ($variantValues as $variantName => $value) {
+                $variant = $this->availableVariants->firstWhere('variant_name', $variantName);
+                if ($variant) {
+                    $this->selectedVariantTypes[] = $variant->id;
+                    $valueRecord = ProductVariantValue::where('product_variant_id', $variant->id)
+                        ->where('value', $value)
+                        ->first();
+                    if ($valueRecord) {
+                        $this->selectedVariantValues[$variant->id] = $valueRecord->id;
                     }
                 }
-                
-                $image->delete();
-                
-                // Reload existing images
-                $this->loadExistingImages();
-                session()->flash('message', 'Image deleted successfully!');
             }
+
+            if (!$this->product && isset($combination['temp_id'])) {
+                $this->loadTempImages($combination['temp_id']);
+                $this->existingImages = $this->variantCombinations[$index]['images'] ?? [];
+            } else {
+                $this->existingImages = $combination['images'] ?? [];
+            }
+            $this->editing_featured_image = null;
+            $this->editing_featured_image_preview = null;
+            $this->editing_gallery_images = [];
+            $this->editing_gallery_images_preview = [];
+
+            $this->updatedSelectedVariantTypes();
+            $this->showAddForm = true;
+
+            Log::info('Editing combination initialized', [
+                'index' => $index,
+                'editing_combination' => $this->editing_combination,
+                'selectedVariantTypes' => $this->selectedVariantTypes,
+                'selectedVariantValues' => $this->selectedVariantValues,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in editCombination', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->addError('general', 'Unable to load variant for editing. Please try again or contact support.');
         }
     }
 
-    private function loadExistingImages()
+    public function addCombination()
     {
-        if ($this->editingCombination) {
-            $combination = ProductVariantCombination::with('images')->find($this->editingCombination);
-            if ($combination) {
-                $this->existingImages = $combination->images->toArray();
-                $this->featuredImagePreview = collect($this->existingImages)->firstWhere('is_primary', true)['image_path'] ?? null;
-                $this->galleryImagePreviews = collect($this->existingImages)->where('is_primary', false)->pluck('image_path')->toArray();
-            }
-        }
-    }
-
-    public function saveCombination()
-    {
-        $this->validate();
-        
         try {
-            // Build variant values array
+            Log::info('addCombination called', [
+                'selectedVariantTypes' => $this->selectedVariantTypes,
+                'selectedVariantValues' => $this->selectedVariantValues,
+                'new_combination' => $this->new_combination,
+                'has_featured_image' => !empty($this->new_featured_image),
+                'temp_path' => $this->temp_featured_path,
+                'editingCombination' => $this->editingCombination,
+            ]);
+
+            $isEditing = $this->editingCombination !== null;
+            $formData = $isEditing ? $this->editing_combination : $this->new_combination;
+            $featuredImage = $isEditing ? $this->editing_featured_image : $this->new_featured_image;
+            $galleryImages = $isEditing ? $this->editing_gallery_images : $this->new_gallery_images;
+
+            $this->validateOnly('selectedVariantTypes');
+            $this->validateOnly('selectedVariantValues');
+            $this->validateOnly($isEditing ? 'editing_combination.stock' : 'new_combination.stock');
+            $this->validateOnly($isEditing ? 'editing_combination.price' : 'new_combination.price');
+            $this->validateOnly($isEditing ? 'editing_combination.sku' : 'new_combination.sku');
+            if (!$isEditing) {
+                $this->validateOnly('new_featured_image');
+            } elseif (empty($this->editing_featured_image) && empty(collect($this->existingImages)->firstWhere('is_primary', true))) {
+                $this->addError('editing_featured_image', 'A featured image is required.');
+                return;
+            }
+            if (!empty($galleryImages)) {
+                $this->validateOnly($isEditing ? 'editing_gallery_images.*' : 'new_gallery_images.*');
+            }
+            Log::info('Validation passed', ['isEditing' => $isEditing]);
+
+            if (empty($this->selectedVariantTypes)) {
+                $this->addError('selectedVariantTypes', 'Please select at least one variant type (e.g., Color, Size).');
+                return;
+            }
+
             $variantValues = [];
             foreach ($this->selectedVariantValues as $variantId => $valueId) {
-                $variant = $this->availableVariants->find($variantId);
-                $value = ProductVariantValue::find($valueId);
-                if ($variant && $value) {
-                    $variantValues[$variant->variant_name] = $value->value;
+                if ($valueId && $valueId !== '') {
+                    $variant = $this->availableVariants->find($variantId);
+                    $value = ProductVariantValue::find($valueId);
+                    if ($variant && $value) {
+                        $variantValues[$variant->variant_name] = $value->value;
+                    } else {
+                        Log::warning('Variant or value not found', ['variantId' => $variantId, 'valueId' => $valueId]);
+                    }
                 }
             }
-            
-            // Check for duplicate combinations (only if creating new)
-            if (!$this->editingCombination) {
-                foreach ($this->variantCombinations as $existing) {
-                    $existingValues = $existing['variant_values'] ?? [];
-                    // Ensure it's an array for comparison
-                    if (is_string($existingValues)) {
-                        $existingValues = json_decode($existingValues, true) ?? [];
-                    }
-                    if ($existingValues === $variantValues) {
-                        $this->addError('selectedVariantValues', 'This variant combination already exists.');
+
+            if (empty($variantValues)) {
+                $this->addError('selectedVariantValues', 'Please select a value for each variant type.');
+                return;
+            }
+
+            foreach ($this->variantCombinations as $index => $existing) {
+                if ($isEditing && $index === $this->editingCombination) {
+                    continue;
+                }
+                $existingValues = $existing['variant_values_data'] ?? json_decode($existing['variant_values'] ?? '[]', true);
+                ksort($existingValues);
+                ksort($variantValues);
+                if ($existingValues === $variantValues) {
+                    $this->addError('selectedVariantValues', 'This variant combination already exists.');
+                    return;
+                }
+            }
+
+            $combinationData = [
+                'temp_id' => $isEditing ? ($this->variantCombinations[$this->editingCombination]['temp_id'] ?? null) : uniqid(),
+                'price' => $formData['price'],
+                'stock' => $formData['stock'],
+                'sku' => $formData['sku'],
+                'variant_values_data' => $variantValues,
+                'images' => $isEditing ? ($this->existingImages ?? []) : [],
+            ];
+
+            if ($this->product) {
+                if ($isEditing) {
+                    $combination = ProductVariantCombination::find($this->variantCombinations[$this->editingCombination]['id']);
+                    if (!$combination) {
+                        $this->addError('general', 'Variant combination not found.');
                         return;
                     }
+                    $combination->update([
+                        'variant_values' => json_encode($variantValues),
+                        'price' => $formData['price'],
+                        'stock' => $formData['stock'],
+                        'sku' => $formData['sku'],
+                    ]);
+                    Log::info('Combination updated in DB', ['id' => $combination->id]);
+
+                    if ($featuredImage || !empty($galleryImages)) {
+                        $this->uploadImages($combination, false);
+                    }
+
+                    $combination->load('images');
+                    $this->variantCombinations[$this->editingCombination] = $combination->toArray();
+                    $this->variantCombinations[$this->editingCombination]['variant_values_data'] = $variantValues;
+                } else {
+                    $combination = ProductVariantCombination::create([
+                        'product_id' => $this->product->id,
+                        'variant_values' => json_encode($variantValues),
+                        'price' => $formData['price'] ?? null,
+                        'stock' => $formData['stock'],
+                        'sku' => $formData['sku'],
+                    ]);
+                    $this->uploadImages($combination, true);
+                    $combination->load('images');
+                    $combinationData = $combination->toArray();
+                    $combinationData['variant_values_data'] = $variantValues;
+                    $this->variantCombinations[] = $combinationData;
                 }
-            }
-            
-            // Create or update combination
-            if ($this->editingCombination) {
-                $combination = ProductVariantCombination::find($this->editingCombination);
-                $combination->update([
-                    'variant_values' => $variantValues,
-                    'price' => $this->combination['price'],
-                    'stock' => $this->combination['stock'],
-                    'sku' => $this->combination['sku'],
-                ]);
             } else {
-                $combination = ProductVariantCombination::create([
-                    'product_id' => $this->product->id,
-                    'variant_values' => $variantValues,
-                    'price' => $this->combination['price'],
-                    'stock' => $this->combination['stock'],
-                    'sku' => $this->combination['sku'],
-                ]);
-            }
-            
-            // Upload images
-            $this->uploadImages($combination);
-            
-            // Reload combinations
-            $this->loadVariantCombinations();
-            
-            // Hide form and show success message
-            $this->hideForm();
-            session()->flash('message', $this->editingCombination ? 'Variant updated successfully!' : 'Variant created successfully!');
-            
-        } catch (\Exception $e) {
-            Log::error('Error saving combination: ' . $e->getMessage());
-            $this->addError('general', 'Failed to save combination: ' . $e->getMessage());
-        }
-    }
-
-    public function deleteCombination($combinationId)
-    {
-        try {
-            $combination = ProductVariantCombination::with('images')->find($combinationId);
-            
-            if ($combination) {
-                // Delete images from ImageKit and database
-                foreach ($combination->images as $image) {
-                    if ($image->image_file_id) {
-                        try {
-                            $service = new ImageKitService();
-                            $service->delete($image->image_file_id);
-                        } catch (\Exception $e) {
-                            Log::error('Failed to delete image from ImageKit: ' . $e->getMessage());
-                        }
-                    }
-                    $image->delete();
-                }
-                
-                // Delete combination
-                $combination->delete();
-                
-                // Reload combinations
-                $this->loadVariantCombinations();
-                
-                session()->flash('message', 'Variant deleted successfully!');
-            }
-        } catch (\Exception $e) {
-            Log::error('Error deleting combination: ' . $e->getMessage());
-            session()->flash('error', 'Failed to delete variant: ' . $e->getMessage());
-        }
-    }
-
-    private function uploadImages($combination)
-    {
-        $this->isUploading = true;
-        $service = new ImageKitService();
-        $slug = $this->product->slug;
-        $time = time();
-        
-        try {
-            // Upload featured image
-            if ($this->featuredImage) {
-                // Delete existing featured image if editing
-                if ($this->editingCombination) {
-                    $existingFeatured = $combination->images()->where('is_primary', true)->first();
-                    if ($existingFeatured) {
-                        if ($existingFeatured->image_file_id) {
-                            try {
-                                $service->delete($existingFeatured->image_file_id);
-                            } catch (\Exception $e) {
-                                Log::error('Failed to delete existing featured image: ' . $e->getMessage());
+                if ($isEditing) {
+                    $this->variantCombinations[$this->editingCombination] = $combinationData;
+                    if ($featuredImage || !empty($galleryImages)) {
+                        $tempCombination = (object) $combinationData;
+                        $tempCombination->id = $combinationData['temp_id'];
+                        $this->uploadImages($tempCombination, false);
+                        $this->loadTempImages($combinationData['temp_id']);
+                        foreach ($this->variantCombinations as &$combo) {
+                            if ($combo['temp_id'] === $combinationData['temp_id']) {
+                                $combinationData = $combo;
+                                break;
                             }
                         }
-                        $existingFeatured->delete();
+                    }
+                } else {
+                    $this->variantCombinations[] = $combinationData;
+                    $tempCombination = (object) $combinationData;
+                    $tempCombination->id = $combinationData['temp_id'];
+                    $this->uploadImages($tempCombination, true);
+                    $this->loadTempImages($combinationData['temp_id']);
+                    foreach ($this->variantCombinations as &$combo) {
+                        if ($combo['temp_id'] === $combinationData['temp_id']) {
+                            $combinationData = $combo;
+                            break;
+                        }
                     }
                 }
-                
-                $fileName = "featured-{$slug}-{$combination->id}-{$time}." . $this->featuredImage->getClientOriginalExtension();
-                $result = $service->upload($this->featuredImage, $fileName, config('services.imagekit.folders.product'));
-                
-                ProductImage::create([
-                    'product_variant_combination_id' => $combination->id,
-                    'image_path' => $result->url,
-                    'image_file_id' => $result->fileId ?? null,
-                    'is_primary' => true,
-                ]);
             }
-            
-            // Upload gallery images
-            if (!empty($this->galleryImages)) {
-                // Delete existing gallery images if editing
-                if ($this->editingCombination) {
-                    $existingGallery = $combination->images()->where('is_primary', false)->get();
-                    foreach ($existingGallery as $image) {
+
+            if (!$this->isInitialMount) {
+                $this->dispatch('combinationAdded', $combinationData);
+            }
+
+            $this->hideAddVariantForm();
+            $this->editingCombination = null;
+            Log::info('addCombination completed successfully', ['isEditing' => $isEditing]);
+        } catch (\Exception $e) {
+            Log::error('Unexpected error in addCombination', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->addError('general', 'An unexpected error occurred: ' . $e->getMessage());
+        }
+    }
+
+    public function removeExistingImage($index)
+    {
+        try {
+            Log::info('removeExistingImage called', ['index' => $index]);
+
+            if (!isset($this->existingImages[$index])) {
+                Log::error('Invalid image index', ['index' => $index]);
+                $this->addError('general', 'Invalid image selected.');
+                return;
+            }
+
+            $image = $this->existingImages[$index];
+
+            if ($this->product && isset($image['id'])) {
+                $dbImage = ProductImage::find($image['id']);
+                if ($dbImage) {
+                    if ($dbImage->image_file_id) {
+                        $service = new ImageKitService();
+                        $service->delete($dbImage->image_file_id);
+                        Log::info('Image deleted from ImageKit', ['file_id' => $dbImage->image_file_id]);
+                    }
+                    $dbImage->delete();
+                    Log::info('Image deleted from DB', ['id' => $image['id']]);
+                }
+            } else {
+                $tempId = $this->variantCombinations[$this->editingCombination]['temp_id'] ?? null;
+                if ($tempId) {
+                    if ($image['is_primary']) {
+                        Session::forget("temp_image_{$tempId}_featured");
+                        Log::info('Removed featured image from session', ['temp_id' => $tempId]);
+                    } else {
+                        $gallery = Session::get("temp_gallery_{$tempId}", []);
+                        unset($gallery[$index]);
+                        Session::put("temp_gallery_{$tempId}", array_values($gallery));
+                        Log::info('Removed gallery image from session', ['temp_id' => $tempId, 'index' => $index]);
+                    }
+                }
+            }
+
+            unset($this->existingImages[$index]);
+            $this->existingImages = array_values($this->existingImages);
+
+            if ($this->editingCombination !== null) {
+                $this->variantCombinations[$this->editingCombination]['images'] = $this->existingImages;
+            }
+
+            Log::info('Image removed successfully', ['index' => $index]);
+        } catch (\Exception $e) {
+            Log::error('Error in removeExistingImage', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->addError('general', 'Failed to remove image: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteCombination($index)
+    {
+        try {
+            Log::info('deleteCombination called', ['index' => $index]);
+
+            if (!isset($this->variantCombinations[$index])) {
+                Log::error('Invalid combination index', ['index' => $index]);
+                $this->addError('general', 'Invalid variant combination selected.');
+                return;
+            }
+
+            $combination = $this->variantCombinations[$index];
+
+            if ($this->product && isset($combination['id'])) {
+                $dbCombination = ProductVariantCombination::find($combination['id']);
+                if ($dbCombination) {
+                    $service = new ImageKitService();
+                    foreach ($dbCombination->images as $image) {
                         if ($image->image_file_id) {
-                            try {
-                                $service->delete($image->image_file_id);
-                            } catch (\Exception $e) {
-                                Log::error('Failed to delete existing gallery image: ' . $e->getMessage());
-                            }
+                            $service->delete($image->image_file_id);
+                            Log::info('Image deleted from ImageKit', ['file_id' => $image->image_file_id]);
                         }
-                        $image->delete();
                     }
+                    $dbCombination->images()->delete();
+                    $dbCombination->delete();
+                    Log::info('Combination deleted from DB', ['id' => $combination['id']]);
                 }
-                
-                foreach ($this->galleryImages as $index => $image) {
-                    if ($image) {
-                        $fileName = "gallery-{$slug}-{$combination->id}-" . ($index + 1) . "-{$time}." . $image->getClientOriginalExtension();
-                        $result = $service->upload($image, $fileName, config('services.imagekit.folders.product'));
-                        
-                        ProductImage::create([
-                            'product_variant_combination_id' => $combination->id,
-                            'image_path' => $result->url,
-                            'image_file_id' => $result->fileId ?? null,
-                            'is_primary' => false,
-                        ]);
-                    }
+            } else {
+                $tempId = $combination['temp_id'] ?? null;
+                if ($tempId) {
+                    Session::forget("temp_image_{$tempId}_featured");
+                    Session::forget("temp_gallery_{$tempId}");
+                    Log::info('Removed temp images from session', ['temp_id' => $tempId]);
                 }
             }
-            
+
+            unset($this->variantCombinations[$index]);
+            $this->variantCombinations = array_values($this->variantCombinations);
+
+            Log::info('Combination deleted successfully', ['index' => $index]);
+            $this->dispatch('combinationDeleted');
         } catch (\Exception $e) {
-            Log::error('Failed to upload images: ' . $e->getMessage());
-            $this->addError('general', 'Failed to upload images: ' . $e->getMessage());
-        } finally {
-            $this->isUploading = false;
+            Log::error('Error in deleteCombination', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->addError('general', 'Failed to delete variant: ' . $e->getMessage());
         }
+    }
+
+    private function loadTempImages($tempId)
+    {
+        foreach ($this->variantCombinations as &$combo) {
+            if ($combo['temp_id'] === $tempId) {
+                $images = $this->getUploadedImagesForTemp($tempId);
+                if (empty($images)) {
+                    Log::warning('No temp images found in session', ['temp_id' => $tempId]);
+                }
+                $combo['images'] = $images;
+                Log::info('Loaded temp images for combination', [
+                    'temp_id' => $tempId,
+                    'image_count' => count($combo['images']),
+                ]);
+                break;
+            }
+        }
+    }
+
+    private function getUploadedImagesForTemp($tempId)
+    {
+        $images = [];
+
+        $featured = Session::get("temp_image_{$tempId}_featured");
+        if ($featured) {
+            $images[] = [
+                'image_path' => $featured['path'],
+                'image_file_id' => $featured['file_id'] ?? null,
+                'is_primary' => true,
+            ];
+            Log::debug('Retrieved featured image from session', ['temp_id' => $tempId, 'url' => $featured['path']]);
+        }
+
+        $gallery = Session::get("temp_gallery_{$tempId}", []);
+        foreach ($gallery as $imgData) {
+            $images[] = [
+                'image_path' => $imgData['path'],
+                'image_file_id' => $imgData['file_id'] ?? null,
+                'is_primary' => false,
+            ];
+            Log::debug('Retrieved gallery image from session', ['temp_id' => $tempId, 'url' => $imgData['path']]);
+        }
+
+        return $images;
     }
 
     private function resetForm()
     {
-        $this->combination = [
-            'id' => null,
-            'price' => '',
-            'stock' => '',
-            'sku' => '',
-            'variant_values' => [],
-        ];
-        
-        $this->selectedVariantTypes = [];
-        $this->selectedVariantValues = [];
-        $this->availableVariantValues = [];
-        
-        $this->featuredImage = null;
-        $this->featuredImagePreview = null;
-        $this->galleryImages = [];
-        $this->galleryImagePreviews = [];
-        $this->existingImages = [];
-        
+        Log::debug('resetForm called - resetting image properties');
+        $this->reset([
+            'selectedVariantTypes',
+            'selectedVariantValues',
+            'new_combination',
+            'new_featured_image',
+            'new_gallery_images',
+            'new_featured_image_preview',
+            'new_gallery_images_preview',
+            'temp_featured_path',
+            'temp_gallery_paths',
+            'editing_combination',
+            'editing_featured_image',
+            'editing_gallery_images',
+            'editing_featured_image_preview',
+            'editing_gallery_images_preview',
+            'existingImages'
+        ]);
         $this->resetErrorBag();
+    }
+
+    private function uploadImages($combination, $isNew = true)
+    {
+        Log::info('uploadImages called', ['isNew' => $isNew, 'combination_id' => $combination->id ?? 'temp']);
+        $this->isUploading = true;
+        $service = new ImageKitService();
+        $slug = $this->product ? $this->product->slug : 'temp-' . time();
+        $time = time();
+
+        $featuredFile = $isNew ? $this->new_featured_image : $this->editing_featured_image;
+        $galleryFiles = $isNew ? $this->new_gallery_images : $this->editing_gallery_images;
+
+        Log::debug('Upload files state', [
+            'featured_set' => !empty($featuredFile),
+            'featured_type' => $featuredFile ? get_class($featuredFile) : 'null',
+            'temp_path' => $isNew ? $this->temp_featured_path : null,
+            'gallery_count' => count($galleryFiles ?? []),
+        ]);
+
+        $uploadFile = null;
+        if ($featuredFile && $featuredFile instanceof TemporaryUploadedFile && $featuredFile->exists()) {
+            $uploadFile = $featuredFile;
+            Log::debug('Using original featured file', ['size' => $uploadFile->getSize()]);
+        } elseif ($isNew && $this->temp_featured_path) {
+            try {
+                $uploadFile = TemporaryUploadedFile::createFromLivewire($this->temp_featured_path);
+                Log::info('Reconstructed featured file from temp path', ['path' => $this->temp_featured_path, 'size' => $uploadFile->getSize()]);
+            } catch (\Exception $e) {
+                Log::error('Failed to reconstruct featured file', ['error' => $e->getMessage()]);
+            }
+        }
+
+        if ($uploadFile && $uploadFile->exists()) {
+            if (!$isNew) {
+                $old = $combination->images()->where('is_primary', true)->first();
+                if ($old && $old->image_file_id) {
+                    try {
+                        $service->delete($old->image_file_id);
+                        Log::info('Old featured image deleted');
+                    } catch (\Exception $e) {
+                        Log::error('Failed to delete old featured image: ' . $e->getMessage());
+                    }
+                    $old->delete();
+                }
+            }
+
+            $fileName = "featured-{$slug}-{$time}." . $uploadFile->getClientOriginalExtension();
+            try {
+                $result = $service->upload($uploadFile, $fileName, config('services.imagekit.folders.product'));
+                Log::debug('ImageKit response type: ' . gettype($result));
+                Log::debug('ImageKit response content: ', ['response' => json_encode($result, JSON_PRETTY_PRINT)]);
+                if (is_string($combination->id)) {
+                    Session::put("temp_image_{$combination->id}_featured", [
+                        'path' => $result->url,
+                        'file_id' => $result->fileId ?? null,
+                    ]);
+                    Log::info('Temp featured image stored in session', ['temp_id' => $combination->id, 'url' => $result->url]);
+                } else {
+                    $image = ProductImage::create([
+                        'product_variant_combination_id' => $combination->id,
+                        'image_path' => $result->url,
+                        'image_file_id' => $result->fileId ?? null,
+                        'is_primary' => true,
+                    ]);
+                    Log::info('Featured image uploaded successfully to DB', [
+                        'url' => $result->url,
+                        'file_id' => $result->fileId ?? 'none',
+                        'db_id' => $image->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to upload featured image: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                $errorMsg = $isNew ? 'new_featured_image' : 'editing_featured_image';
+                $this->addError($errorMsg, 'Failed to upload featured image: ' . $e->getMessage());
+            }
+        } else {
+            Log::warning('No valid featured image to upload', [
+                'featured_set' => !empty($featuredFile),
+                'instanceof_valid' => $featuredFile instanceof TemporaryUploadedFile ? true : false,
+                'exists' => $featuredFile?->exists() ?? false,
+                'temp_path' => $this->temp_featured_path,
+            ]);
+            if ($isNew) {
+                $this->addError('new_featured_image', 'Featured image is required and must be valid for variants.');
+            }
+        }
+
+        if (!empty($galleryFiles)) {
+            Log::info('Uploading gallery images', ['count' => count($galleryFiles)]);
+            $gallerySessionKey = "temp_gallery_{$combination->id}";
+            $tempGallery = $isNew ? [] : (is_string($combination->id) ? Session::get($gallerySessionKey, []) : []);
+            foreach ($galleryFiles as $idx => $image) {
+                $uploadGalleryFile = null;
+                if ($image instanceof TemporaryUploadedFile && $image->exists()) {
+                    $uploadGalleryFile = $image;
+                } elseif ($isNew && isset($this->temp_gallery_paths[$idx])) {
+                    try {
+                        $uploadGalleryFile = TemporaryUploadedFile::createFromLivewire($this->temp_gallery_paths[$idx]);
+                        Log::info('Reconstructed gallery file', ['index' => $idx, 'path' => $this->temp_gallery_paths[$idx]]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to reconstruct gallery file', ['index' => $idx, 'error' => $e->getMessage()]);
+                    }
+                }
+
+                if ($uploadGalleryFile && $uploadGalleryFile->exists()) {
+                    $fileName = "gallery-{$slug}-" . ($idx + 1) . "-{$time}." . $uploadGalleryFile->getClientOriginalExtension();
+                    try {
+                        $result = $service->upload($uploadGalleryFile, $fileName, config('services.imagekit.folders.product'));
+                        $tempGallery[] = [
+                            'path' => $result->url,
+                            'file_id' => $result->fileId ?? null,
+                        ];
+                        if (is_string($combination->id)) {
+                            Session::put("{$gallerySessionKey}_{$idx}", $tempGallery[$idx]);
+                        } else {
+                            $galleryImage = ProductImage::create([
+                                'product_variant_combination_id' => $combination->id,
+                                'image_path' => $result->url,
+                                'image_file_id' => $result->fileId ?? null,
+                                'is_primary' => false,
+                            ]);
+                            Log::info('Gallery image uploaded to DB', ['index' => $idx, 'url' => $result->url, 'db_id' => $galleryImage->id]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Failed to upload gallery image ' . $idx . ': ' . $e->getMessage());
+                    }
+                } else {
+                    Log::warning('Invalid gallery image at index ' . $idx, ['path' => $this->temp_gallery_paths[$idx] ?? 'none']);
+                }
+            }
+            if (is_string($combination->id)) {
+                Session::put($gallerySessionKey, $tempGallery);
+                Log::info('Temp gallery images stored in session', ['temp_id' => $combination->id, 'count' => count($tempGallery)]);
+            }
+        }
+
+        $this->isUploading = false;
+        Log::info('uploadImages completed');
+    }
+
+    public function handleReupload($product_id)
+    {
+        $this->product = Product::find($product_id);
+        $this->loadVariantCombinations();
+        Log::info('Reupload handled for product', ['id' => $product_id]);
     }
 
     public function render()

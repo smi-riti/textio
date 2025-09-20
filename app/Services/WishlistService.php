@@ -51,14 +51,24 @@ class WishlistService
         return ['success' => true, 'message' => 'Product removed from wishlist.'];
     }
 
-    public function isInWishlist(int $productId): bool
-    {
-        if (!Auth::check()) {
-            return false;
-        }
+  public function isInWishlist(int $productId): bool
+{
+    static $wishlistProductIds = null;
 
-        return Wishlist::where('user_id', Auth::id())->where('product_id', $productId)->exists();
+    if (!Auth::check()) {
+        return false;
     }
+
+    // Load wishlist product IDs only once per request
+    if ($wishlistProductIds === null) {
+        $wishlistProductIds = Wishlist::where('user_id', Auth::id())
+            ->pluck('product_id')
+            ->toArray();
+    }
+
+    return in_array($productId, $wishlistProductIds);
+}
+
 
     public function getWishlistItems()
     {

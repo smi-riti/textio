@@ -8,20 +8,18 @@
             <!-- Desktop Navigation and Search -->
             <div class="hidden md:flex items-center space-x-6">
                 <nav class="flex space-x-6">
-                    <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">T-Shirts</a>
-                    <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Hoodies</a>
-                    <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Mugs</a>
-                    <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Posters</a>
-                    <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">All Products</a>
+                    <a wire:navigate href="{{route('about')}}" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">About Us</a>
+                    <a wire:navigate href="{{route('contact')}}" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Contact Us</a>
+                    <a wire:navigate href="{{route('public.product.all')}}" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Browse</a>
                 </nav>
-                <form wire:submit.prevent="search" class="relative group">
+                {{-- <form wire:submit.prevent="search" class="relative group">
                     <input wire:model.debounce.500ms="searchQuery" type="text" placeholder="Search products..." class="w-48 px-4 py-1.5 text-[#171717] text-sm bg-gray-100 rounded-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#8f4da7] transition-all duration-300 ease-in-out group-hover:w-56">
                     <button type="submit" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#171717] group-hover:text-[#8f4da7] transition-colors duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                     </button>
-                </form>
+                </form> --}}
             </div>
 
             <!-- Right Side Icons -->

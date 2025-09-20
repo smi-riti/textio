@@ -28,10 +28,10 @@ class AllProduct extends Component
     public $parentCategories;
     public $subcategories = [];
     public $showAllCategories = false;
-    
+
     #[Url(as: 'category')]
     public $selectedCategory = null;
-    
+
     #[Url(as: 'subcats')]
     public $selectedSubcategories = [];
 
@@ -44,14 +44,14 @@ class AllProduct extends Component
     public $showAllBrands = false;
     #[Url(as: 'brands')]
     public $selectedBrands = [];
-    
+
     // Temporary brand selections (before apply)
     public $tempSelectedBrands = [];
 
     // Price range
     #[Url(as: 'price_min')]
     public $minPrice = 0;
-    
+
     #[Url(as: 'price_max')]
     public $maxPrice = 10000;
 
@@ -80,7 +80,7 @@ class AllProduct extends Component
     // Wishlist storage (you can enhance this with database)
     public $wishlistItems = [];
 
-   public function mount()
+    public function mount()
     {
         $this->categories = Category::where('is_active', true)->get();
         $this->parentCategories = Category::where('is_active', true)
@@ -126,9 +126,12 @@ class AllProduct extends Component
             ->get()
             ->map(function ($combination) {
                 // Decode the JSON string to array
-                $values = json_decode($combination->variant_values, true);
-                if (!is_array($values)) return null;
-                
+                $values = is_array($combination->variant_values)
+                    ? $combination->variant_values
+                    : json_decode($combination->variant_values, true);
+                if (!is_array($values))
+                    return null;
+
                 // Look for Color/color keys in the variant_values array
                 return $values['Color'] ?? $values['color'] ?? null;
             })
@@ -137,9 +140,9 @@ class AllProduct extends Component
             ->sort()
             ->values()
             ->toArray();
-        
+
         $this->availableColors = $colors;
-        
+
         // Debug: Log the colors found
         \Log::info('Available colors fetched:', $colors);
     }
@@ -151,9 +154,12 @@ class AllProduct extends Component
             ->get()
             ->map(function ($combination) {
                 // Decode the JSON string to array
-                $values = json_decode($combination->variant_values, true);
-                if (!is_array($values)) return null;
-                
+                $values = is_array($combination->variant_values)
+                    ? $combination->variant_values
+                    : json_decode($combination->variant_values, true);
+                if (!is_array($values))
+                    return null;
+
                 // Look for Size/size keys in the variant_values array
                 return $values['Size'] ?? $values['size'] ?? null;
             })
@@ -162,9 +168,9 @@ class AllProduct extends Component
             ->sort()
             ->values()
             ->toArray();
-        
+
         $this->availableSizes = $sizes;
-        
+
         // Debug: Log the sizes found
         \Log::info('Available sizes fetched:', $sizes);
     }
@@ -193,10 +199,10 @@ class AllProduct extends Component
         } else {
             $this->subcategories = collect(); // Use empty collection
         }
-        
+
         // Reset subcategory selection when parent category changes
         $this->tempSelectedSubcategories = [];
-        
+
         // Refresh available colors and sizes based on new category
         $this->refreshVariantFilters();
     }
@@ -281,7 +287,7 @@ class AllProduct extends Component
 
         // Refresh variant filters
         $this->refreshVariantFilters();
-        
+
         $this->resetPage();
         $this->dispatch('close-mobile-filters');
     }
@@ -298,7 +304,7 @@ class AllProduct extends Component
         if ($result['success']) {
             $this->dispatch('wishlistUpdated');
             session()->flash('wishlist_message', $result['message']);
-            
+
             // Update local wishlist items for UI
             if (!in_array($productId, $this->wishlistItems)) {
                 $this->wishlistItems[] = $productId;
@@ -323,7 +329,7 @@ class AllProduct extends Component
         if ($result['success']) {
             $this->dispatch('wishlistUpdated');
             session()->flash('wishlist_message', $result['message']);
-            
+
             // Update local wishlist items for UI
             $this->wishlistItems = array_diff($this->wishlistItems, [$productId]);
         } else {
@@ -380,7 +386,7 @@ class AllProduct extends Component
         $this->selectedSizes = $this->tempSelectedSizes;
         $this->minPrice = $this->tempMinPrice;
         $this->maxPrice = $this->tempMaxPrice;
-        
+
         // Update subcategories for the selected category
         if ($this->selectedCategory) {
             $this->subcategories = Category::where('parent_category_id', $this->selectedCategory)
@@ -389,7 +395,7 @@ class AllProduct extends Component
         } else {
             $this->subcategories = collect();
         }
-        
+
         $this->resetPage();
         $this->dispatch('close-mobile-filters');
     }
@@ -421,18 +427,18 @@ class AllProduct extends Component
         // Filter by color and size using ProductVariantCombination
         // Note: Using LIKE patterns because variant_values is stored as longtext, not JSON column
         if (!empty($this->selectedColors)) {
-            $query->whereHas('variantCombinations', function($q) {
-                $q->where(function($subQ) {
+            $query->whereHas('variantCombinations', function ($q) {
+                $q->where(function ($subQ) {
                     foreach ($this->selectedColors as $color) {
                         $subQ->orWhere('variant_values', 'LIKE', "%{$color}%");
                     }
                 });
             });
         }
-        
+
         if (!empty($this->selectedSizes)) {
-            $query->whereHas('variantCombinations', function($q) {
-                $q->where(function($subQ) {
+            $query->whereHas('variantCombinations', function ($q) {
+                $q->where(function ($subQ) {
                     foreach ($this->selectedSizes as $size) {
                         $subQ->orWhere('variant_values', 'LIKE', "%{$size}%");
                     }
@@ -442,23 +448,23 @@ class AllProduct extends Component
 
         // Apply price filter
         if ($this->minPrice > 0 || $this->maxPrice < 10000) {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->whereBetween('price', [$this->minPrice, $this->maxPrice])
-                  ->orWhereBetween('discount_price', [$this->minPrice, $this->maxPrice]);
+                    ->orWhereBetween('discount_price', [$this->minPrice, $this->maxPrice]);
             });
         }
 
         // Apply search filter
         if ($this->searchQuery) {
-            $query->where(function($q) {
-                $q->where('name', 'like', '%'.$this->searchQuery.'%')
-                  ->orWhere('description', 'like', '%'.$this->searchQuery.'%')
-                  ->orWhereHas('category', function($categoryQuery) {
-                      $categoryQuery->where('title', 'like', '%'.$this->searchQuery.'%');
-                  })
-                  ->orWhereHas('brand', function($brandQuery) {
-                      $brandQuery->where('name', 'like', '%'.$this->searchQuery.'%');
-                  });
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->searchQuery . '%')
+                    ->orWhere('description', 'like', '%' . $this->searchQuery . '%')
+                    ->orWhereHas('category', function ($categoryQuery) {
+                        $categoryQuery->where('title', 'like', '%' . $this->searchQuery . '%');
+                    })
+                    ->orWhereHas('brand', function ($brandQuery) {
+                        $brandQuery->where('name', 'like', '%' . $this->searchQuery . '%');
+                    });
             });
         }
 
@@ -479,7 +485,7 @@ class AllProduct extends Component
             case 'popularity':
             default:
                 $query->orderBy('featured', 'desc')
-                      ->orderBy('created_at', 'desc');
+                    ->orderBy('created_at', 'desc');
                 break;
         }
 
