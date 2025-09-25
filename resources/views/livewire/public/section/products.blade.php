@@ -1,4 +1,4 @@
-<section class="py-12 bg-gray-50">
+<section class="py-5 bg-gray-50">
     <div class="container mx-auto px-4">
         <h2 class="text-3xl font-semibold text-center mb-4 text-[#171717]">Featured Products</h2>
         <p class="text-center text-gray-600 mb-12">Discover our most popular custom printing products</p>

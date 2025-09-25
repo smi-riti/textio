@@ -1,4 +1,4 @@
- <section class="relative h-96 md:h-[500px] bg-primary text-white overflow-hidden">
+ <section class="relative h-[298px] md:h-[500px] bg-primary text-white overflow-hidden">
      
              <!-- Background pattern -->
              <div
@@ -6,14 +6,14 @@
              </div>
 
              <!-- Content container -->
-             <div class="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
+             <div class="relative container mx-auto px-2 h-full flex flex-col justify-center items-center text-center">
                  <!-- Main heading -->
-                 <h1 class="text-4xl md:text-6xl font-bold mb-4 animate-fade-in">
-                     Premium <span class="text-accent">Printing</span> Services
+                 <h1 class="text-2xl md:text-6xl  font-bold mb-4 animate-fade-in">
+                     Premium <span class="text-accent">Customization</span> Services
                  </h1>
 
                  <!-- Subheading -->
-                 <p class="text-lg md:text-xl max-w-2xl mb-8 animate-fade-in-delay">
+                 <p class="text-sm md:text-xl max-w-2xl mb-8 animate-fade-in-delay">
                      Custom printing on t-shirts, mugs, caps and more. Bring your ideas to life with our high-quality
                      printing solutions.
                  </p>
@@ -24,10 +24,7 @@
                          class="bg-accent hover:bg-[#7c4190] text-white font-semibold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105">
                          Explore Mores
                      </a>
-                     <a wire:navigate href="{{route('contact')}}"
-                         class="border-2 border-white hover:border-accent hover:bg-accent/10 font-semibold py-3 px-8 rounded-lg transition duration-300">
-                         Get a Quote
-                     </a>
+                   
                  </div>
              </div>
 

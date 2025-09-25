@@ -30,9 +30,7 @@
                 <a href="{{ route('google.redirect') }}" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition">
                     <i class="ti-google text-red-500 "></i> <span>Sign in with Google</span>
                 </a>
-                {{-- <a href="#" class="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition">
-                    <i class="ti-facebook text-blue-600"></i> <span>Sign in with Facebook</span>
-                </a> --}}
+               
             </div>
             <p class="text-center block lg:hidden mt-8">
                 Don't have an account? <a href="#" class="text-purple-600 hover:underline">Sign up</a>.

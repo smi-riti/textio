@@ -166,7 +166,7 @@
 </div>
 
     <!-- Footer -->
-@if (!in_array(Route::currentRouteName(), ['myCart', 'myOrder','view.product']))
+@if (!in_array(Route::currentRouteName(), ['myCart', 'myOrder','view.product','public.product.all']))
         <livewire:public.section.footer />
     @endif
     @livewireScripts

@@ -1,4 +1,4 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6" x-data="{ mobileFiltersOpen: false }" wire:ignore.self
+<div class="max-w-7xl mb-16 md:mb-0 mx-auto px-4 sm:px-6 lg:px-8 py-6" x-data="{ mobileFiltersOpen: false }" wire:ignore.self
     @close-mobile-filters.window="if (window.innerWidth < 1024) { mobileFiltersOpen = false }">
 
     <!-- Flash Messages -->
@@ -25,6 +25,7 @@
             <span class="block sm:inline">{{ session('wishlist_error') }}</span>
         </div>
     @endif
+
     <div class="flex flex-col lg:flex-row gap-6">
 
         <!-- Left Sidebar - Filters -->
@@ -46,7 +47,7 @@
             </div>
 
             <!-- Filters Container -->
-            <div class="bg-white rounded-lg border border-gray-200"
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm"
                 :class="{ 'hidden lg:block': !mobileFiltersOpen, 'block': mobileFiltersOpen }">
 
                 <!-- Search Bar -->
@@ -54,7 +55,7 @@
                     <h6 class="text-lg font-semibold text-gray-900 mb-3">Search</h6>
                     <div class="relative">
                         <input type="text"
-                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#8f4da7] focus:border-[#8f4da7]"
                             placeholder="Search products..." wire:model.live.debounce.300ms="searchQuery">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,8 +71,7 @@
                     <h6 class="text-lg font-semibold text-gray-900 mb-3">Product categories</h6>
                     <!-- All Categories Option -->
                     <div class="mb-2">
-                        <button wire:click="resetFilters" class="text-blue-600 hover:underline text-sm">All
-                            Categories</button>
+                        <button wire:click="resetFilters" class="text-[#8f4da7] hover:underline text-sm font-medium">All Categories</button>
                     </div>
                     <!-- Parent Categories -->
                     @php
@@ -80,14 +80,14 @@
                     @foreach ($categoriesToShow as $category)
                         <div class="mb-1">
                             <button wire:click="$set('tempSelectedCategory', {{ $category->id }})"
-                                class="w-full text-left px-2 py-1 rounded {{ $tempSelectedCategory == $category->id ? 'bg-blue-100 font-bold' : '' }}">
+                                class="w-full text-left px-2 py-1 rounded transition-colors {{ $tempSelectedCategory == $category->id ? 'bg-[#8f4da7] text-white font-medium' : 'text-gray-700 hover:bg-gray-100' }}">
                                 {{ $category->title }}
                             </button>
                         </div>
                     @endforeach
                     <!-- See More/Less for Categories -->
                     @if ($parentCategories->count() > 8)
-                        <button wire:click="toggleShowAllCategories" class="text-xs text-blue-600 mt-2">
+                        <button wire:click="toggleShowAllCategories" class="text-xs text-[#8f4da7] mt-2 font-medium">
                             {{ $showAllCategories ? 'Show Less' : 'See More' }}
                         </button>
                     @endif
@@ -98,10 +98,11 @@
                             <h6 class="text-sm font-semibold text-gray-700 mb-2">Subcategories</h6>
                             @foreach ($subcategories as $subcat)
                                 <div class="mb-1">
-                                    <label class="inline-flex items-center">
+                                    <label class="inline-flex items-center cursor-pointer">
                                         <input type="checkbox" wire:click="toggleTempSubcategory({{ $subcat->id }})"
-                                            @if (in_array($subcat->id, $tempSelectedSubcategories)) checked @endif>
-                                        <span class="ml-2">{{ $subcat->title }}</span>
+                                            @if (in_array($subcat->id, $tempSelectedSubcategories)) checked @endif
+                                            class="text-[#8f4da7] focus:ring-[#8f4da7] rounded">
+                                        <span class="ml-2 text-sm text-gray-700">{{ $subcat->title }}</span>
                                     </label>
                                 </div>
                             @endforeach
@@ -122,7 +123,7 @@
                             <label class="flex items-center cursor-pointer">
                                 <input type="checkbox" wire:click="toggleTempBrand({{ $brand->id }})"
                                     @if (in_array($brand->id, $tempSelectedBrands)) checked @endif
-                                    class="text-purple-600 focus:ring-purple-500 rounded">
+                                    class="text-[#8f4da7] focus:ring-[#8f4da7] rounded">
                                 <span class="ml-2 text-sm text-gray-700">{{ $brand->name }}</span>
                             </label>
                         @endforeach
@@ -131,7 +132,7 @@
                     <!-- See More/Less for Brands -->
                     @if ($brands->count() > 8)
                         <button wire:click="toggleShowAllBrands"
-                            class="text-purple-600 text-sm font-medium hover:text-purple-700 mt-2">
+                            class="text-[#8f4da7] text-sm font-medium hover:text-[#7a3d8f] mt-2">
                             {{ $showAllBrands ? 'See Less' : 'See More (' . ($brands->count() - 8) . ' more)' }}
                         </button>
                     @endif
@@ -158,15 +159,15 @@
                         <!-- Slider Track -->
                         <div class="relative h-2 bg-gray-200 rounded-full">
                             <!-- Active Range -->
-                            <div x-ref="progress" class="absolute h-2 bg-purple-500 rounded-full"></div>
+                            <div x-ref="progress" class="absolute h-2 bg-[#8f4da7] rounded-full"></div>
                         </div>
 
                         <!-- Range Inputs -->
                         <div class="relative">
                             <input type="range" :min="minRange" :max="maxRange" x-model="tempMinPrice"
-                                class="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-500 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer">
+                                class="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#8f4da7] [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#8f4da7] [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer">
                             <input type="range" :min="minRange" :max="maxRange" x-model="tempMaxPrice"
-                                class="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-500 [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer">
+                                class="absolute w-full h-2 bg-transparent appearance-none pointer-events-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#8f4da7] [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#8f4da7] [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer">
                         </div>
 
                         <!-- Price Display -->
@@ -188,7 +189,7 @@
                     <div class="flex flex-wrap gap-2">
                         @foreach ($availableColors as $color)
                             <button wire:click="toggleTempColor('{{ $color }}')"
-                                class="px-3 py-1 rounded border text-sm {{ in_array($color, $tempSelectedColors) ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-300 hover:border-purple-600' }} transition-colors">
+                                class="px-3 py-1 rounded border text-sm transition-colors {{ in_array($color, $tempSelectedColors) ? 'bg-[#8f4da7] text-white border-[#8f4da7]' : 'bg-white text-gray-700 border-gray-300 hover:border-[#8f4da7]' }}">
                                 {{ ucfirst($color) }}
                             </button>
                         @endforeach
@@ -205,20 +206,17 @@
                     <div class="flex flex-wrap gap-2">
                         @foreach ($availableSizes as $size)
                             <button wire:click="toggleTempSize('{{ $size }}')"
-                                class="px-3 py-1 rounded border text-sm {{ in_array($size, $tempSelectedSizes) ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-300 hover:border-purple-600' }} transition-colors">
+                                class="px-3 py-1 rounded border text-sm transition-colors {{ in_array($size, $tempSelectedSizes) ? 'bg-[#8f4da7] text-white border-[#8f4da7]' : 'bg-white text-gray-700 border-gray-300 hover:border-[#8f4da7]' }}">
                                 {{ strtoupper($size) }}
                             </button>
                         @endforeach
                     </div>
                 </div>
 
-
-
                 <!-- Apply All Filters Button -->
                 <div class="p-4 border-t border-gray-200">
                     <button wire:click="applyAllFilters"
-                        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">Apply
-                        Filters</button>
+                        class="w-full bg-[#8f4da7] text-white py-2 rounded hover:bg-[#7a3d8f] transition font-medium">Apply Filters</button>
                 </div>
 
                 <!-- Clear Filters -->
@@ -231,8 +229,7 @@
                         !empty($selectedSizes) ||
                         $selectedCategory)
                     <div class="p-4">
-                        <button wire:click="resetFilters" class="text-red-600 hover:underline text-sm">Clear All
-                            Filters</button>
+                        <button wire:click="resetFilters" class="text-red-600 hover:underline text-sm font-medium">Clear All Filters</button>
                     </div>
                 @endif
             </div>
@@ -241,7 +238,7 @@
         <!-- Right Content - Products -->
         <div class="flex-1">
             <!-- Results Header & Sort -->
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div>
                     <h2 class="text-xl font-semibold text-gray-900">
                         Showing {{ $products->firstItem() ?? 0 }}-{{ $products->lastItem() ?? 0 }} of
@@ -250,9 +247,9 @@
                 </div>
 
                 <!-- Sort Dropdown -->
-                <div class="relative" x-data="{ open: false }">
+                {{-- <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open"
-                        class="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        class="flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#8f4da7]">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -290,28 +287,26 @@
                     <div x-show="open" @click.outside="open = false" x-transition
                         class="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-10">
                         <div class="py-1">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#8f4da7] transition-colors"
                                 wire:click="$set('sortBy', 'popularity')" @click="open = false">Sort by popularity</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#8f4da7] transition-colors"
                                 wire:click="$set('sortBy', 'latest')" @click="open = false">Sort by latest</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                wire:click="$set('sortBy', 'price_low')" @click="open = false">Sort by price: low to
-                                high</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                wire:click="$set('sortBy', 'price_high')" @click="open = false">Sort by price: high to
-                                low</a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#8f4da7] transition-colors"
+                                wire:click="$set('sortBy', 'price_low')" @click="open = false">Sort by price: low to high</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#8f4da7] transition-colors"
+                                wire:click="$set('sortBy', 'price_high')" @click="open = false">Sort by price: high to low</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#8f4da7] transition-colors"
                                 wire:click="$set('sortBy', 'name')" @click="open = false">Sort by name</a>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             </div>
 
             <!-- Products List (Row Layout) -->
             <div class="space-y-4" wire:loading.class="opacity-50">
                 @forelse($products as $product)
                     <div
-                        class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors">
+                        class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors shadow-sm hover:shadow-md">
                         <div class="flex flex-col sm:flex-row">
                             <!-- Product Image -->
                             <div class="relative group sm:w-64 w-full">
@@ -365,7 +360,7 @@
                                 <!-- Discount Badge -->
                                 @if ($product->discount_price && $product->discount_price < $product->price)
                                     <div class="absolute top-2 left-2">
-                                        <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                        <span class="bg-[#8f4da7] text-white text-xs font-bold px-2 py-1 rounded">
                                             {{ round((($product->price - $product->discount_price) / $product->price) * 100) }}%
                                             OFF
                                         </span>
@@ -378,13 +373,13 @@
                                 <div class="flex justify-between items-start">
                                     <div class="flex-1">
                                         <a wire:navigate href="{{ route('public.product.view', $product->slug) }}"
-                                            class="text-lg font-semibold text-gray-900 mb-1">{{ $product->name }}</a>
+                                            class="text-lg font-semibold text-gray-900 mb-1 hover:text-[#8f4da7] transition-colors">{{ $product->name }}</a>
                                         <p class="text-sm text-gray-600 mb-2">
                                             {{ $product->category->title ?? 'No Category' }}</p>
 
                                         <!-- Price -->
                                         <div class="flex items-center space-x-2 mb-3">
-                                            <span class="text-2xl font-bold text-purple-600">
+                                            <span class="text-2xl font-bold text-[#8f4da7]">
                                                 ₹{{ number_format($product->discount_price ?? $product->price) }}
                                             </span>
                                             @if ($product->discount_price && $product->discount_price < $product->price)
@@ -402,15 +397,6 @@
                                         </div>
 
                                         <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-4">
-                                            {{-- <span class="flex items-center">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                                </svg>
-                                                {{ $product->sku ?? 'N/A' }}
-                                            </span> --}}
                                             <span class="flex items-center">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">

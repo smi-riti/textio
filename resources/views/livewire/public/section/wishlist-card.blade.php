@@ -17,7 +17,7 @@
                 <div class="flex flex-col sm:flex-row items-start bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md transition duration-300">
                    <a href="{{route('view.product',$item->product->slug)}}" class="sm:flex-shrink-0">
                      <div class="w-24 h-24 mb-4 sm:mb-0 sm:mr-4">
-                        <img src="{{ $item->product->images->first()->image_path }}"
+                        <img src="{{ $item->product->firstVariantImage->image_path }}"
                             alt="{{ $item->product->name }}" class="w-full h-full object-cover rounded-lg">
                     </div>
                    </a>
@@ -78,10 +78,6 @@
         overflow: hidden;
     }
     
-    @media (max-width: 640px) {
-        .container {
-            padding-bottom: 80px;
-        }
-    }
+   
 </style>
 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Public\Section;
 
+use App\Models\ProductReview;
 use App\Models\ProductVariantCombination;
 use App\Models\ProductImage;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,10 @@ class ViewProduct extends Component
     public $variantCombinations = [];
     public $colorImages = [];
     public $hasStock = true;
+
+    public $approvedReviews;
+
+    public $reviewCount;
 
     public function mount($slug)
     {
@@ -58,17 +63,26 @@ class ViewProduct extends Component
         if ($this->variantCombinations->isNotEmpty()) {
             $firstCombination = $this->variantCombinations->first();
             $variantValues = $this->parseVariantValues($firstCombination->variant_values);
-            
+
             if (is_array($variantValues) && !empty($variantValues)) {
                 $this->selectedVariants = $variantValues;
                 $this->selectedVariantCombination = $firstCombination;
-                
+
                 Log::info('Auto-selected first variant:', [
                     'combination_id' => $firstCombination->id,
                     'variant_values' => $variantValues
                 ]);
             }
+
+            $this->approvedReviews = $this->product->reviews()->where('approved', true)
+            ->with('user')
+            ->get();
+
+           
+           
         }
+
+        
 
         $this->whatsappNumber = env('WHATSAPP_NUMBER', '+1234567890');
         $this->customizationMessage = env('WHATSAPP_CUSTOMIZATION_MESSAGE', 'Hi! I\'m interested in customizing this product:');
@@ -82,7 +96,7 @@ class ViewProduct extends Component
             'selectedVariantCombination' => $this->selectedVariantCombination ? $this->selectedVariantCombination->id : null
         ]);
 
-                // Dispatch initial variant image and gallery
+        // Dispatch initial variant image and gallery
         $initialImage = null;
         $initialGallery = [];
 
@@ -109,13 +123,15 @@ class ViewProduct extends Component
 
     private function getPrimaryImageForVariant($variantCombination)
     {
-        if (!$variantCombination) return null;
+        if (!$variantCombination)
+            return null;
         return $variantCombination->primary_image; // Uses accessor from ProductVariantCombination
     }
 
     private function getGalleryImagesForVariant($variantCombination)
     {
-        if (!$variantCombination) return [];
+        if (!$variantCombination)
+            return [];
         return $variantCombination->gallery_images->pluck('image_path')->toArray();
     }
 
@@ -151,16 +167,17 @@ class ViewProduct extends Component
         $colorImages = [];
         foreach ($this->variantCombinations as $combination) {
             $values = $this->parseVariantValues($combination->variant_values);
-            if (!is_array($values) || !isset($values['Color'])) continue;
+            if (!is_array($values) || !isset($values['Color']))
+                continue;
 
             $color = $values['Color'];
             $primaryImage = $this->getPrimaryImageForVariant($combination);
-            
+
             if ($color && $primaryImage) {
                 // Ensure image URL is properly formatted
                 $primaryImage = $this->ensureImageUrl($primaryImage);
                 $colorImages[$color] = $primaryImage;
-                
+
                 Log::info("Found color image:", [
                     'color' => $color,
                     'image' => $primaryImage
@@ -212,7 +229,7 @@ class ViewProduct extends Component
         }
 
         Log::info('Selecting variant:', ['type' => $type, 'value' => $value]);
-        
+
         $this->selectedVariants[$type] = $value;
         $this->selectedVariantCombination = null;
 
@@ -423,6 +440,8 @@ class ViewProduct extends Component
         return "https://wa.me/" . str_replace(['+', ' ', '-'], '', $this->whatsappNumber) . "?text=" . $encodedMessage;
     }
 
+
+
     public function render()
     {
         $price = $this->product->price;
@@ -437,7 +456,7 @@ class ViewProduct extends Component
                 $colorValue = $this->selectedVariants['Color'];
                 $variantImage = isset($this->colorImages[$colorValue]) ? $this->colorImages[$colorValue] : null;
             }
-            
+
             // If no color image, use the variant combination's primary image
             if (!$variantImage) {
                 $variantImage = $this->getPrimaryImageForVariant($this->selectedVariantCombination);
@@ -445,7 +464,7 @@ class ViewProduct extends Component
         }
 
         $currentVariant = $this->selectedVariantCombination;
-        
+
         if (!$currentVariant && $this->variantCombinations->isNotEmpty()) {
             $currentVariant = $this->variantCombinations->first();
         }
@@ -469,7 +488,7 @@ class ViewProduct extends Component
         if ($currentVariant) {
             $formattedProductImages = $this->getGalleryImagesForVariant($currentVariant);
         } else {
-            $formattedProductImages = $this->product->images->map(function($image) {
+            $formattedProductImages = $this->product->images->map(function ($image) {
                 return $this->ensureImageUrl($image->image_path);
             })->toArray();
         }

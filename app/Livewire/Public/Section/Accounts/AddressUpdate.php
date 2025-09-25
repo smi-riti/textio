@@ -49,13 +49,13 @@ class AddressUpdate extends Component
             $this->resetForm();
         }
     }
- 
+
     public function save()
     {
         $this->validate();
 
         $data = [
-            'user_id' => Auth::id(),
+            'user_id' => Auth::user()->id,
             'name' => $this->name,
             'phone' => $this->phone,
             'postal_code' => $this->postal_code,
@@ -100,8 +100,17 @@ class AddressUpdate extends Component
     public function resetForm()
     {
         $this->reset([
-            'name', 'phone', 'postal_code', 'address_line', 'area',
-            'city', 'state', 'landmark', 'alt_phone', 'address_type', 'address_id'
+            'name',
+            'phone',
+            'postal_code',
+            'address_line',
+            'area',
+            'city',
+            'state',
+            'landmark',
+            'alt_phone',
+            'address_type',
+            'address_id'
         ]);
         $this->resetErrorBag();
     }

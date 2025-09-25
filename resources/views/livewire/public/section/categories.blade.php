@@ -1,7 +1,7 @@
-<section class="py-16 bg-white">
+<section class="py-5 md:py-10 bg-white">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         @if ($categories->isNotEmpty())
-            <div class="text-center mb-12">
+            <div class="text-center mb-10">
                 <h2 class="text-3xl md:text-4xl font-semibold text-[#171717] mb-4">Product Categories</h2>
                 <p class="text-gray-600 max-w-2xl mx-auto">Find exactly what you're looking for</p>
             </div>

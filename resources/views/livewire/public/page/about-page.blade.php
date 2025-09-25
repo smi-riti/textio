@@ -1,11 +1,6 @@
 <div>
 
-   <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Textio</title>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
@@ -24,16 +19,8 @@
             line-height: 1.6;
         }
 
-        .heading-font {
-            font-family: 'Playfair Display', serif;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-           
-        }
-
+       
+       
         .text-accent {
             color: var(--accent-color);
         }
@@ -45,7 +32,7 @@
         /* Hero Section */
         .hero-section {
             background-color: #f3e8ff;
-            
+
             text-align: center;
         }
 
@@ -62,9 +49,7 @@
         }
 
         /* CEO Section */
-        .ceo-section {
-          
-        }
+        .ceo-section {}
 
         .ceo-section .content {
             background-color: var(--card-background);
@@ -105,7 +90,7 @@
             font-weight: 500;
         }
 
-       
+
 
         .content-section .content {
             background-color: var(--card-background);
@@ -280,121 +265,141 @@
             }
         }
     </style>
-</head>
-<body>
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <h1 class="heading-font">About <span class="text-accent">TEXTIO</span></h1>
-            <p>We believe fashion is more than just clothing - it's a way to express yourself.</p>
-        </div>
-    </section>
+    </head>
 
-    <!-- CEO Section -->
-    <section class="ceo-section">
-        <div class="container">
-            <div class="content">
-                <h2 class="heading-font">Meet Our Visionary Leader</h2>
-                <h3 class="text-accent">Priyanshu Bhattacharya</h3>
-                <p class="quote">
-                    "Fashion is the armor to survive the reality of everyday life. At TEXTIO, we don't just create clothes; we craft confidence, personality, and self-expression."
-                </p>
-                <p>
-                    Under Priyanshu's visionary leadership, TEXTIO has transformed from a custom t-shirt printing startup into a complete fashion brand that celebrates individuality. His passion for accessible fashion and belief in clothing as a form of self-expression drives our company's innovation and commitment to quality.
-                </p>
-                <div class="tags">
-                    <span class="tag">Visionary</span>
-                    <span class="tag">Innovator</span>
-                    <span class="tag">Leader</span>
+    <body>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <h1 class="heading-font">About <span class="text-accent">TEXTIO</span></h1>
+                <p>We believe fashion is more than just clothing - it's a way to express yourself.</p>
+            </div>
+        </section>
+
+        <!-- CEO Section -->
+        <section class="ceo-section">
+            <div class="container">
+                <div class="content">
+                    <h2 class="heading-font">Meet Our Visionary Leader</h2>
+                    <h3 class="text-accent">Priyanshu Bhattacharya</h3>
+                    <p class="quote">
+                        "Fashion is the armor to survive the reality of everyday life. At TEXTIO, we don't just create
+                        clothes; we craft confidence, personality, and self-expression."
+                    </p>
+                    <p>
+                        Under Priyanshu's visionary leadership, TEXTIO has transformed from a custom t-shirt printing
+                        startup into a complete fashion brand that celebrates individuality. His passion for accessible
+                        fashion and belief in clothing as a form of self-expression drives our company's innovation and
+                        commitment to quality.
+                    </p>
+                    <div class="tags">
+                        <span class="tag">Visionary</span>
+                        <span class="tag">Innovator</span>
+                        <span class="tag">Leader</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Content Section -->
-    <section class="content-section">
-        <div class="container">
-            <div class="content">
-                <div>
-                    <h2 class="text-accent heading-font">Our Story</h2>
-                    <p>
-                        At <span class="text-accent">TEXTIO</span>, we believe fashion is more than just clothing - it's a way to express yourself. In an era where uniqueness is paramount, we create apparel that helps you showcase your style and feel confident every day.
-                    </p>
-                    <p>
-                        We began our journey in 2024 to revolutionize the custom t-shirt printing industry, and it has now evolved into a complete fashion brand. Today, we proudly offer a wide range of clothing, including t-shirts, sweatshirts, and hoodies—all designed with quality, comfort, and style.
-                    </p>
+        <!-- Content Section -->
+        <section class="content-section">
+            <div class="container">
+                <div class="content">
+                    <div>
+                        <h2 class="text-accent heading-font">Our Story</h2>
+                        <p>
+                            At <span class="text-accent">TEXTIO</span>, we believe fashion is more than just clothing -
+                            it's a way to express yourself. In an era where uniqueness is paramount, we create apparel
+                            that helps you showcase your style and feel confident every day.
+                        </p>
+                        <p>
+                            We began our journey in 2024 to revolutionize the custom t-shirt printing industry, and it
+                            has now evolved into a complete fashion brand. Today, we proudly offer a wide range of
+                            clothing, including t-shirts, sweatshirts, and hoodies—all designed with quality, comfort,
+                            and style.
+                        </p>
+                    </div>
+                    <div class="grid">
+                        <div class="card">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                            <h3 class="heading-font">Our Mission</h3>
+                            <p>To make stylish, customizable, and high-quality fashion accessible to everyone.</p>
+                        </div>
+                        <div class="card">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <h3 class="heading-font">Our Vision</h3>
+                            <p>To keep fashion personal, affordable, and sustainable so everyone can express themselves
+                                through clothing they love to wear.</p>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </section>
+
+        <!-- Values Section -->
+        <section class="values-section">
+            <div class="container">
+                <h2 class="heading-font">Our Values</h2>
+                <p>The principles that guide everything we do at Textio</p>
                 <div class="grid">
                     <div class="card">
                         <div class="icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <h3 class="heading-font">Our Mission</h3>
-                        <p>To make stylish, customizable, and high-quality fashion accessible to everyone.</p>
+                        <h3 class="heading-font">Self-Expression</h3>
+                        <p>We believe clothing is a powerful medium for expressing individuality and personality.</p>
                     </div>
                     <div class="card">
                         <div class="icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                             </svg>
                         </div>
-                        <h3 class="heading-font">Our Vision</h3>
-                        <p>To keep fashion personal, affordable, and sustainable so everyone can express themselves through clothing they love to wear.</p>
+                        <h3 class="heading-font">Quality</h3>
+                        <p>We never compromise on the quality of our materials, craftsmanship, or designs.</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="heading-font">Community</h3>
+                        <p>We foster a community where people can share their unique styles and inspire others.</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Values Section -->
-    <section class="values-section">
-        <div class="container">
-            <h2 class="heading-font">Our Values</h2>
-            <p>The principles that guide everything we do at Textio</p>
-            <div class="grid">
-                <div class="card">
-                    <div class="icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="heading-font">Self-Expression</h3>
-                    <p>We believe clothing is a powerful medium for expressing individuality and personality.</p>
-                </div>
-                <div class="card">
-                    <div class="icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                    </div>
-                    <h3 class="heading-font">Quality</h3>
-                    <p>We never compromise on the quality of our materials, craftsmanship, or designs.</p>
-                </div>
-                <div class="card">
-                    <div class="icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="heading-font">Community</h3>
-                    <p>We foster a community where people can share their unique styles and inspire others.</p>
-                </div>
+        <!-- Call to Action -->
+        <section class="cta-section">
+            <div class="container">
+                <h2 class="heading-font">Join the Textio Community</h2>
+                <p>Be part of a fashion movement that celebrates individuality and self-expression</p>
+                <a href="/products">Explore Our Collections</a>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Call to Action -->
-    <section class="cta-section">
-        <div class="container">
-            <h2 class="heading-font">Join the Textio Community</h2>
-            <p>Be part of a fashion movement that celebrates individuality and self-expression</p>
-            <a href="/products">Explore Our Collections</a>
-        </div>
-    </section>
-</body>
-</html>
 
 
 </div>

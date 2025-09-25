@@ -202,7 +202,7 @@
 
                         <!-- Main Image -->
                         <div class="relative main-image flex-1">
-                            <div class="relative overflow-hidden rounded-xl bg-gray-100">
+                            <div class="relative overflow-hidden gap-2 rounded-xl bg-gray-100">
                                 <img x-bind:src="images[activeImageIndex]" class="w-full h-96 object-contain zoom-image"
                                     alt="{{ $product->name }}" @mousemove="zoomImage($event)">
                                 <!-- Eye icon for fullscreen -->
@@ -216,10 +216,8 @@
                                     <livewire:public.section.wishlist-button :productId="$product->id" />
                                 </div>
                                 <!-- Share button -->
-                                <button
-                                    class="absolute top-3 right-24 p-2 rounded-full bg-white shadow-md share-button"
-                                    @click="shareProduct()"
-                                    title="Share Product">
+                                <button class="absolute top-3 right-24 p-2 rounded-full bg-white shadow-md share-button"
+                                    @click="shareProduct()" title="Share Product">
                                     <i class="fas fa-share-alt text-[#8f4da7]"></i>
                                 </button>
                             </div>
@@ -232,17 +230,15 @@
                     <h1 class="text-2xl font-sans font-semibold text-[#171717] mb-3">{{ $product->name }}</h1>
 
                     <!-- Ratings -->
-                    {{-- <div class="flex items-center gap-2 mb-5">
-                        <div class="flex text-yellow-400">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <i class="far fa-star"></i>
-                        </div>
-                        <span class="text-sm text-gray-600">(4 reviews)</span>
-                    </div> --}}
-
+                  @if ($approvedReviews && $approvedReviews->isNotEmpty())
+    <div class="flex items-center gap-2 mb-5">
+        <a class="text-xs rounded px-2 py-1 bg-green-600 text-white">
+            {{ number_format($approvedReviews->avg('rating') ?? 0, 1) }}
+            <i class="fas fa-star text-white text-xs"></i>
+        </a>
+        <span class="text-gray-400 text-xs">{{ $approvedReviews->count() }} Rating{{ $approvedReviews->count() === 1 ? '' : 's' }}</span>
+    </div>
+@endif
                     <!-- Price -->
                     <div class="flex items-center gap-3 mb-6" wire:loading.class="opacity-50">
                         <p class="text-2xl font-semibold text-[#8f4da7]">
@@ -344,19 +340,19 @@
                     @endif
 
                     <!-- Desktop Buttons -->
-                    @if($hasStock)
-                    <div class="desktop-buttons mb-5">
-                        <button wire:navigate wire:click="addToCart({{ $product->id }})"
-                            class="flex-1 px-6 py-3.5 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
-                            wire:loading.attr="disabled" wire:target="addToCart">
-                            Add to Cart
-                        </button>
-                        <button wire:navigate wire:click="buyNow"
-                            class="flex-1 px-6 py-3.5 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
-                            wire:loading.attr="disabled" wire:target="buyNow">
-                            Buy Now
-                        </button>
-                    </div>
+                    @if ($hasStock)
+                        <div class="desktop-buttons mb-5">
+                            <button wire:navigate wire:click="addToCart({{ $product->id }})"
+                                class="flex-1 px-6 py-3.5 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
+                                wire:loading.attr="disabled" wire:target="addToCart">
+                                Add to Cart
+                            </button>
+                            <button wire:navigate wire:click="buyNow"
+                                class="flex-1 px-6 py-3.5 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
+                                wire:loading.attr="disabled" wire:target="buyNow">
+                                Buy Now
+                            </button>
+                        </div>
                     @else
                         <div class="desktop-buttons mb-5">
                             <button disabled
@@ -392,31 +388,30 @@
             </div>
 
             <!-- Mobile Fixed Buttons -->
-            @if($hasStock)
-            <div class="fixed-bottom-buttons">
-                <button wire:click="addToCart({{ $product->id }})"
-                    class="flex-1 px-4 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
-                    wire:loading.attr="disabled" wire:target="addToCart">
-                    Add to Cart
-                </button>
-                <button wire:click="buyNow"
-                    class="flex-1 px-4 py-3 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
-                    wire:loading.attr="disabled" wire:target="buyNow">
-                    Buy Now
-                </button>
-            </div>
+            @if ($hasStock)
+                <div class="fixed-bottom-buttons">
+                    <button wire:click="addToCart({{ $product->id }})"
+                        class="flex-1 px-4 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
+                        wire:loading.attr="disabled" wire:target="addToCart">
+                        Add to Cart
+                    </button>
+                    <button wire:click="buyNow"
+                        class="flex-1 px-4 py-3 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
+                        wire:loading.attr="disabled" wire:target="buyNow">
+                        Buy Now
+                    </button>
+                </div>
             @else
-            <div class="fixed-bottom-buttons">
-                <button disabled
-                    class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
-                    Add to Cart
-                </button>
-                <button disabled
-                    class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
-                    Buy Now
-                </button>
-            </div>
-            
+                <div class="fixed-bottom-buttons">
+                    <button disabled
+                        class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+                        Add to Cart
+                    </button>
+                    <button disabled
+                        class="flex-1 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+                        Buy Now
+                    </button>
+                </div>
             @endif
 
             <!-- Tabs Section -->
@@ -444,58 +439,183 @@
                     <p class="text-gray-700 leading-relaxed">{{ $product->description }}</p>
                 </div>
 
-                <div x-show="activeTab === 'reviews'" class="tab-content">
-                    <div class="space-y-6">
-                        <!-- Review Form -->
-                        <div class="pt-4">
-                            <h3 class="text-xl font-medium text-[#171717] mb-4">Add a Review</h3>
-                            <form class="space-y-4" wire:submit.prevent="submitReview">
-                                <div class="flex gap-1 text-2xl text-yellow-400 mb-4">
-                                    <i class="far fa-star cursor-pointer hover:scale-110 transition-transform"
-                                        @click="setRating(1)"></i>
-                                    <i class="far fa-star cursor-pointer hover:scale-110 transition-transform"
-                                        @click="setRating(2)"></i>
-                                    <i class="far fa-star cursor-pointer hover:scale-110 transition-transform"
-                                        @click="setRating(3)"></i>
-                                    <i class="far fa-star cursor-pointer hover:scale-110 transition-transform"
-                                        @click="setRating(4)"></i>
-                                    <i class="far fa-star cursor-pointer hover:scale-110 transition-transform"
-                                        @click="setRating(5)"></i>
-                                </div>
-                                <div>
-                                    <textarea
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent"
-                                        rows="4" placeholder="Your review" wire:model="review"></textarea>
-                                    @error('review')
-                                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <input type="text"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent"
-                                            placeholder="Your Name" wire:model="name">
-                                        @error('name')
-                                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                                        @enderror
+                <div x-show="activeTab === 'reviews'"
+                    class="tab-content p-6 bg-gradient-to-br from-gray-50 to-gray-100 min-h-[400px]">
+                    <div class="max-w-4xl mx-auto">
+                        <!-- Header Section -->
+                        <div class="mb-8 text-center">
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Customer Reviews</h2>
+                            <p class="text-gray-600">What our customers are saying about us</p>
+
+                            <!-- Review Summary -->
+                            <div class="mt-6 flex flex-wrap justify-center gap-4">
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                                    <div class="text-2xl font-bold text-[#8f4da7]">{{ $approvedReviews->count() }}
                                     </div>
-                                    <div>
-                                        <input type="email"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent"
-                                            placeholder="Your Email" wire:model="email">
-                                        @error('email')
-                                            <span class="text-red-500 text-sm">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                    <div class="text-sm text-gray-600">Total Reviews</div>
                                 </div>
-                                <button type="submit"
-                                    class="px-6 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium">
-                                    Submit Review
-                                </button>
-                            </form>
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                                    <div class="text-2xl font-bold text-[#8f4da7]">
+                                        {{ number_format($approvedReviews->avg('rating') ?? 0, 1) }}
+                                    </div>
+                                    <div class="text-sm text-gray-600">Average Rating</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                                    <div class="text-2xl font-bold text-[#8f4da7]">5★</div>
+                                    <div class="text-sm text-gray-600">Top Rating</div>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Reviews Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            @foreach ($approvedReviews as $review)
+                                <div
+                                    class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden">
+                                    <!-- Review Header -->
+                                    <div class="p-6 pb-4">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex items-center space-x-3">
+                                                <!-- User Avatar -->
+                                                <div
+                                                    class="w-12 h-12 rounded-full bg-gradient-to-r from-[#8f4da7] to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                                                    {{ substr($review->user->name ?? 'A', 0, 1) }}
+                                                </div>
+                                                <div>
+                                                    <h4 class="font-semibold text-gray-900">
+                                                        {{ $review->user->name ?? 'Anonymous' }}
+                                                    </h4>
+                                                    <span class="text-sm text-gray-500">
+                                                        {{ $review->created_at->diffForHumans() }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Rating Badge -->
+                                            <div
+                                                class="flex items-center space-x-1 bg-gray-100 px-3 py-1 rounded-full">
+                                                <span class="text-yellow-500 font-bold">{{ $review->rating }}</span>
+                                                <svg class="w-4 h-4 text-yellow-400" fill="currentColor"
+                                                    viewBox="0 0 20 20">
+                                                    <path
+                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Star Rating -->
+                                    <div class="px-6 pb-3">
+                                        <div class="flex space-x-1">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <svg class="w-5 h-5 {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"
+                                                    fill="currentColor" viewBox="0 0 20 20">
+                                                    <path
+                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            @endfor
+                                        </div>
+                                    </div>
+
+                                    <!-- Review Content -->
+                                    <div class="px-6 pb-6">
+                                        <p class="text-gray-700 leading-relaxed line-clamp-4">
+                                            {{ $review->comment }}
+                                        </p>
+
+                                        <!-- Review Actions -->
+                                        <div class="mt-4 flex items-center justify-between text-sm text-gray-500">
+                                            <span class="flex items-center space-x-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <span>{{ $review->created_at->format('M d, Y') }}</span>
+                                            </span>
+                                            <div class="flex space-x-4">
+                                                <button
+                                                    class="flex items-center space-x-1 hover:text-[#8f4da7] transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905a3.61 3.61 0 01-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                                    </svg>
+                                                    <span>Helpful</span>
+                                                </button>
+                                                <button
+                                                    class="flex items-center space-x-1 hover:text-[#8f4da7] transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                    </svg>
+                                                    <span>Reply</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <!-- Empty State -->
+                        @if ($approvedReviews->isEmpty())
+                            <div class="text-center py-16 bg-white rounded-2xl shadow-lg border border-gray-200">
+                                <div class="max-w-md mx-auto">
+                                    <div
+                                        class="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Reviews Yet</h3>
+                                    <p class="text-gray-600">Be the first to share your experience with others!</p>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Load More Button (if needed) -->
+                        @if ($approvedReviews->count() > 8)
+                            <div class="mt-8 text-center">
+                                <button
+                                    class="px-6 py-3 bg-gradient-to-r from-[#8f4da7] to-purple-600 text-white font-medium rounded-lg hover:from-[#7e3d96] hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#8f4da7] focus:ring-offset-2">
+                                    Load More Reviews
+                                </button>
+                            </div>
+                        @endif
                     </div>
                 </div>
+
+                <style>
+                    .line-clamp-4 {
+                        display: -webkit-box;
+                        -webkit-line-clamp: 4;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+
+                    .tab-content {
+                        animation: fadeIn 0.5s ease-in-out;
+                    }
+
+                    @keyframes fadeIn {
+                        from {
+                            opacity: 0;
+                            transform: translateY(10px);
+                        }
+
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                </style>
 
                 <div x-show="activeTab === 'additional'" class="tab-content">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -610,17 +730,17 @@
                                 // Get the main image and gallery
                                 let mainImage = event.detail.image;
                                 let gallery = event.detail.galleryImages || [];
-                                
+
                                 // Remove duplicates
                                 gallery = gallery.filter(img => img !== mainImage);
-                                
+
                                 // Update the images array
                                 this.images = [mainImage, ...gallery];
                                 this.thumbs = [mainImage, ...gallery];
-                                
+
                                 // Force reset active image to show the new main image
                                 this.activeImageIndex = 0;
-                                
+
                                 console.log('Images updated:', {
                                     mainImage,
                                     gallery,

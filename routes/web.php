@@ -13,6 +13,7 @@ use App\Livewire\Admin\Product\CreateProduct;
 use App\Livewire\Admin\Product\UpdateProduct;
 use App\Livewire\Admin\Product\Variant\VariantName;
 use App\Livewire\Admin\Product\Variant\VariantValus;
+use App\Livewire\Admin\Review\ReviewApproval;
 use App\Livewire\Admin\Users\Customer;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
@@ -26,6 +27,7 @@ use App\Livewire\Public\Section\Accounts\ProfileInformation;
 use App\Livewire\Public\Section\CheckOut;
 use App\Livewire\Public\Section\LandingPage;
 use App\Livewire\Public\Section\MyCart;
+use App\Livewire\Public\Section\Review\ReviewWork;
 use App\Livewire\Public\Section\ViewProduct;
 use App\Livewire\Public\Section\WishlistCard;
 use App\Livewire\User\Product\Show;
@@ -74,6 +76,8 @@ Route::get('/contact', ContactPage::class)->name('contact');
 Route::get('/about', AboutPage::class)->name('about');
 Route::get('/privacy', PrivacyPolicy::class)->name('privacy');
 Route::get('/termsConditions', TermsConditons::class)->name('conditions');
+
+Route::get('/review/{slug}',ReviewWork::class)->name('review');
 // Admin routes protected by middleware
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     // Dashboard
@@ -113,12 +117,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('user', Customer::class)->name('customer');
     Route::get('order/index', Index::class)->name('orderindex');
     Route::get('order/show/{id}', OrderShow::class)->name('orders.show');
+    Route::get('/reviewApproval',ReviewApproval::class)->name('review.approve');
 });
 
 
 
 Route::middleware('auth')->group(function () {
-    Route::get('/cart', Cart::class)->name('public.cart');
     Route::get('/myorder', CheckOut::class)->name('myOrder');
     //  Route::post('/cart/add', [ProductDetail::class, 'addToCart'])->name('cart.add');
 });

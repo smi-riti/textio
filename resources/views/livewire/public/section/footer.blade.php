@@ -23,19 +23,11 @@
             <div>
                 <h3 class="text-lg font-semibold mb-5 pb-2 border-b border-[#8f4da7] inline-block">Shop</h3>
                 <ul class="space-y-3">
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
-                        <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        T-Shirts
-                    </a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
-                        <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        Hoodies & Sweatshirts
-                    </a></li>
+                  
                     
-                    
-                    <li><a href="#" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
+                    <li><a href="{{route('public.product.all')}}" class="text-gray-400 hover:text-[#8f4da7] transition-colors duration-300 text-sm flex items-center">
                         <span class="w-1 h-1 bg-[#8f4da7] rounded-full mr-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        All Products
+                        Explore Products
                     </a></li>
                 </ul>
             </div>
@@ -72,7 +64,8 @@
                         <div class="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center mr-3 flex-shrink-0">
                             <i class="fas fa-map-marker-alt text-[#8f4da7] text-sm"></i>
                         </div>
-                        <span class="text-gray-400 text-sm">123 Printing Street, Design City, DC 12345</span>
+                        <span class="text-gray-400 text-sm">First floor YPN
+Purnea Bihar 854301</span>
                     </li>
                     <li class="flex items-center">
                         <div class="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center mr-3 flex-shrink-0">

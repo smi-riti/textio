@@ -88,7 +88,7 @@
                                     <div class="flex items-center bg-gray-100 rounded-lg p-1">
                                         <button wire:click="decreaseQuantity({{ $item->id }})"
                                             class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-[#8f4da7] transition rounded-lg"
-                                            @if($item->quantity <= 1) disabled @endif>
+                                            @if ($item->quantity <= 1) disabled @endif>
                                             <i class="fas fa-minus text-sm"></i>
                                         </button>
                                         <span class="mx-3 text-gray-800 font-medium text-sm min-w-[20px] text-center">
@@ -108,10 +108,12 @@
                                 </div>
 
                                 <!-- Stock Warning Message -->
-                                @if($availableStock <= 0)
-                                    <p class="text-red-600 text-xs mt-1">Stock not available - Cannot increase quantity</p>
+                                @if ($availableStock <= 0)
+                                    <p class="text-red-600 text-xs mt-1">Stock not available - Cannot increase quantity
+                                    </p>
                                 @elseif($availableStock < 5)
-                                    <p class="text-yellow-600 text-xs mt-1">Only {{ $availableStock }} left in stock</p>
+                                    <p class="text-yellow-600 text-xs mt-1">Only {{ $availableStock }} left in stock
+                                    </p>
                                 @endif
                             </div>
                         </div>
@@ -141,54 +143,57 @@
             </div>
 
             <!-- Right Column - Order Summary -->
-            <div class="w-full lg:w-4/12 md:mb-0 mb-32">
-                <div class="bg-white rounded-lg p-5 sm:p-6 sticky top-10 shadow-sm">
-                    <h2 class="text-lg sm:text-xl font-semibold text-[#171717] mb-4 border-b pb-3">Order Summary</h2>
+            @if ($cartItems && $cartItems->count() > 0)
+                <div class="w-full lg:w-4/12 md:mb-0 mb-32">
+                    <div class="bg-white rounded-lg p-5 sm:p-6 sticky top-10 shadow-sm">
+                        <h2 class="text-lg sm:text-xl font-semibold text-[#171717] mb-4 border-b pb-3">Order Summary
+                        </h2>
 
-                    <div class="space-y-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Price ({{ $cartItems->count() }} items)</span>
-                            <span
-                                class="text-gray-800">₹{{ number_format($cartItems->sum(fn($item) => $this->getItemPrice($item) * $item->quantity), 0) }}</span>
-                        </div>
-
-                        @php
-                            $totalDiscount = $cartItems->sum(function ($item) {
-                                $price = $this->getItemPrice($item);
-                                $regularPrice = $this->getItemRegularPrice($item);
-                                return ($regularPrice - $price) * $item->quantity;
-                            });
-                        @endphp
-
-                        @if ($totalDiscount > 0)
+                        <div class="space-y-3">
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Discount</span>
-                                <span class="text-green-600">-₹{{ number_format($totalDiscount, 0) }}</span>
+                                <span class="text-gray-600">Price ({{ $cartItems->count() }} items)</span>
+                                <span
+                                    class="text-gray-800">₹{{ number_format($cartItems->sum(fn($item) => $this->getItemPrice($item) * $item->quantity), 0) }}</span>
                             </div>
-                        @endif
 
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Delivery</span>
-                            <span class="text-green-600">FREE</span>
+                            @php
+                                $totalDiscount = $cartItems->sum(function ($item) {
+                                    $price = $this->getItemPrice($item);
+                                    $regularPrice = $this->getItemRegularPrice($item);
+                                    return ($regularPrice - $price) * $item->quantity;
+                                });
+                            @endphp
+
+                            @if ($totalDiscount > 0)
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Discount</span>
+                                    <span class="text-green-600">-₹{{ number_format($totalDiscount, 0) }}</span>
+                                </div>
+                            @endif
+
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Delivery</span>
+                                <span class="text-green-600">FREE</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="border-t border-gray-200 mt-4 pt-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-bold text-[#171717]">Total Amount</span>
-                            <span class="text-xl font-bold text-[#8f4da7]">
-                                ₹{{ number_format($cartItems->sum(fn($item) => $this->getItemPrice($item) * $item->quantity), 0) }}
-                            </span>
+                        <div class="border-t border-gray-200 mt-4 pt-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-bold text-[#171717]">Total Amount</span>
+                                <span class="text-xl font-bold text-[#8f4da7]">
+                                    ₹{{ number_format($cartItems->sum(fn($item) => $this->getItemPrice($item) * $item->quantity), 0) }}
+                                </span>
+                            </div>
+
+                            @if ($totalDiscount > 0)
+                                <p class="text-green-600 mt-2 text-sm bg-green-50 p-2 rounded-lg">
+                                    🎉 You saved ₹{{ number_format($totalDiscount, 0) }} on this order!
+                                </p>
+                            @endif
                         </div>
-
-                        @if ($totalDiscount > 0)
-                            <p class="text-green-600 mt-2 text-sm bg-green-50 p-2 rounded-lg">
-                                🎉 You saved ₹{{ number_format($totalDiscount, 0) }} on this order!
-                            </p>
-                        @endif
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
 
         <!-- Fixed Place Order Button - Mobile Optimized -->

@@ -51,7 +51,7 @@
                     </button>
                     <div x-show="accountDropdownOpen" @click.outside="accountDropdownOpen = false" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-2 w-48 bg-white shadow-md rounded-md z-50 overflow-hidden">
                         @auth
-                            <a wire:navigate href="#" class="block px-4 py-2 text-[#171717] hover:bg-gray-100 hover:text-[#8f4da7] transition-colors duration-200">My Orders</a>
+                            <a wire:navigate href="{{route('myOrders')}}" class="block px-4 py-2 text-[#171717] hover:bg-gray-100 hover:text-[#8f4da7] transition-colors duration-200">My Orders</a>
                             <form action="{{ route('logout') }}" method="POST" class="block">
                                 @csrf
                                 <button type="submit" class="w-full text-left px-4 py-2 text-[#171717] hover:bg-gray-100 hover:text-[#8f4da7] transition-colors duration-200">Logout</button>
@@ -76,40 +76,16 @@
 
         <!-- Mobile Menu -->
         <div x-show="$wire.mobileMenuOpen" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4" class="md:hidden py-4 border-t border-gray-200">
-            <form wire:submit.prevent="search" class="mb-4">
-                <div class="relative">
-                    <input wire:model.debounce.500ms="searchQuery" type="text" placeholder="Search products..." class="w-full px-4 py-2 text-[#171717] text-sm bg-gray-100 rounded-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#8f4da7] transition-all duration-300">
-                    {{-- <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-4 top-1/2 transform -translate-y-1/2 text-[#171717]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg> --}}
-                    <button type="submit" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#171717] hover:text-[#8f4da7] transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </button>
-                </div>
-            </form>
+            
             <nav class="flex flex-col space-y-3">
-                <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">T-Shirts</a>
-                <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Hoodies</a>
-                <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Mugs</a>
-                <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Posters</a>
-                <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">All Products</a>
+                <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">About Us</a>
+                <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Contact Us</a>
+                <a wire:navigate href="#" class="text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">Browse</a>
             </nav>
             <div class="mt-4 space-y-2">
                 @auth
-                    <a wire:navigate href="{{ route('myCart') }}" class="flex items-center text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                        </svg>
-                        My Cart (<span x-text="@entangle('cartCount')"></span>)
-                    </a>
-                    <a wire:navigate href="{{ route('wishlist.index') }}" class="flex items-center text-[#171717] hover:text-[#8f4da7] font-medium text-sm transition-colors duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 016.364 6.364l-7.682 7.682a.75.75 0 01-1.06 0l-7.682-7.682a4.5 4.5 0 010-6.364z" />
-                        </svg>
-                        Wishlist (<span x-text="@entangle('wishlistCount')"></span>)
-                    </a>
+                    
+                     
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full py-2 bg-[#8f4da7] text-white rounded-md font-medium text-sm hover:bg-[#171717] transition-colors duration-200">Logout</button>

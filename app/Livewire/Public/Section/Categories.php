@@ -15,7 +15,7 @@ class Categories extends Component
     {
 $this->categories = Category::select('id', 'title', 'slug','image')
     ->where('is_active', true)
-    ->limit(3)
+    ->take(3)
     ->get();
 
 
