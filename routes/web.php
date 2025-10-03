@@ -63,7 +63,7 @@ Route::post('/logout', function () {
 
 Route::get('/login', Login::class)->name('login');
 Route::get('/auth/google', [Login::class, 'redirectToGoogle'])->name('google.redirect');
-Route::get('/auth/google/callback', [Login::class, 'handleGoogleCallback'])->name('auth.google.callback');
+Route::get('/auth/google-callback', [Login::class, 'handleGoogleCallback'])->name('auth.google.callback');
 // Route::get('/cart',AddItem::class)->name('cart');
 
 Route::get('/mycart', MyCart::class)->name('myCart');

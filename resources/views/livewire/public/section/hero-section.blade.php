@@ -1,79 +1,60 @@
- <section class="relative h-[298px] md:h-[500px] bg-primary text-white overflow-hidden">
-     
-             <!-- Background pattern -->
-             <div
-                 class="absolute inset-0 bg-[radial-gradient(#8f4da755_1px,transparent_2px)] [background-size:24px_24px]">
-             </div>
+<section class="relative h-[300px] md:h-[460px] bg-[#171717] text-white overflow-hidden">
+    <!-- Background pattern -->
+    <div class="absolute "></div>
 
-             <!-- Content container -->
-             <div class="relative container mx-auto px-2 h-full flex flex-col justify-center items-center text-center">
-                 <!-- Main heading -->
-                 <h1 class="text-2xl md:text-6xl  font-bold mb-4 animate-fade-in">
-                     Premium <span class="text-accent">Customization</span> Services
-                 </h1>
+    <!-- Content container -->
+    <div class="relative container mx-auto px-6 h-full flex flex-col justify-center items-center text-center">
+        <!-- Main heading -->
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-3 animate-pop-in text-white">
+            Your Unique Style
+        </h1>
 
-                 <!-- Subheading -->
-                 <p class="text-sm md:text-xl max-w-2xl mb-8 animate-fade-in-delay">
-                     Custom printing on t-shirts, mugs, caps and more. Bring your ideas to life with our high-quality
-                     printing solutions.
-                 </p>
+        <!-- Subheading -->
+        <p class="text-base text-white md:text-lg max-w-md mb-6 animate-pop-in-delay">
+            Shop exclusive, ready-to-wear t-shirts and hoodies designed for you. Easy browsing, fast checkout!
+        </p>
 
-                 <!-- CTA buttons -->
-                 <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-delay-2">
-                     <a wire:navigate href="{{route('public.product.all')}}"
-                         class="bg-accent hover:bg-[#7c4190] text-white font-semibold py-3 px-8 rounded-lg transition duration-300 transform hover:scale-105">
-                         Explore Mores
-                     </a>
-                   
-                 </div>
-             </div>
+        <!-- CTA button -->
+        <div class="flex gap-4 animate-pop-in-delay-2">
+            <a wire:navigate href="{{route('public.product.all')}}"
+               class="bg-[#570674] hover:bg-[#8f4da7] text-white font-semibold py-4 px-8 rounded-full transition duration-300 transform hover:scale-105">
+                Browse Collection
+            </a>
+        </div>
+    </div>
 
-             <!-- Decorative elements -->
-             <div class="absolute bottom-0 left-0 w-full flex justify-between items-end px-10 opacity-70">
-                 <!-- Left graphic - T-shirt -->
-                 <div class="transform translate-y-6 hidden md:block">
-                     <svg width="120" height="120" viewBox="0 0 512 512" class="fill-accent">
-                         <path
-                             d="M256 96c-13.25 0-24 10.75-24 24s10.75 24 24 24 24-10.75 24-24-10.75-24-24-24zm80 144c0-26.5-21.5-48-48-48h-64c-26.5 0-48 21.5-48 48v192h160V240zM336 96h-32.9c-7.52-17.05-24.66-28.57-43.82-28.13-21.02.5-38.25 17.78-39.28 38.72C219.5 128.2 237.8 148 262 148h32.9c8.02 0 14.31-7.1 13.93-15.1-.38-8.01-6.99-14.9-14.93-14.9h-1.8c-13.25 0-24-10.75-24-24s10.75-24 24-24 24 10.75 24 24c0 8.84 7.16 16 16 16h32c8.84 0 16-7.16 16-16 0-26.51-21.49-48-48-48z" />
-                     </svg>
-                 </div>
+    <!-- Decorative element - Curved line -->
+    {{-- <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+        <svg class="w-full h-10 md:h-14" viewBox="0 0 1200 120" preserveAspectRatio="none" fill="#ffffff33">
+            <path d="M0,0V60c100,30,250,45,400,30s300-45,450-15c150,30,250-15,350-45V0Z"/>
+        </svg>
+    </div> --}}
 
-                 <!-- Right graphic - Printing machine -->
-                 <div class="transform translate-y-4 scale-90 hidden md:block">
-                     <svg width="140" height="140" viewBox="0 0 512 512" class="fill-accent">
-                         <path
-                             d="M128 192h256v64H128v-64zM448 64H64C28.65 64 0 92.65 0 128v192c0 35.35 28.65 64 64 64h48v80c0 4.25 2.75 8 6.75 9.38C121.4 453.4 123.2 453.8 125 453.8c3 0 6-1.25 8.25-3.5L224 368h224c35.35 0 64-28.65 64-64V128C512 92.65 483.3 64 448 64zM464 304c0 8.822-7.178 16-16 16H113.2l-40.8 40.8V352H64c-8.822 0-16-7.178-16-16V128c0-8.822 7.178-16 16-16h384c8.822 0 16 7.178 16 16V304z" />
-                     </svg>
-                 </div>
-             </div>
+    <style>
+        /* Custom animations */
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
-         <style>
-             /* Custom animations */
-             @keyframes fadeIn {
-                 from {
-                     opacity: 0;
-                     transform: translateY(20px);
-                 }
+        .animate-pop-in {
+            animation: popIn 0.6s ease-out forwards;
+        }
 
-                 to {
-                     opacity: 1;
-                     transform: translateY(0);
-                 }
-             }
+        .animate-pop-in-delay {
+            opacity: 0;
+            animation: popIn 0.6s ease-out 0.2s forwards;
+        }
 
-             .animate-fade-in {
-                 animation: fadeIn 1s ease-out forwards;
-             }
-
-             .animate-fade-in-delay {
-                 opacity: 0;
-                 animation: fadeIn 1s ease-out 0.3s forwards;
-             }
-
-             .animate-fade-in-delay-2 {
-                 opacity: 0;
-                 animation: fadeIn 1s ease-out 0.6s forwards;
-             }
-         </style>
-     
- </section>
+        .animate-pop-in-delay-2 {
+            opacity: 0;
+            animation: popIn 0.6s ease-out 0.4s forwards;
+        }
+    </style>
+</section>
