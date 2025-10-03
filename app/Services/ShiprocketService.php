@@ -3,29 +3,157 @@
 namespace App\Services;
 
 use App\Models\Order;
-use App\Models\Payment;
 use App\Models\ShiprocketOrder;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class ShiprocketService
 {
-    /**
-     * Create a Shiprocket order/shipment based on the local Order model.
-     * Calculates total weight/dimensions and prepares payload.
-     * Updates shiprocket_orders table and syncs to Shiprocket.
-     *
-     * @param Order $order
-     * @return ShiprocketOrder
-     * @throws \Exception
-     */
-    public function createShipment(Order $order)
+    protected string $baseUrl;
+
+    public function __construct()
     {
+        $this->baseUrl = config('services.shiprocket.base_url', 'https://apiv2.shiprocket.in');
+    }
+
+    protected function getToken(): ?string
+    {
+        if (Cache::has('shiprocket_lockout')) {
+            $lockoutUntil = Cache::get('shiprocket_lockout');
+            if (now()->lessThan($lockoutUntil)) {
+                Log::warning('Shiprocket API locked out until: ' . $lockoutUntil);
+                return null;
+            }
+        }
+
+        return Cache::remember('shiprocket_token', config('services.shiprocket.token_cache_ttl', 14400), function () {
+            $email = config('services.shiprocket.email');
+            $password = config('services.shiprocket.password');
+
+            Log::info('Attempting Shiprocket authentication', [
+                'email' => $email,
+                'base_url' => $this->baseUrl,
+            ]);
+
+            try {
+                $response = Http::timeout(10)
+                    ->withHeaders(['Content-Type' => 'application/json'])
+                    ->post("{$this->baseUrl}/v1/external/auth/login", [
+                        'email' => $email,
+                        'password' => $password,
+                    ]);
+
+                if (!$response->successful()) {
+                    $body = $response->body();
+                    if (str_contains($body, '<!DOCTYPE html>')) {
+                        Log::error('Shiprocket server error (HTML response): ' . substr($body, 0, 500));
+                        throw new \Exception('Shiprocket API server error, possibly under maintenance.');
+                    }
+                    if ($response->status() === 400 && str_contains($body, 'Too many failed login attempts')) {
+                        Cache::put('shiprocket_lockout', now()->addMinutes(30), now()->addMinutes(30));
+                        Log::error('Shiprocket token fetch failed: Too many login attempts, locked out for 30 minutes', ['response' => $body]);
+                        throw new \Exception('Shiprocket API locked out for 30 minutes.');
+                    }
+                    Log::error('Shiprocket token fetch failed', [
+                        'status' => $response->status(),
+                        'response' => $body,
+                        'email_used' => $email,
+                    ]);
+                    throw new \Exception('Failed to authenticate with Shiprocket: ' . ($response->json()['message'] ?? 'Unknown error'));
+                }
+
+                $token = $response->json()['token'] ?? null;
+                if (empty($token)) {
+                    Log::error('Shiprocket token fetch failed: No token in response', ['response' => $response->json()]);
+                    throw new \Exception('Failed to obtain Shiprocket token.');
+                }
+
+                Log::info('Shiprocket token obtained successfully', ['token' => substr($token, 0, 10) . '...']);
+                return $token;
+            } catch (\Exception $e) {
+                Log::error('Shiprocket authentication error: ' . $e->getMessage());
+                throw $e;
+            }
+        });
+    }
+
+    protected function getValidPickupLocation(string $token): ?string
+    {
+        try {
+            $response = Http::withToken($token)
+                ->get("{$this->baseUrl}/v1/external/settings/company/pickup");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                // dd($data);
+                if (!empty($data['data']['shipping_address']) && is_array($data['data']['shipping_address']) && !empty($data['data']['shipping_address'][0]['pickup_location'])) {
+                    $pickup = $data['data']['shipping_address'][0]['pickup_location'];
+                    Log::info('Fetched valid pickup location', ['pickup_location' => $pickup]);
+                    return $pickup;
+                }
+                Log::error('No valid pickup locations found', ['response' => $data]);
+                throw new \Exception('No valid pickup locations available.');
+            }
+
+            Log::error('Failed to fetch pickup locations', ['status' => $response->status(), 'response' => $response->body()]);
+            throw new \Exception('Failed to fetch pickup locations: ' . ($response->json()['message'] ?? 'Unknown error'));
+        } catch (\Exception $e) {
+            Log::error('Pickup location fetch error: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    protected function getValidChannelId(string $token): ?string
+    {
+        try {
+            $response = Http::withToken($token)
+                ->get("{$this->baseUrl}/v1/external/channels");
+
+            if ($response->successful()) {
+                $data = $response->json();
+                if (!empty($data['data']) && is_array($data['data']) && !empty($data['data'][0]['id'])) {
+                    $channelId = $data['data'][0]['id'];
+                    Log::info('Fetched valid channel ID', ['channel_id' => $channelId]);
+                    return $channelId;
+                }
+                Log::error('No channels found', ['response' => $data]);
+                throw new \Exception('No valid channels available.');
+            }
+
+            Log::error('Failed to fetch channels', ['status' => $response->status(), 'response' => $response->body()]);
+            throw new \Exception('Failed to fetch channels: ' . ($response->json()['message'] ?? 'Unknown error'));
+        } catch (\Exception $e) {
+            Log::error('Channel ID fetch error: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function createShipment(Order $order): ?ShiprocketOrder
+    {
+        $token = $this->getToken();
+        if (!$token) {
+            Log::warning('Skipping shipment creation due to API lockout', ['order_id' => $order->id]);
+            return null;
+        }
+
+        try {
+            $pickupLocation = $this->getValidPickupLocation($token);
+            $channelId = $this->getValidChannelId($token);
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch pickup location or channel ID', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            throw new \Exception('Cannot create shipment: ' . $e->getMessage());
+        }
+
         $address = $order->address;
         $user = $order->user;
         $payment = $order->payment;
 
-        // Prepare order items for Shiprocket
+        if (!$address || !$user || !$payment) {
+            Log::error('Invalid order data', ['order_id' => $order->id, 'address' => $address, 'user' => $user, 'payment' => $payment]);
+            throw new \Exception('Invalid order data: Missing address, user, or payment information.');
+        }
+
         $orderItems = [];
         $totalWeight = 0;
         $maxLength = 0;
@@ -36,17 +164,20 @@ class ShiprocketService
             $product = $item->product;
             $quantity = $item->quantity;
 
+            $sku = $product->sku ?? $product->slug ?? 'SKU-' . $product->id;
+            $sku = substr($sku, 0, 50); // Ensure SKU is 50 characters or less
+
             $orderItems[] = [
                 'name' => $product->name,
-                'sku' => $product->slug ?? 'SKU-' . $product->id,
+                'sku' => $sku,
                 'units' => $quantity,
                 'selling_price' => $item->unit_price,
                 'discount' => 0,
                 'tax' => 0,
-                'hsn' => '',
+                'hsn' => $product->hsn_code ?? '',
             ];
 
-            $totalWeight += (($product->weight ?? 500) * $quantity) / 1000;
+            $totalWeight += (($product->weight ?? 500) * $quantity) / 1000; // grams to kg
             $maxLength = max($maxLength, $product->length ?? 10);
             $maxBreadth = max($maxBreadth, $product->breadth ?? 10);
             $maxHeight = max($maxHeight, $product->height ?? 5);
@@ -55,8 +186,8 @@ class ShiprocketService
         $payload = [
             'order_id' => $order->order_number,
             'order_date' => $order->created_at->format('Y-m-d H:i'),
-            'pickup_location' => 'Home', // From previous fix
-            'channel_id' => env('SHIPROCKET_CHANNEL_ID', '4421134'), // Default channel ID
+            'pickup_location' => $pickupLocation,
+            'channel_id' => $channelId,
             'billing_customer_name' => $address->name,
             'billing_last_name' => '',
             'billing_address' => $address->address_line,
@@ -69,7 +200,7 @@ class ShiprocketService
             'billing_phone' => $address->phone,
             'shipping_is_billing' => true,
             'order_items' => $orderItems,
-            'payment_method' => ($payment->payment_method === Payment::METHOD_COD) ? 'COD' : 'Prepaid',
+            'payment_method' => ($payment->payment_method === 'cod') ? 'COD' : 'Prepaid',
             'sub_total' => $order->total_amount,
             'length' => $maxLength,
             'breadth' => $maxBreadth,
@@ -78,177 +209,89 @@ class ShiprocketService
         ];
 
         try {
-            // Fetch token
-            $tokenResponse = Http::post('https://apiv2.shiprocket.in/v1/external/auth/login', [
-                'email' => env('SHIPROCKET_EMAIL'),
-                'password' => env('SHIPROCKET_PASSWORD'),
-            ]);
-
-            if (!$tokenResponse->successful()) {
-                Log::error('Shiprocket token fetch failed: ' . $tokenResponse->body());
-                throw new \Exception('Failed to authenticate with Shiprocket.');
-            }
-
-            $token = $tokenResponse->json()['token'] ?? null;
-            if (empty($token)) {
-                throw new \Exception('Failed to obtain Shiprocket token.');
-            }
-
-            // Create shipment
+            Log::info('Creating Shiprocket shipment', ['order_id' => $order->id, 'payload' => $payload]);
             $response = Http::withToken($token)
-                ->post('https://apiv2.shiprocket.in/v1/external/orders/create', $payload);
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post("{$this->baseUrl}/v1/external/orders/create/adhoc", $payload);
 
             if ($response->successful()) {
                 $data = $response->json();
-
                 if (!isset($data['order_id']) || !isset($data['shipment_id']) || !isset($data['awb_code'])) {
-                    Log::error('Shiprocket create failed: Invalid response data', ['response' => $data]);
-                    throw new \Exception('Failed to create Shiprocket shipment: Invalid response.');
+                    Log::error('Shiprocket create failed: Invalid response', ['response' => $data]);
+                    throw new \Exception('Invalid response from Shiprocket.');
                 }
 
-                // Store in shiprocket_orders (updates DB)
+                // dd($data);
+
                 $shiprocket = ShiprocketOrder::updateOrCreate(
                     ['order_id' => $order->id],
                     [
                         'shiprocket_order_id' => $data['order_id'],
                         'shipment_id' => $data['shipment_id'],
                         'awb_code' => $data['awb_code'],
+                        //  'awb_code' => 88,
+
                         'courier_company_id' => $data['courier_company_id'] ?? null,
                         'status' => 'confirmed',
-                        'raw_payload' => json_encode($data),
+                        'raw_payload' => $data,
                     ]
                 );
 
-                // Update order status to 'processing'
                 $order->update(['status' => 'processing']);
 
-                Log::info('Shiprocket shipment created for order ' . $order->order_number, ['awb_code' => $data['awb_code']]);
-
+                Log::info('Shiprocket shipment created', ['order' => $order->order_number, 'awb' => $data['awb_code']]);
                 return $shiprocket;
-            } else {
-                Log::error('Shiprocket create failed: ' . $response->body());
-                throw new \Exception('Failed to create Shiprocket shipment: ' . ($response->json()['message'] ?? 'Unknown error.'));
             }
+
+            Log::error('Shiprocket create failed', ['status' => $response->status(), 'response' => $response->body()]);
+            throw new \Exception('Failed to create shipment: ' . ($response->json()['message'] ?? 'Unknown error'));
         } catch (\Exception $e) {
-            Log::error('Shiprocket error: ' . $e->getMessage());
-            throw $e;
+            Log::error('Shiprocket error: ' . $e->getMessage(), ['order_id' => $order->id]);
+            throw new \Exception('Shipment creation failed: ' . $e->getMessage(), 0, $e);
         }
     }
 
-    /**
-     * Track shipment by AWB code from Shiprocket API.
-     * Updates shiprocket_orders table with latest status and syncs to orders.status.
-     * Returns tracking data for admin display.
-     *
-     * @param string $awbCode
-     * @return array Tracking data
-     * @throws \Exception
-     */
-    public function trackShipment(string $awbCode)
+    public function trackShipment(string $awbCode): array
     {
+        $token = $this->getToken();
+        if (!$token) {
+            throw new \Exception('Cannot track shipment due to API lockout.');
+        }
+
         try {
-            // Fetch token
-            $tokenResponse = Http::post('https://apiv2.shiprocket.in/v1/external/auth/login', [
-                'email' => env('SHIPROCKET_EMAIL'),
-                'password' => env('SHIPROCKET_PASSWORD'),
-            ]);
-
-            if (!$tokenResponse->successful()) {
-                Log::error('Shiprocket token fetch failed for tracking: ' . $tokenResponse->body());
-                throw new \Exception('Failed to authenticate with Shiprocket.');
-            }
-
-            $token = $tokenResponse->json()['token'] ?? null;
-            if (empty($token)) {
-                throw new \Exception('Failed to obtain Shiprocket token.');
-            }
-
-            // Track by AWB
+            Log::info('Tracking Shiprocket shipment', ['awb' => $awbCode]);
             $response = Http::withToken($token)
-                ->get("https://apiv2.shiprocket.in/v1/external/courier/track/awb/{$awbCode}");
+                ->get("{$this->baseUrl}/v1/external/courier/track/awb/{$awbCode}");
 
             if ($response->successful()) {
                 $data = $response->json();
 
-                if (!isset($data['data']['shipment_status'])) {
-                    Log::error('Shiprocket tracking failed: Invalid response data', ['response' => $data]);
-                    throw new \Exception('Invalid tracking response from Shiprocket.');
+                if (!isset($data['tracking_data']['shipment_status'])) {
+                    Log::error('Shiprocket tracking failed: Invalid response', ['response' => $data]);
+                    throw new \Exception('Invalid tracking response.');
                 }
 
-                // Find the ShiprocketOrder by AWB
-                $shiprocketOrder = ShiprocketOrder::where('awb_code', $awbCode)->first();
-                if (!$shiprocketOrder) {
-                    throw new \Exception('Shipment not found in database.');
-                }
+                $shiprocketOrder = ShiprocketOrder::where('awb_code', $awbCode)->firstOrFail();
+                $status = strtolower($data['tracking_data']['shipment_status']);
 
-                // Update shiprocket_orders table
                 $shiprocketOrder->update([
-                    'status' => $data['data']['shipment_status'], // e.g., 'in_transit', 'delivered'
-                    'raw_payload' => json_encode($data),
-                    'delivered_at' => $data['data']['shipment_status'] === 'delivered' ? now() : null,
+                    'status' => in_array($status, ['pending', 'confirmed', 'shipped', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled', 'returned'])
+                        ? $status
+                        : 'pending',
+                    'raw_payload' => $data,
+                    'delivered_at' => $status === 'delivered' ? now() : null,
                 ]);
 
-                // Sync to orders table
-                $order = $shiprocketOrder->order;
-                $order->update(['status' => $data['data']['shipment_status']]);
+                $shiprocketOrder->order->update(['status' => $status]);
 
-                Log::info('Shiprocket tracking updated for AWB ' . $awbCode, ['status' => $data['data']['shipment_status']]);
-
-                return $data['data']; // Return tracking details for admin display
-            } else {
-                Log::error('Shiprocket tracking failed: ' . $response->body());
-                throw new \Exception('Failed to track shipment: ' . ($response->json()['message'] ?? 'Unknown error.'));
+                Log::info('Shiprocket tracking updated', ['awb' => $awbCode, 'status' => $status]);
+                return $data['tracking_data'];
             }
+
+            Log::error('Shiprocket tracking failed', ['status' => $response->status(), 'response' => $response->body()]);
+            throw new \Exception('Failed to track: ' . ($response->json()['message'] ?? 'Unknown error'));
         } catch (\Exception $e) {
-            Log::error('Shiprocket tracking error: ' . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * Cancel shipment in Shiprocket (optional, for admin-initiated cancellations).
-     * Updates shiprocket_orders and orders tables.
-     *
-     * @param string $shipmentId
-     * @return bool Success
-     * @throws \Exception
-     */
-    public function cancelShipment(string $shipmentId)
-    {
-        try {
-            $tokenResponse = Http::post('https://apiv2.shiprocket.in/v1/external/auth/login', [
-                'email' => env('SHIPROCKET_EMAIL'),
-                'password' => env('SHIPROCKET_PASSWORD'),
-            ]);
-
-            $token = $tokenResponse->json()['token'] ?? null;
-            if (empty($token)) {
-                throw new \Exception('Failed to obtain Shiprocket token.');
-            }
-
-            $response = Http::withToken($token)
-                ->post('https://apiv2.shiprocket.in/v1/external/courier/cancel/shipment', [
-                    'shipment_id' => $shipmentId,
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-
-                $shiprocketOrder = ShiprocketOrder::where('shipment_id', $shipmentId)->first();
-                if ($shiprocketOrder) {
-                    $shiprocketOrder->update(['status' => 'cancelled']);
-                    $shiprocketOrder->order->update(['status' => 'canceled']);
-                }
-
-                Log::info('Shiprocket shipment cancelled for ID ' . $shipmentId);
-
-                return true;
-            } else {
-                Log::error('Shiprocket cancel failed: ' . $response->body());
-                throw new \Exception('Failed to cancel shipment.');
-            }
-        } catch (\Exception $e) {
-            Log::error('Shiprocket cancel error: ' . $e->getMessage());
+            Log::error('Tracking error: ' . $e->getMessage(), ['awb' => $awbCode]);
             throw $e;
         }
     }

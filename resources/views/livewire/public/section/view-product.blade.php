@@ -1,4 +1,5 @@
-<div wire:ignore.self x-data="productPage()">
+<div wire:ignore.self x-data="{ ...productPage(), buttonLoading: false }">
+    <x-loader message="Please wait..." class="bg-[#8f4da7]" x-show="buttonLoading"/>
     <style>
         .zoom-image {
             transition: transform 0.5s ease;
@@ -343,14 +344,30 @@
                     @if ($hasStock)
                         <div class="desktop-buttons mb-5">
                             <button wire:navigate wire:click="addToCart({{ $product->id }})"
+                                @click="buttonLoading = true"
                                 class="flex-1 px-6 py-3.5 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
                                 wire:loading.attr="disabled" wire:target="addToCart">
-                                Add to Cart
+                                <span x-show="!buttonLoading">Add to Cart</span>
+                                <span x-show="buttonLoading" class="inline-flex items-center justify-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Loading...
+                                </span>
                             </button>
                             <button wire:navigate wire:click="buyNow"
+                                @click="buttonLoading = true"
                                 class="flex-1 px-6 py-3.5 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
                                 wire:loading.attr="disabled" wire:target="buyNow">
-                                Buy Now
+                                <span x-show="!buttonLoading">Buy Now</span>
+                                <span x-show="buttonLoading" class="inline-flex items-center justify-center">
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Loading...
+                                </span>
                             </button>
                         </div>
                     @else
@@ -371,17 +388,14 @@
 
                     <!-- Product Meta -->
                     <div class="space-y-3 text-sm text-gray-700">
-                        <p class="flex gap-2">
-                            <span class="font-medium text-[#171717]">SKU:</span>
-                            <span>{{ $sku }}</span>
-                        </p>
+                      
                         <p class="flex gap-2">
                             <span class="font-medium text-[#171717]">Category:</span>
                             <span>{{ $product->category ? $product->category->title : 'No Category' }}</span>
                         </p>
                         <p class="flex gap-2">
-                            <span class="font-medium text-[#171717]">Tags:</span>
-                            <span>Cup, Magazine, Poster, T-shirt</span>
+                            <span class="font-medium text-[#171717]">Brands:</span>
+                            <span>{{$product->brand->name}}</span>
                         </p>
                     </div>
                 </div>
@@ -390,15 +404,31 @@
             <!-- Mobile Fixed Buttons -->
             @if ($hasStock)
                 <div class="fixed-bottom-buttons">
-                    <button wire:click="addToCart({{ $product->id }})"
+                    <button wire:navigate wire:click="addToCart({{ $product->id }})"
+                        @click="buttonLoading = true"
                         class="flex-1 px-4 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
                         wire:loading.attr="disabled" wire:target="addToCart">
-                        Add to Cart
+                        <span x-show="!buttonLoading">Add to Cart</span>
+                        <span x-show="buttonLoading" class="inline-flex items-center justify-center">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Loading...
+                        </span>
                     </button>
                     <button wire:click="buyNow"
+                        @click="buttonLoading = true"
                         class="flex-1 px-4 py-3 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
                         wire:loading.attr="disabled" wire:target="buyNow">
-                        Buy Now
+                        <span x-show="!buttonLoading">Buy Now</span>
+                        <span x-show="buttonLoading" class="inline-flex items-center justify-center">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Loading...
+                        </span>
                     </button>
                 </div>
             @else
@@ -430,7 +460,7 @@
                     <button class="tab-button font-medium transition-colors text-[#171717]"
                         :class="{ 'active text-[#8f4da7]': activeTab === 'additional' }"
                         @click="activeTab = 'additional'">
-                        Additional Info
+                         Info
                     </button>
                 </div>
 
@@ -444,24 +474,24 @@
                     <div class="max-w-4xl mx-auto">
                         <!-- Header Section -->
                         <div class="mb-8 text-center">
-                            <h2 class="text-3xl font-bold text-gray-900 mb-2">Customer Reviews</h2>
+                            <h2 class="text-3xl font-semibold text-gray-900 mb-2">Customer Reviews</h2>
                             <p class="text-gray-600">What our customers are saying about us</p>
 
                             <!-- Review Summary -->
                             <div class="mt-6 flex flex-wrap justify-center gap-4">
                                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                                    <div class="text-2xl font-bold text-[#8f4da7]">{{ $approvedReviews->count() }}
+                                    <div class="text-2xl font-semibold text-[#8f4da7]">{{ $approvedReviews->count() }}
                                     </div>
                                     <div class="text-sm text-gray-600">Total Reviews</div>
                                 </div>
                                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                                    <div class="text-2xl font-bold text-[#8f4da7]">
+                                    <div class="text-2xl font-semibold text-[#8f4da7]">
                                         {{ number_format($approvedReviews->avg('rating') ?? 0, 1) }}
                                     </div>
                                     <div class="text-sm text-gray-600">Average Rating</div>
                                 </div>
                                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                                    <div class="text-2xl font-bold text-[#8f4da7]">5★</div>
+                                    <div class="text-2xl font-semibold text-[#8f4da7]">5★</div>
                                     <div class="text-sm text-gray-600">Top Rating</div>
                                 </div>
                             </div>
@@ -478,7 +508,7 @@
                                             <div class="flex items-center space-x-3">
                                                 <!-- User Avatar -->
                                                 <div
-                                                    class="w-12 h-12 rounded-full bg-gradient-to-r from-[#8f4da7] to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                                                    class="w-12 h-12 rounded-full bg-gradient-to-r from-[#8f4da7] to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
                                                     {{ substr($review->user->name ?? 'A', 0, 1) }}
                                                 </div>
                                                 <div>
@@ -494,7 +524,7 @@
                                             <!-- Rating Badge -->
                                             <div
                                                 class="flex items-center space-x-1 bg-gray-100 px-3 py-1 rounded-full">
-                                                <span class="text-yellow-500 font-bold">{{ $review->rating }}</span>
+                                                <span class="text-yellow-500 font-semibold">{{ $review->rating }}</span>
                                                 <svg class="w-4 h-4 text-yellow-400" fill="currentColor"
                                                     viewBox="0 0 20 20">
                                                     <path
@@ -621,11 +651,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <h4 class="font-medium text-lg mb-3 text-[#171717]">Dimensions</h4>
-                            <p class="text-gray-700">10 x 20 x 5 cm</p>
+                            <p class="text-gray-700">{{$product->height}} x {{$product->breadth}} x {{$product->length}} cm</p>
                         </div>
                         <div>
                             <h4 class="font-medium text-lg mb-3 text-[#171717]">Weight</h4>
-                            <p class="text-gray-700">0.5 kg</p>
+                            <p class="text-gray-700">{{$product->weight}} kg</p>
                         </div>
                         <div>
                             <h4 class="font-medium text-lg mb-3 text-[#171717]">Materials</h4>

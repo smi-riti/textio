@@ -41,75 +41,97 @@
                 </div>
             @endif
 
-            @if ($currentStep === 1)
-                <div class="rounded-xl bg-white p-4 lg:p-6 shadow-sm">
-                    <h2 class="mb-5 text-lg font-medium text-gray-900">Basic Information</h2>
-                    <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                        <div class="lg:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
-                            <input type="text" wire:model.live="name" placeholder="Enter product name"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
-                            @error('name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div class="lg:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Slug *</label>
-                            <input type="text" wire:model="slug" placeholder="product-slug"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
-                            @error('slug')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                            <p class="mt-1 text-sm text-gray-500">Used in product URL</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
-                            <select wire:model="category_id"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
-                                <option value="">Select Category</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->title }}</option>
-                                @endforeach
-                            </select>
-                            @error('category_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
-                            <select wire:model="brand_id"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
-                                <option value="">Select Brand</option>
-                                @foreach ($brands as $brand)
-                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('brand_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                       
-                        <div class="lg:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                            <textarea wire:model="description" rows="4" placeholder="Describe your product..."
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent resize-none transition-colors duration-200"></textarea>
-                            @error('description')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                    <div class="mt-6 pt-5 border-t border-gray-200">
-                        <h3 class="text-md font-medium text-gray-900 mb-4">Customization</h3>
-                        <div class="flex items-center">
-                            <input type="checkbox" wire:model="is_customizable" id="is_customizable"
-                                class="w-4 h-4 text-[#8f4da7] bg-gray-100 border-gray-300 rounded focus:ring-[#8f4da7] focus:ring-2">
-                            <label for="is_customizable"
-                                class="ml-3 text-sm text-gray-700 cursor-pointer">This product can be
-                                customized</label>
-                        </div>
-                    </div>
-                </div>
-            @endif
+           @if ($currentStep === 1)
+    <div class="rounded-xl bg-white p-4 lg:p-6 shadow-sm">
+        <h2 class="mb-5 text-lg font-medium text-gray-900">Basic Information</h2>
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <div class="lg:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
+                <input type="text" wire:model.live="name" placeholder="Enter product name"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
+                @error('name')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="lg:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Slug *</label>
+                <input type="text" wire:model="slug" placeholder="product-slug"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
+                @error('slug')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+                <p class="mt-1 text-sm text-gray-500">Used in product URL</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select wire:model="category_id"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
+                    <option value="">Select Category</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->title }}</option>
+                    @endforeach
+                </select>
+                @error('category_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                <select wire:model="brand_id"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
+                    <option value="">Select Brand</option>
+                    @foreach ($brands as $brand)
+                        <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                    @endforeach
+                </select>
+                @error('brand_id')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                <input type="text" wire:model="weight" placeholder="Enter weight"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
+                @error('weight')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Length (cm)</label>
+                <input type="text" wire:model="length" placeholder="Enter length"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
+                @error('length')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Breadth (cm)</label>
+                <input type="text" wire:model="breadth" placeholder="Enter breadth"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
+                @error('breadth')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Height (cm)</label>
+                <input type="text" wire:model="height" placeholder="Enter height"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
+                @error('height')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="lg:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea wire:model="description" rows="4" placeholder="Describe your product..."
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent resize-none transition-colors duration-200"></textarea>
+                @error('description')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <!-- Customization moved to step 4 -->
+        </div>
+    </div>
+@endif
 
             @if ($currentStep === 2)
                 <div class="rounded-xl bg-white p-4 lg:p-6 shadow-sm">
@@ -229,6 +251,12 @@
                                     <label for="featured"
                                         class="ml-3 text-sm text-gray-700 cursor-pointer">Featured on
                                         homepage</label>
+                                </div>
+                                <div class="flex items-center mt-3">
+                                    <input type="checkbox" wire:model="is_customizable" id="is_customizable"
+                                        class="w-4 h-4 text-[#8f4da7] bg-gray-100 border-gray-300 rounded focus:ring-[#8f4da7] focus:ring-2">
+                                    <label for="is_customizable"
+                                        class="ml-3 text-sm text-gray-700 cursor-pointer">This product can be customized </label>
                                 </div>
                             </div>
                         </div>

@@ -37,6 +37,14 @@ class CreateProduct extends Component
     public $isSaving = false;
     public $loadingMessage = '';
 
+    public $weight;
+
+    public $length;
+
+    public $breadth;
+
+    public $height;
+
     protected $listeners = [
         'stepChanged' => 'handleStepChange',
         'combinationAdded' => 'handleCombinationAdded',
@@ -52,6 +60,10 @@ class CreateProduct extends Component
             'description' => 'nullable|string|min:10',
             'price' => 'required|numeric|min:0',
             'discount_price' => 'required|numeric|min:0',
+            'weight'=>'nullable|string|min:0',
+            'length'=>'nullable|string|min:0',
+            'breadth'=>'nullable|string|min:0',
+            'height'=>'nullable|string|min:0',
             'category_id' => 'nullable|exists:categories,id',
             'brand_id' => 'nullable|exists:brands,id',
             'status' => 'boolean',
@@ -148,7 +160,10 @@ class CreateProduct extends Component
                 'description' => $this->description ?: null,
                 'price' => $this->price,
                 'discount_price' => $this->discount_price,
-                'sku' => $this->sku ?: null,
+                'weight' => $this->weight,
+                'length' => $this->length,
+                'breadth' => $this->breadth,
+                'height' => $this->height,
                 'category_id' => $this->category_id ?: null,
                 'brand_id' => $this->brand_id ?: null,
                 'status' => $this->status,
@@ -265,69 +280,73 @@ class CreateProduct extends Component
         session()->forget($galleryKey);
         Log::info('Gallery images associated from temp', ['db_id' => $dbId, 'count' => count($tempGallery)]);
     }
-    private function validateCurrentStep()
-    {
-        Log::info('Validating step', ['step' => $this->currentStep]);
-        switch ($this->currentStep) {
-            case 1:
-                try {
-                    $this->validate([
-                        'name' => 'required|string|max:255',
-                        'slug' => 'required|string|max:255|unique:products,slug',
-                        'description' => 'nullable|string|min:10',
-                        'category_id' => 'nullable|exists:categories,id',
-                        'brand_id' => 'nullable|exists:brands,id',
-                    ]);
-                    return true;
-                } catch (\Illuminate\Validation\ValidationException $e) {
-                    Log::error('Step 1 validation failed: ' . json_encode($e->errors()));
-                    return false;
-                }
-            case 2:
-                try {
-                    $rules = [
-                        'price' => 'required|numeric|min:0',
-                        'discount_price' => 'required|numeric|min:0',
-                    ];
-                    if ($this->price && is_numeric($this->price) && $this->price > 0) {
-                        $rules['discount_price'] .= '|lt:price';
-                    }
-                    $this->validate($rules);
-                    return true;
-                } catch (\Illuminate\Validation\ValidationException $e) {
-                    Log::error('Step 2 validation failed: ' . json_encode($e->errors()));
-                    return false;
-                }
-            case 3:
-                try {
-                    $this->validate([
-                        'variantCombinations' => 'required|array|min:1',
-                        'variantCombinations.*.variant_values_data' => 'required|array|min:1',
-                        'variantCombinations.*.stock' => 'required|integer|min:0',
-                    ]);
-                    Log::info('Step 3 validation passed', ['variant_count' => count($this->variantCombinations)]);
-                    return true;
-                } catch (\Illuminate\Validation\ValidationException $e) {
-                    Log::error('Step 3 validation failed: ' . json_encode($e->errors()));
-                    session()->flash('error', 'At least one variant combination is required.');
-                    return false;
-                }
-            case 4:
-                try {
-                    $this->validate([
-                        'meta_title' => 'nullable|string|max:255',
-                        'meta_description' => 'nullable|string|max:500',
-                        'highlights' => 'nullable|array',
-                    ]);
-                    return true;
-                } catch (\Illuminate\Validation\ValidationException $e) {
-                    Log::error('Step 4 validation failed: ' . json_encode($e->errors()));
-                    return false;
-                }
-            default:
+   private function validateCurrentStep()
+{
+    Log::info('Validating step', ['step' => $this->currentStep]);
+    switch ($this->currentStep) {
+        case 1:
+            try {
+                $this->validate([
+                    'name' => 'required|string|max:255',
+                    'slug' => 'required|string|max:255|unique:products,slug',
+                    'description' => 'nullable|string|min:10',
+                    'category_id' => 'nullable|exists:categories,id',
+                    'brand_id' => 'nullable|exists:brands,id',
+                    'weight' => 'nullable|string|min:0',
+                    'length' => 'nullable|string|min:0',
+                    'breadth' => 'nullable|string|min:0',
+                    'height' => 'nullable|string|min:0',
+                ]);
                 return true;
-        }
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error('Step 1 validation failed: ' . json_encode($e->errors()));
+                return false;
+            }
+        case 2:
+            try {
+                $rules = [
+                    'price' => 'required|numeric|min:0',
+                    'discount_price' => 'required|numeric|min:0',
+                ];
+                if ($this->price && is_numeric($this->price) && $this->price > 0) {
+                    $rules['discount_price'] .= '|lt:price';
+                }
+                $this->validate($rules);
+                return true;
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error('Step 2 validation failed: ' . json_encode($e->errors()));
+                return false;
+            }
+        case 3:
+            try {
+                $this->validate([
+                    'variantCombinations' => 'required|array|min:1',
+                    'variantCombinations.*.variant_values_data' => 'required|array|min:1',
+                    'variantCombinations.*.stock' => 'required|integer|min:0',
+                ]);
+                Log::info('Step 3 validation passed', ['variant_count' => count($this->variantCombinations)]);
+                return true;
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error('Step 3 validation failed: ' . json_encode($e->errors()));
+                session()->flash('error', 'At least one variant combination is required.');
+                return false;
+            }
+        case 4:
+            try {
+                $this->validate([
+                    'meta_title' => 'nullable|string|max:255',
+                    'meta_description' => 'nullable|string|max:500',
+                    'highlights' => 'nullable|array',
+                ]);
+                return true;
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error('Step 4 validation failed: ' . json_encode($e->errors()));
+                return false;
+            }
+        default:
+            return true;
     }
+}
 
     public function handleCombinationAdded($combination)
     {

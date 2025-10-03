@@ -1,4 +1,22 @@
-<div>
+<div x-data="{ 
+    isLoading: false,
+    isRemoveLoading: false,
+    isQuantityLoading: false,
+    showLoader(type) {
+        if(type === 'remove') this.isRemoveLoading = true;
+        else if(type === 'quantity') this.isQuantityLoading = true;
+        else this.isLoading = true;
+    },
+    hideLoader(type) {
+        if(type === 'remove') this.isRemoveLoading = false;
+        else if(type === 'quantity') this.isQuantityLoading = false;
+        else this.isLoading = false;
+    }
+}">
+    <x-loader message="Please wait..." class="bg-[#8f4da7]" x-show="isLoading"/>
+    <x-loader message="Please wait..." class="bg-[#8f4da7]" x-show="isRemoveLoading"/>
+    <x-loader message="Please wait..." class="bg-[#8f4da7]" x-show="isQuantityLoading"/>
+    
     <div class="container mx-auto px-4 py-6 max-w-7xl">
         <h1 class="text-2xl sm:text-3xl font-semibold text-[#171717] mb-6">My Cart</h1>
 
@@ -20,8 +38,8 @@
                             <a href="{{ route('view.product', $item->product->slug) }}" class="sm:flex-shrink-0">
                                 <div
                                     class="w-full sm:w-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden mx-auto sm:mx-0">
-                                    @if ($item->product->images && $item->product->images->first())
-                                        <img src="{{ $item->product->images->first()->image_path }}"
+                                    @if ($item->product->firstVariantImage)
+                                <img src="{{ $item->product->firstVariantImage->image_path ?? asset('images/placeholder.jpg') }}"
                                             alt="{{ $item->product->name }}" class="w-full h-auto object-contain">
                                     @else
                                         <i class="fas fa-image text-gray-400 text-3xl"></i>
@@ -134,12 +152,16 @@
 
                 @if ($cartItems->isNotEmpty())
                     <div class="bg-white hidden sm:flex rounded-lg justify-end p-2 mb-4">
-                        <button wire:click="placeOrder"
+                        <button wire:navigate wire:click="placeOrder"
+                            x-on:click="showLoader('order')"
+                            wire:loading.remove
                             class="bg-[#8f4da7] hover:bg-[#7a3c93] text-white py-2 px-16 rounded flex items-center justify-center transition">
                             Place Order
                         </button>
                     </div>
                 @endif
+
+                
             </div>
 
             <!-- Right Column - Order Summary -->
@@ -206,7 +228,9 @@
                             ₹{{ number_format($cartItems->sum(fn($item) => $this->getItemPrice($item) * $item->quantity), 0) }}
                         </p>
                     </div>
-                    <button wire:click="placeOrder"
+                    <button wire:navigate wire:click="placeOrder"
+                        x-on:click="showLoader('order')"
+                        wire:loading.remove
                         class="bg-[#8f4da7] hover:bg-[#7a3c93] text-white py-3 px-8 rounded-xl font-semibold text-base transition shadow-lg flex items-center gap-2">
                         <i class="fas fa-shopping-bag"></i>
                         Place Order

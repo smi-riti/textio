@@ -59,12 +59,13 @@ return [
     ],
     
 
-    'shiprocket' => [
-    'base_url' => env('SHIPROCKET_BASE_URL', 'https://apiv2.shiprocket.in'),
-    'email' => env('SHIPROCKET_EMAIL'),
-    'password' => env('SHIPROCKET_PASSWORD'),
-    'token_cache_ttl' => env('SHIPROCKET_TOKEN_TTL', 14400),
-],
+   'shiprocket' => [
+        'base_url' => env('SHIPROCKET_BASE_URL', 'https://apiv2.shiprocket.in'),
+        'email' => env('SHIPROCKET_EMAIL'),
+        'password' => env('SHIPROCKET_PASSWORD'),
+        'token_cache_ttl' => env('SHIPROCKET_TOKEN_TTL', 14400),
+        'channel_id' => env('SHIPROCKET_CHANNEL_ID', ''),  // Add this if needed
+    ],
 
 
 ];

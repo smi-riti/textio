@@ -251,4 +251,56 @@ class PaymentService
             throw $e;
         }
     }
+
+    /**
+     * Handle order cancellation and refund if payment was made
+     */
+    public function handleOrderCancellation(Order $order, string $cancellationReason): void
+    {
+        try {
+            DB::beginTransaction();
+
+            // Update order status
+            $order->update([
+                'status' => 'canceled',
+                'cancellation_reason' => $cancellationReason,
+                'cancelled_at' => now()
+            ]);
+
+            // Check if order has a payment and it was paid
+            $payment = $order->payment;
+            if ($payment && $payment->isPaid() && $payment->isOnline()) {
+                // Process refund
+                $refundResult = $this->refundPayment(
+                    $payment->razorpay_payment_id,
+                    $payment->amount
+                );
+
+                // Update payment status
+                $payment->update([
+                    'payment_status' => Payment::STATUS_REFUNDED,
+                    'notes' => array_merge($payment->notes ?? [], [
+                        'refunded_at' => now()->toISOString(),
+                        'refund_id' => $refundResult['id'],
+                        'cancellation_reason' => $cancellationReason
+                    ])
+                ]);
+
+                Log::info('Order cancelled and payment refunded', [
+                    'order_id' => $order->id,
+                    'payment_id' => $payment->id,
+                    'refund_id' => $refundResult['id']
+                ]);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to process order cancellation', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+            throw new \Exception('Failed to cancel order: ' . $e->getMessage());
+        }
+    }
 }

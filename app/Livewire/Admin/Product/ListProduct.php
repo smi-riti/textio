@@ -135,7 +135,7 @@ class ListProduct extends Component
     public function render()
     {
         $query = Product::query()
-            ->with(['category:id,title', 'brand:id,name', 'variantCombinations'])
+            ->with(['category:id,title', 'brand:id,name', 'variantCombinations','variants'])
             ->withCount('variantCombinations')
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
@@ -155,7 +155,6 @@ class ListProduct extends Component
         $products = $query->paginate($this->perPage);
         $categories = Category::where('is_active', true)->select('id', 'title')->get();
         $brands = Brand::where('is_active', true)->select('id', 'name')->get();
-
         return view('livewire.admin.product.list-product', [
             'products' => $products,
             'categories' => $categories,

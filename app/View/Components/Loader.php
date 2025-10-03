@@ -6,6 +6,8 @@ use Illuminate\View\Component;
 
 class Loader extends Component
 {
+
+    
     public $message;
 
     public function __construct($message = null)
