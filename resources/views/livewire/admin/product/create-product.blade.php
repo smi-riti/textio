@@ -53,7 +53,7 @@
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
-            <div class="lg:col-span-2">
+            {{-- <div class="lg:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Slug *</label>
                 <input type="text" wire:model="slug" placeholder="product-slug"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8f4da7] focus:border-transparent transition-colors duration-200">
@@ -61,7 +61,7 @@
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
                 <p class="mt-1 text-sm text-gray-500">Used in product URL</p>
-            </div>
+            </div> --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select wire:model="category_id"
