@@ -243,7 +243,7 @@
                         <button
                             class="group flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
                             @click="shareProduct()" title="Share Product" aria-label="Share Product">
-                           <i class="fas fa-share-alt text-gray-500 text-sm "></i>
+                            <i class="fas fa-share-alt text-gray-500 text-sm "></i>
                             <span
                                 class="text-sm font-medium text-gray-600 group-hover:text-gray-800 hidden sm:inline">Share</span>
                         </button>
@@ -417,15 +417,21 @@
 
                     <!-- Product Meta -->
                     <div class="space-y-3 text-sm text-gray-700">
-                        <p class="flex gap-2">
-                            <span class="font-medium text-[#171717]">Category:</span>
-                            <span>{{ $product->category ? $product->category->title : 'No Category' }}</span>
-                        </p>
-                        <p class="flex gap-2">
-                            <span class="font-medium text-[#171717]">Brands:</span>
-                            <span>{{ $product->brand->name }}</span>
-                        </p>
+                        @if ($product->category)
+                            <p class="flex gap-2">
+                                <span class="font-medium text-[#171717]">Category:</span>
+                                <span>{{ $product->category->title }}</span>
+                            </p>
+                        @endif
+
+                        @if ($product->brand)
+                            <p class="flex gap-2">
+                                <span class="font-medium text-[#171717]">Brand:</span>
+                                <span>{{ $product->brand->name }}</span>
+                            </p>
+                        @endif
                     </div>
+
                 </div>
             </div>
 
