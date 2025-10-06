@@ -1,5 +1,5 @@
 <div wire:ignore.self x-data="{ ...productPage(), buttonLoading: false }">
-    <x-loader message="Please wait..." class="bg-[#8f4da7]" x-show="buttonLoading"/>
+    <x-loader message="Please wait..." class="bg-[#8f4da7]" x-show="buttonLoading" />
     <style>
         .zoom-image {
             transition: transform 0.5s ease;
@@ -204,42 +204,64 @@
                         <!-- Main Image -->
                         <div class="relative main-image flex-1">
                             <div class="relative overflow-hidden gap-2 rounded-xl bg-gray-100">
-                                <img x-bind:src="images[activeImageIndex]" class="w-full h-96 object-contain zoom-image"
-                                    alt="{{ $product->name }}" @mousemove="zoomImage($event)">
-                                <!-- Eye icon for fullscreen -->
+                                <img x-bind:src="images[activeImageIndex]"
+                                    class="w-full h-[30rem] object-contain zoom-image" alt="{{ $product->name }}"
+                                    @mousemove="zoomImage($event)">
+
+                                <!-- Fullscreen button -->
+                                <div class="flex gap-2">
+                                    <button
+                                        class="absolute top-3 right-2 p-2 rounded-full bg-white shadow-md transition-colors hover:bg-gray-100 w-10 h-10 flex items-center justify-center"
+                                        @click="openFullscreen()" title="View Fullscreen">
+                                        <i class="fas fa-eye text-[#8f4da7] text-base"></i>
+                                    </button>
+
+                                    <!-- Wishlist button -->
+                                    <div class="absolute top-3 right-14">
+                                        <livewire:public.section.wishlist-button :productId="$product->id" />
+                                    </div>
+
+
+                                    {{-- <!-- Share button -->
                                 <button
-                                    class="absolute top-3 right-3 p-2 rounded-full bg-white shadow-md transition-colors hover:bg-gray-100"
-                                    @click="openFullscreen()">
-                                    <i class="fas fa-eye text-[#8f4da7]"></i>
-                                </button>
-                                <!-- Wishlist button component -->
-                                <div class="absolute top-3 right-14">
-                                    <livewire:public.section.wishlist-button :productId="$product->id" />
-                                </div>
-                                <!-- Share button -->
-                                <button class="absolute top-3 right-24 p-2 rounded-full bg-white shadow-md share-button"
+                                    class="absolute top-3 right-24 p-2 rounded-full bg-white shadow-md transition-colors hover:bg-gray-100 w-10 h-10 flex items-center justify-center"
                                     @click="shareProduct()" title="Share Product">
-                                    <i class="fas fa-share-alt text-[#8f4da7]"></i>
-                                </button>
+                                    <i class="fas fa-share-alt text-[#8f4da7] text-base"></i>
+                                </button> --}}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Product Info -->
-                <div class="lg:w-1/2">
-                    <h1 class="text-2xl font-sans font-semibold text-[#171717] mb-3">{{ $product->name }}</h1>
+                <div class="lg:w-1/2 relative">
+                    <div class="flex justify-between items-center mb-4">
+                        <h1 class="text-lg font-sans  text-gray-800 md:text-xl">
+                            {{ $product->name }}
+                        </h1>
+                        <button
+                            class="group flex items-center gap-2 px-3 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                            @click="shareProduct()" title="Share Product" aria-label="Share Product">
+                           <i class="fas fa-share-alt text-gray-500 text-sm "></i>
+                            <span
+                                class="text-sm font-medium text-gray-600 group-hover:text-gray-800 hidden sm:inline">Share</span>
+                        </button>
+                    </div>
+
 
                     <!-- Ratings -->
-                  @if ($approvedReviews && $approvedReviews->isNotEmpty())
-    <div class="flex items-center gap-2 mb-5">
-        <a class="text-xs rounded px-2 py-1 bg-green-600 text-white">
-            {{ number_format($approvedReviews->avg('rating') ?? 0, 1) }}
-            <i class="fas fa-star text-white text-xs"></i>
-        </a>
-        <span class="text-gray-400 text-xs">{{ $approvedReviews->count() }} Rating{{ $approvedReviews->count() === 1 ? '' : 's' }}</span>
-    </div>
-@endif
+                    @if ($approvedReviews && $approvedReviews->isNotEmpty())
+                        <div class="flex items-center gap-2 mb-5">
+                            <a class="text-xs rounded px-2 py-1 bg-green-600 text-white">
+                                {{ number_format($approvedReviews->avg('rating') ?? 0, 1) }}
+                                <i class="fas fa-star text-white text-xs"></i>
+                            </a>
+                            <span class="text-gray-400 text-xs">{{ $approvedReviews->count() }}
+                                Rating{{ $approvedReviews->count() === 1 ? '' : 's' }}</span>
+                        </div>
+                    @endif
+
                     <!-- Price -->
                     <div class="flex items-center gap-3 mb-6" wire:loading.class="opacity-50">
                         <p class="text-2xl font-semibold text-[#8f4da7]">
@@ -342,36 +364,43 @@
 
                     <!-- Desktop Buttons -->
                     @if ($hasStock)
-                        <div class="desktop-buttons mb-5">
+                        <div class="desktop-buttons py-8 flex gap-3">
                             <button wire:navigate wire:click="addToCart({{ $product->id }})"
                                 @click="buttonLoading = true"
                                 class="flex-1 px-6 py-3.5 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
                                 wire:loading.attr="disabled" wire:target="addToCart">
                                 <span x-show="!buttonLoading">Add to Cart</span>
                                 <span x-show="buttonLoading" class="inline-flex items-center justify-center">
-                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none"
+                                        viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
                                     </svg>
                                     Loading...
                                 </span>
                             </button>
-                            <button wire:navigate wire:click="buyNow"
-                                @click="buttonLoading = true"
+                            <button wire:navigate wire:click="buyNow" @click="buttonLoading = true"
                                 class="flex-1 px-6 py-3.5 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
                                 wire:loading.attr="disabled" wire:target="buyNow">
                                 <span x-show="!buttonLoading">Buy Now</span>
                                 <span x-show="buttonLoading" class="inline-flex items-center justify-center">
-                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none"
+                                        viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
                                     </svg>
                                     Loading...
                                 </span>
                             </button>
                         </div>
                     @else
-                        <div class="desktop-buttons mb-5">
+                        <div class="desktop-buttons mb-5 flex gap-3">
                             <button disabled
                                 class="flex-1 px-6 py-3.5 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
                                 Add to Cart
@@ -388,14 +417,13 @@
 
                     <!-- Product Meta -->
                     <div class="space-y-3 text-sm text-gray-700">
-                      
                         <p class="flex gap-2">
                             <span class="font-medium text-[#171717]">Category:</span>
                             <span>{{ $product->category ? $product->category->title : 'No Category' }}</span>
                         </p>
                         <p class="flex gap-2">
                             <span class="font-medium text-[#171717]">Brands:</span>
-                            <span>{{$product->brand->name}}</span>
+                            <span>{{ $product->brand->name }}</span>
                         </p>
                     </div>
                 </div>
@@ -404,28 +432,34 @@
             <!-- Mobile Fixed Buttons -->
             @if ($hasStock)
                 <div class="fixed-bottom-buttons">
-                    <button wire:navigate wire:click="addToCart({{ $product->id }})"
-                        @click="buttonLoading = true"
+                    <button wire:navigate wire:click="addToCart({{ $product->id }})" @click="buttonLoading = true"
                         class="flex-1 px-4 py-3 bg-[#171717] text-white rounded-lg hover:bg-[#8f4da7] transition-colors font-medium"
                         wire:loading.attr="disabled" wire:target="addToCart">
                         <span x-show="!buttonLoading">Add to Cart</span>
                         <span x-show="buttonLoading" class="inline-flex items-center justify-center">
-                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
                             </svg>
                             Loading...
                         </span>
                     </button>
-                    <button wire:click="buyNow"
-                        @click="buttonLoading = true"
+                    <button wire:click="buyNow" @click="buttonLoading = true"
                         class="flex-1 px-4 py-3 bg-[#8f4da7] text-white rounded-lg hover:bg-[#7a3c93] transition-colors font-medium"
                         wire:loading.attr="disabled" wire:target="buyNow">
                         <span x-show="!buttonLoading">Buy Now</span>
                         <span x-show="buttonLoading" class="inline-flex items-center justify-center">
-                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none"
+                                viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
                             </svg>
                             Loading...
                         </span>
@@ -460,7 +494,7 @@
                     <button class="tab-button font-medium transition-colors text-[#171717]"
                         :class="{ 'active text-[#8f4da7]': activeTab === 'additional' }"
                         @click="activeTab = 'additional'">
-                         Info
+                        Info
                     </button>
                 </div>
 
@@ -524,7 +558,8 @@
                                             <!-- Rating Badge -->
                                             <div
                                                 class="flex items-center space-x-1 bg-gray-100 px-3 py-1 rounded-full">
-                                                <span class="text-yellow-500 font-semibold">{{ $review->rating }}</span>
+                                                <span
+                                                    class="text-yellow-500 font-semibold">{{ $review->rating }}</span>
                                                 <svg class="w-4 h-4 text-yellow-400" fill="currentColor"
                                                     viewBox="0 0 20 20">
                                                     <path
@@ -651,11 +686,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <h4 class="font-medium text-lg mb-3 text-[#171717]">Dimensions</h4>
-                            <p class="text-gray-700">{{$product->height}} x {{$product->breadth}} x {{$product->length}} cm</p>
+                            <p class="text-gray-700">{{ $product->height }} x {{ $product->breadth }} x
+                                {{ $product->length }} cm</p>
                         </div>
                         <div>
                             <h4 class="font-medium text-lg mb-3 text-[#171717]">Weight</h4>
-                            <p class="text-gray-700">{{$product->weight}} kg</p>
+                            <p class="text-gray-700">{{ $product->weight }} kg</p>
                         </div>
                         <div>
                             <h4 class="font-medium text-lg mb-3 text-[#171717]">Materials</h4>

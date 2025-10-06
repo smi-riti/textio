@@ -3,8 +3,11 @@
 namespace App\Livewire\Public\Page;
 
 use App\Models\Enquiry;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Attributes\Rule;
+
+#[Title('Contact-us')]
 
 class ContactPage extends Component
 {

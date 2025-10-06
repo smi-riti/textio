@@ -5,9 +5,11 @@ namespace App\Livewire\Public\Section;
 use App\Models\Order;
 use App\Services\ShiprocketService;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+#[Title('My Order')]
 class MyOrders extends Component
 {
     use WithPagination;

@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Public\Page;
 
+use Livewire\Attributes\Title;
 use Livewire\Component;
+
+#[Title('Privacy-Policy')]
 
 class PrivacyPolicy extends Component
 {

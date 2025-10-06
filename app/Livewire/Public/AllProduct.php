@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Public;
 
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,6 +13,8 @@ use App\Models\ProductVariantCombination;
 use App\Services\WishlistService;
 use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
+
+#[Title('All Products')]
 
 class AllProduct extends Component
 {

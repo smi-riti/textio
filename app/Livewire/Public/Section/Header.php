@@ -5,7 +5,10 @@ namespace App\Livewire\Public\Section;
 use App\Models\Cart;
 use App\Models\Wishlist;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Title;
 use Livewire\Component;
+
+#[Title('Home')]
 
 class Header extends Component
 {

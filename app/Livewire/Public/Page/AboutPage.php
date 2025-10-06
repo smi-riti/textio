@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Public\Page;
 
+use Livewire\Attributes\Title;
 use Livewire\Component;
+    #[Title('About')]
 
 class AboutPage extends Component
 {

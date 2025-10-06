@@ -12,8 +12,7 @@
                             @if ($product->firstVariantImage)
                                 <img src="{{ $product->firstVariantImage->image_path ?? asset('images/placeholder.jpg') }}"
                                     alt="{{ $product->firstVariantImage->name }}" class="w-full h-64 object-cover">
-                            @else
-                            <h1>hello</h1>
+                           
                             @endif
                         </a>
                         <div class="absolute top-3 right-3 text-xs font-semibold rounded-full uppercase tracking-wide">

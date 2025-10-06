@@ -120,12 +120,12 @@
         <ul class="pt-4 mt-4 border-t border-gray-200">
             <p class="text-xs uppercase text-gray-500 tracking-wider mb-4">Actions</p>
             <li>
-                <form wire:navigate method="POST" action="{{ route('logout') }}">
-                    @csrf
+                 <form action="{{ route('logout') }}" method="POST">
+                        @csrf
                     <button type="submit"
                             class="w-full flex items-center p-3 rounded-lg hover:bg-gray-100 transition-all text-left">
                         <i class="bi bi-box-arrow-right mr-3 text-red-500"></i>
-                        <span>Logout</span>
+                        Logout
                     </button>
                 </form>
             </li>

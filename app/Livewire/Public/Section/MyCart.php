@@ -5,8 +5,10 @@ namespace App\Livewire\Public\Section;
 use App\Models\Cart;
 use App\Models\ProductVariantCombination;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
+#[Title('My Cart')]
 class MyCart extends Component
 {
     public $cartItems = [];

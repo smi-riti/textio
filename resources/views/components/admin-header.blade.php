@@ -40,7 +40,7 @@
                     <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email ?? 'admin@email.com' }}</p>
                 </div>
                 <div class="py-1">
-                    <form wire:navigate method="POST" action="{{ route('logout') }}">
+                    <form  method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit"
                                 class="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">

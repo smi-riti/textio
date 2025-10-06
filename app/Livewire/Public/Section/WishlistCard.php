@@ -4,8 +4,10 @@ namespace App\Livewire\Public\Section;
 use App\Models\Wishlist;
 use App\Services\CartService;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Title;
 use Livewire\Component;
 
+#[Title('wishlist')]
 class WishlistCard extends Component
 {
      public $wishlistItems;

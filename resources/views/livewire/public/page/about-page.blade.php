@@ -281,13 +281,13 @@
             <div class="container">
                 <div class="content">
                     <h2 class="heading-font">Meet Our Visionary Leader</h2>
-                    <h3 class="text-accent">Priyanshu Bhattacharya</h3>
+                    <h3 class="text-accent">Textio</h3>
                     <p class="quote">
                         "Fashion is the armor to survive the reality of everyday life. At TEXTIO, we don't just create
                         clothes; we craft confidence, personality, and self-expression."
                     </p>
                     <p>
-                        Under Priyanshu's visionary leadership, TEXTIO has transformed from a custom t-shirt printing
+                        Under Textio's visionary leadership, TEXTIO has transformed from a custom t-shirt printing
                         startup into a complete fashion brand that celebrates individuality. His passion for accessible
                         fashion and belief in clothing as a form of self-expression drives our company's innovation and
                         commitment to quality.
