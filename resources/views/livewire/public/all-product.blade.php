@@ -303,142 +303,105 @@
             </div>
 
             <!-- Products List (Row Layout) -->
-            <div class="space-y-4" wire:loading.class="opacity-50">
-                @forelse($products as $product)
-                    <div
-                        class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-300 transition-colors shadow-sm hover:shadow-md">
-                        <div class="flex flex-col sm:flex-row">
-                            <!-- Product Image -->
-                            <div class="relative group sm:w-64 w-full">
-                                @if ($product->firstVariantImage)
-                                    <a href="{{ route('public.product.view', $product->slug) }}">
-                                        <img src="{{ $product->firstVariantImage->image_path ?? asset('images/placeholder.jpg') }}"
-                                            alt="{{ $product->name }}" class="w-full h-48 sm:h-64 object-cover">
-                                    </a>
-                                @else
-                                    <div class="w-full h-48 sm:h-64 bg-gray-100 flex items-center justify-center">
-                                        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                @endif
-
-                                <!-- Action Icons (Always visible now) -->
-                                <div class="absolute top-2 right-2 flex flex-col space-y-2">
-                                    <!-- View Product -->
-                                    <a href="{{ route('public.product.view', $product->slug) }}"
-                                        class="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"
-                                        title="View Product">
-                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </a>
-
-                                    <!-- Wishlist -->
-                                    @php
-                                        $isInWishlist = in_array($product->id, $wishlistItems ?? []);
-                                    @endphp
-                                    <button
-                                        wire:click="{{ $isInWishlist ? 'removeFromWishlist' : 'addToWishlist' }}({{ $product->id }})"
-                                        class="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md"
-                                        title="{{ $isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}">
-                                        <svg class="w-5 h-5 {{ $isInWishlist ? 'text-red-500 fill-current' : 'text-gray-600' }} transition-colors"
-                                            fill="{{ $isInWishlist ? 'currentColor' : 'none' }}"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Discount Badge -->
-                                @if ($product->discount_price && $product->discount_price < $product->price)
-                                    <div class="absolute top-2 left-2">
-                                        <span class="bg-[#8f4da7] text-white text-xs font-bold px-2 py-1 rounded">
-                                            {{ round((($product->price - $product->discount_price) / $product->price) * 100) }}%
-                                            OFF
-                                        </span>
-                                    </div>
-                                @endif
+          <div class="space-y-4 sm:space-y-0" wire:loading.class="opacity-50">
+    @if ($products->isNotEmpty())
+        <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
+            @foreach($products as $product)
+                <div
+                    class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-all shadow-sm hover:shadow-md">
+                    
+                    <!-- Product Image -->
+                    <div class="relative group">
+                        <a href="{{ route('public.product.view', $product->slug) }}">
+                            <div class="aspect-[3/4] bg-gray-50 flex items-center justify-center overflow-hidden">
+                                <img src="{{ $product->firstVariantImage->image_path ?? asset('images/placeholder.jpg') }}"
+                                    alt="{{ $product->name }}"
+                                    class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" />
                             </div>
+                        </a>
 
-                            <!-- Product Details -->
-                            <div class="flex-1 p-6">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-1">
-                                        <a wire:navigate href="{{ route('public.product.view', $product->slug) }}"
-                                            class="text-lg font-semibold text-gray-900 mb-1 hover:text-[#8f4da7] transition-colors">{{ $product->name }}</a>
-                                        <p class="text-sm text-gray-600 mb-2">
-                                            {{ $product->category->title ?? 'No Category' }}</p>
+                        <!-- Wishlist / View Icons -->
+                        <div class="absolute top-2 right-2 flex flex-col space-y-2">
+                            <a href="{{ route('public.product.view', $product->slug) }}"
+                                class="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition shadow-md"
+                                title="View Product">
+                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </a>
 
-                                        <!-- Price -->
-                                        <div class="flex items-center space-x-2 mb-3">
-                                            <span class="text-2xl font-bold text-[#8f4da7]">
-                                                ₹{{ number_format($product->discount_price ?? $product->price) }}
-                                            </span>
-                                            @if ($product->discount_price && $product->discount_price < $product->price)
-                                                <span class="text-lg text-gray-500 line-through">
-                                                    ₹{{ number_format($product->price) }}
-                                                </span>
-                                            @endif
-                                        </div>
-
-                                        <!-- Product Meta -->
-                                        <div class="text-sm text-gray-500 space-y-1 mb-4">
-                                            <p>There are many variations of passages of Lorem Ipsum available, but the
-                                                majority have suffered alteration in some form, by injected humour, or
-                                                randomised words which don't look even slightly believable.</p>
-                                        </div>
-
-                                        <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-4">
-                                            <span class="flex items-center">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                                </svg>
-                                                @if ($product->IsInStock())
-                                                    <span class="text-green-600">In Stock</span>
-                                                @else
-                                                    <span class="text-red-600">Out of Stock</span>
-                                                @endif
-                                            </span>
-                                            @if ($product->is_customizable)
-                                                <span class="flex items-center">
-                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                        viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                    Customizable
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @php
+                                $isInWishlist = in_array($product->id, $wishlistItems ?? []);
+                            @endphp
+                            <button
+                                wire:click="{{ $isInWishlist ? 'removeFromWishlist' : 'addToWishlist' }}({{ $product->id }})"
+                                class="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition shadow-md"
+                                title="{{ $isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist' }}">
+                                <svg class="w-4 h-4 {{ $isInWishlist ? 'text-red-500 fill-current' : 'text-gray-600' }}"
+                                    fill="{{ $isInWishlist ? 'currentColor' : 'none' }}"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
                         </div>
+
+                        <!-- Discount Badge -->
+                        @if ($product->discount_price && $product->discount_price < $product->price)
+                            <div class="absolute top-2 left-2">
+                                <span class="bg-[#8f4da7] text-white text-xs font-semibold px-2 py-1 rounded">
+                                    {{ round((($product->price - $product->discount_price) / $product->price) * 100) }}% OFF
+                                </span>
+                            </div>
+                        @endif
                     </div>
-                @empty
-                    <div class="text-center py-12">
-                        <svg class="w-24 h-24 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-3-3V6a3 3 0 10-6 0v3M4 20h16a2 2 0 002-2V10a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <h3 class="text-xl font-medium text-gray-900 mb-2">No products found</h3>
-                        <p class="text-gray-500 mb-4">Try adjusting your search criteria or filters</p>
+
+                    <!-- Product Info -->
+                    <div class="p-3 sm:p-4 text-center">
+                        <a wire:navigate href="{{ route('public.product.view', $product->slug) }}"
+                            class="block text-sm sm:text-base font-semibold text-gray-900 mb-1 hover:text-[#8f4da7] transition">
+                            {{ Str::limit($product->name, 40) }}
+                        </a>
+                        <p class="text-xs sm:text-sm text-gray-500 mb-2">{{ $product->category->title ?? 'No Category' }}</p>
+
+                        <div class="flex justify-center items-center space-x-2 mb-3">
+                            <span class="text-sm sm:text-lg font-semibold text-[#8f4da7]">
+                                ₹{{ number_format($product->discount_price ?? $product->price) }}
+                            </span>
+                            @if ($product->discount_price && $product->discount_price < $product->price)
+                                <span class="text-xs sm:text-sm text-gray-400 line-through">
+                                    ₹{{ number_format($product->price) }}
+                                </span>
+                            @endif
+                        </div>
+
+                        <button
+                            wire:navigate
+                            href="{{ route('public.product.view', $product->slug) }}"
+                            class="w-full bg-[#171717] text-white py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-[#8f4da7] transition-colors">
+                            View Product
+                        </button>
                     </div>
-                @endforelse
-            </div>
+                </div>
+            @endforeach
+        </div>
+    @else
+        <div class="text-center py-12">
+            <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-3-3V6a3 3 0 10-6 0v3M4 20h16a2 2 0 002-2V10a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <h3 class="text-lg sm:text-xl font-medium text-gray-900 mb-2">No products found</h3>
+            <p class="text-gray-500">Try adjusting your search criteria or filters</p>
+        </div>
+    @endif
+</div>
+
+
 
             <!-- Pagination -->
             @if ($products->hasPages())
