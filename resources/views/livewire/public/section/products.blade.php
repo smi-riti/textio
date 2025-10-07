@@ -35,7 +35,7 @@
                                                 <a  href="{{ route('view.product', $product->slug) }}">
 
                         <h3
-                            class="text-sm sm:text-base font-sans font-semibold text-[#171717] mb-1 line-clamp-2 min-h-[2.5rem]">
+                            class="text-sm sm:text-base font-sans font-semibold text-[#171717] mb-1 line-clamp-2 min-h-[2.5rem] truncate">
                             {{ $product->name }}
                         </h3>
 
