@@ -136,7 +136,7 @@
                             </div>
                         </div>
                     @empty
-                        <div class="text-center py-8">
+                        <div class="text-center  py-8">
                             <div
                                 class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                                 <i class="fas fa-shopping-cart text-gray-400 text-3xl"></i>

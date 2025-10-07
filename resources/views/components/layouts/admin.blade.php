@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ $metaDescription ?? 'Admin panel for Textio to manage users, content, and settings efficiently.' }}">
+
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Textio Admin Dashboard' }}</title>
     <!-- Tailwind CSS -->

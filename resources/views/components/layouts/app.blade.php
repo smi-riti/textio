@@ -4,21 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Textio | {{ $title ?? 'Textio'}}</title>
+    <meta name="description"
+        content="{{ $metaDescription ?? 'Textio is your go-to platform for creating, sharing, and managing content with ease.' }}">
+
+    <title>Textio | {{ $title ?? 'Textio' }}
+
+
+    </title>
+{{-- <link rel="icon" type="image/png" href="{{ asset('favicon/letter-t(1).png') }}?v=1"> --}}
+{{-- <link rel="icon" type="image/png" class="bg-purple-500" href="{{ asset('favicon/letter-t (1).png') }}?v=1"> --}}
+<link rel="icon" type="image/png" class="bg-purple-500" href="{{ asset('favicon/letter-t-purple.png') }}?v=1">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-             tailwind.config = {
-                 theme: {
-                     extend: {
-                         colors: {
-                             primary: '#171717',
-                             accent: '#8f4da7',
-                         }
-                     }
-                 }
-             }
-         </script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#171717',
+                        accent: '#8f4da7',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -120,53 +129,53 @@
     </main>
 
     <!-- Mobile bottom navbar -->
-   <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-between items-center z-50"
-    x-data="{ activeButton: '{{ Route::currentRouteName() === 'home' ? 'home' : (Route::currentRouteName() === 'wishlist.index' ? 'wishlist' : (Route::currentRouteName() === 'myCart' ? 'cart' : (auth()->guest() ? 'signin' : 'profile'))) }}' }">
-    
-    <!-- Home Button -->
-    <a wire:navigate href="{{ route('home') }}" class="text-center p-2"
-        :class="{ 'text-purple-600': activeButton === 'home', 'text-gray-500': activeButton !== 'home' }"
-        @click.stop="activeButton = 'home'">
-        <i class="fas fa-home text-lg"></i>
-        <p class="text-xs mt-1">Home</p>
-    </a>
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-between items-center z-50"
+        x-data="{ activeButton: '{{ Route::currentRouteName() === 'home' ? 'home' : (Route::currentRouteName() === 'wishlist.index' ? 'wishlist' : (Route::currentRouteName() === 'myCart' ? 'cart' : (auth()->guest() ? 'signin' : 'profile'))) }}' }">
 
-    <!-- Wishlist Button -->
-    <a wire:navigate href="{{ auth()->guest() ? route('login') : route('wishlist.index') }}" class="text-center p-2"
-        :class="{ 'text-purple-600': activeButton === 'wishlist', 'text-gray-500': activeButton !== 'wishlist' }"
-        @click.stop="activeButton = '{{ auth()->guest() ? 'signin' : 'wishlist' }}'">
-        <i class="fas fa-heart text-lg"></i>
-        <p class="text-xs mt-1">Wishlist</p>
-    </a>
-
-    <!-- Cart Button -->
-    <a wire:navigate href="{{ auth()->guest() ? route('login') : route('myCart') }}" class="text-center p-2"
-        :class="{ 'text-purple-600': activeButton === 'cart', 'text-gray-500': activeButton !== 'cart' }"
-        @click.stop="activeButton = '{{ auth()->guest() ? 'signin' : 'cart' }}'">
-        <i class="fas fa-shopping-bag text-lg"></i>
-        <p class="text-xs mt-1">Cart</p>
-    </a>
-
-    <!-- Sign In / Profile Button -->
-    @guest
-        <a wire:navigate href="{{ route('login') }}" class="text-center p-2"
-            :class="{ 'text-purple-600': activeButton === 'signin', 'text-gray-500': activeButton !== 'signin' }"
-            @click.stop="activeButton = 'signin'">
-            <i class="fas fa-sign-in-alt text-lg"></i>
-            <p class="text-xs mt-1">Sign In</p>
+        <!-- Home Button -->
+        <a wire:navigate href="{{ route('home') }}" class="text-center p-2"
+            :class="{ 'text-purple-600': activeButton === 'home', 'text-gray-500': activeButton !== 'home' }"
+            @click.stop="activeButton = 'home'">
+            <i class="fas fa-home text-lg"></i>
+            <p class="text-xs mt-1">Home</p>
         </a>
-    @else
-        <a wire:navigate href="{{ route('profile-information') }}" class="text-center p-2"
-            :class="{ 'text-purple-600': activeButton === 'profile', 'text-gray-500': activeButton !== 'profile' }"
-            @click.stop="activeButton = 'profile'">
-            <i class="fas fa-user text-lg"></i>
-            <p class="text-xs mt-1">Profile</p>
+
+        <!-- Wishlist Button -->
+        <a wire:navigate href="{{ auth()->guest() ? route('login') : route('wishlist.index') }}" class="text-center p-2"
+            :class="{ 'text-purple-600': activeButton === 'wishlist', 'text-gray-500': activeButton !== 'wishlist' }"
+            @click.stop="activeButton = '{{ auth()->guest() ? 'signin' : 'wishlist' }}'">
+            <i class="fas fa-heart text-lg"></i>
+            <p class="text-xs mt-1">Wishlist</p>
         </a>
-    @endguest
-</div>
+
+        <!-- Cart Button -->
+        <a wire:navigate href="{{ auth()->guest() ? route('login') : route('myCart') }}" class="text-center p-2"
+            :class="{ 'text-purple-600': activeButton === 'cart', 'text-gray-500': activeButton !== 'cart' }"
+            @click.stop="activeButton = '{{ auth()->guest() ? 'signin' : 'cart' }}'">
+            <i class="fas fa-shopping-bag text-lg"></i>
+            <p class="text-xs mt-1">Cart</p>
+        </a>
+
+        <!-- Sign In / Profile Button -->
+        @guest
+            <a wire:navigate href="{{ route('login') }}" class="text-center p-2"
+                :class="{ 'text-purple-600': activeButton === 'signin', 'text-gray-500': activeButton !== 'signin' }"
+                @click.stop="activeButton = 'signin'">
+                <i class="fas fa-sign-in-alt text-lg"></i>
+                <p class="text-xs mt-1">Sign In</p>
+            </a>
+        @else
+            <a wire:navigate href="{{ route('profile-information') }}" class="text-center p-2"
+                :class="{ 'text-purple-600': activeButton === 'profile', 'text-gray-500': activeButton !== 'profile' }"
+                @click.stop="activeButton = 'profile'">
+                <i class="fas fa-user text-lg"></i>
+                <p class="text-xs mt-1">Profile</p>
+            </a>
+        @endguest
+    </div>
 
     <!-- Footer -->
-@if (!in_array(Route::currentRouteName(), ['myCart', 'myOrder','view.product','public.product.all']))
+    @if (!in_array(Route::currentRouteName(), ['myCart', 'myOrder', 'view.product', 'public.product.all']))
         <livewire:public.section.footer />
     @endif
     @livewireScripts
@@ -179,7 +188,8 @@
         // Ensure mobile menu is closed on page load
         document.addEventListener('livewire:initialized', () => {
             // Find the Header component by name
-            const headerComponent = window.Livewire.components.components().find(c => c.name === 'public.section.header');
+            const headerComponent = window.Livewire.components.components().find(c => c.name ===
+                'public.section.header');
             if (headerComponent) {
                 headerComponent.set('mobileMenuOpen', false);
             }

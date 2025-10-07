@@ -25,7 +25,7 @@ class Products extends Component
             ->where('featured', true)
             ->inRandomOrder()
             ->latest()
-            ->limit(4)
+            ->limit(5)
             ->get();
         $this->loadWishlist();
         // Removed incorrect dispatch: $this->dispatch("add-to-cart", productId: $product->id);
