@@ -2,7 +2,7 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="py-3 flex items-center justify-between">
             <a class="flex items-center" href="/" wire:navigate>
-                <span class="text-2xl font-bold tracking-tight text-[#171717]">TEXTIO</span>
+                <span class="text-3xl font-bold tracking-tight text-[#171717]">TEXTIO</span>
             </a>
 
             <!-- Desktop Navigation and Search -->

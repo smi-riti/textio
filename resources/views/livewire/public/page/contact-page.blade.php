@@ -28,7 +28,7 @@
                                 <i class="fas fa-phone text-purple-600 text-xl"></i>
                             </div>
                             <h3 class="font-semibold text-gray-800 mb-2">Phone</h3>
-                            <p class="text-gray-600">+91 70046 64014</p>
+                             <a href="https://wa.me/919060573350" class="text-gray-600">+91  9060573350</a>
                         </div>
 
                         <!-- Email -->
@@ -38,7 +38,7 @@
                                 <i class="fas fa-envelope text-blue-600 text-xl"></i>
                             </div>
                             <h3 class="font-semibold text-gray-800 mb-2">Email</h3>
-                            <p class="text-gray-600">textiollp@gmail.com</p>
+                            <a href="mailto:textiollp@gmail.com" class="text-gray-600">textiollp@gmail.com</a>
                         </div>
 
                         <!-- Address -->

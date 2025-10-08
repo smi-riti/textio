@@ -86,7 +86,6 @@ class ShiprocketService
 
             if ($response->successful()) {
                 $data = $response->json();
-                // dd($data);
                 if (!empty($data['data']['shipping_address']) && is_array($data['data']['shipping_address']) && !empty($data['data']['shipping_address'][0]['pickup_location'])) {
                     $pickup = $data['data']['shipping_address'][0]['pickup_location'];
                     Log::info('Fetched valid pickup location', ['pickup_location' => $pickup]);
@@ -221,16 +220,12 @@ class ShiprocketService
                     throw new \Exception('Invalid response from Shiprocket.');
                 }
 
-                // dd($data);
-
                 $shiprocket = ShiprocketOrder::updateOrCreate(
                     ['order_id' => $order->id],
                     [
                         'shiprocket_order_id' => $data['order_id'],
                         'shipment_id' => $data['shipment_id'],
                         'awb_code' => $data['awb_code'],
-                        //  'awb_code' => 88,
-
                         'courier_company_id' => $data['courier_company_id'] ?? null,
                         'status' => 'confirmed',
                         'raw_payload' => $data,
@@ -292,6 +287,53 @@ class ShiprocketService
             throw new \Exception('Failed to track: ' . ($response->json()['message'] ?? 'Unknown error'));
         } catch (\Exception $e) {
             Log::error('Tracking error: ' . $e->getMessage(), ['awb' => $awbCode]);
+            throw $e;
+        }
+    }
+
+    public function cancelShipment(string $shipment_id): bool
+    {
+        $token = $this->getToken();
+        if (!$token) {
+            Log::warning('Skipping shipment cancellation due to API lockout', ['shipment_id' => $shipment_id]);
+            throw new \Exception('Cannot cancel shipment due to API lockout.');
+        }
+
+        try {
+            // Find the ShiprocketOrder to get the shiprocket_order_id
+            $shiprocketOrder = ShiprocketOrder::where('shipment_id', $shipment_id)->firstOrFail();
+            Log::info('Canceling Shiprocket order', ['shiprocket_order_id' => $shiprocketOrder->shiprocket_order_id]);
+
+            $response = Http::withToken($token)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post("{$this->baseUrl}/v1/external/orders/cancel", [
+                    'ids' => [$shiprocketOrder->shiprocket_order_id],
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                Log::info('Shiprocket order canceled successfully', ['shiprocket_order_id' => $shiprocketOrder->shiprocket_order_id, 'response' => $data]);
+
+                // Update the ShiprocketOrder status to 'cancelled'
+                $shiprocketOrder->update([
+                    'status' => 'cancelled',
+                    'raw_payload' => $data,
+                ]);
+
+                // Update the associated order status
+                $shiprocketOrder->order->update(['status' => 'canceled']);
+
+                return true;
+            }
+
+            Log::error('Shiprocket order cancellation failed', [
+                'shiprocket_order_id' => $shiprocketOrder->shiprocket_order_id,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+            throw new \Exception('Failed to cancel order: ' . ($response->json()['message'] ?? 'Unknown error'));
+        } catch (\Exception $e) {
+            Log::error('Shiprocket cancellation error: ' . $e->getMessage(), ['shipment_id' => $shipment_id]);
             throw $e;
         }
     }
