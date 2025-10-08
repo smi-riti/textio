@@ -713,47 +713,74 @@
 
             <!-- Related Products -->
             @if ($relatedProducts->isNotEmpty())
-               <div class="mb-16">
-    <h2 class="text-2xl font-medium text-center mb-8 text-[#171717]">Related Products</h2>
+                <div class="mb-16">
+                    <h2 class="text-2xl font-medium text-center mb-8 text-[#171717]">Related Products</h2>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 px-2 sm:px-4">
-        @foreach ($relatedProducts as $relatedProduct)
-            <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                   <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 md:gap-4 px-2 sm:px-3">
+    @foreach ($relatedProducts as $relatedProduct)
+        <div class="bg-white border border-[#dedada] rounded-lg overflow-hidden w-full mx-auto transition-all duration-300">
+            <!-- Image Section -->
+            <div class="relative p-1 sm:p-2">
                 <a href="{{ route('view.product', $relatedProduct->slug) }}">
-                    <div class="relative aspect-[3/4] bg-gray-100 flex items-center justify-center overflow-hidden group">
-                        <img src="{{ $relatedProduct->firstVariantImage->image_path ?? asset('images/placeholder.jpg') }}"
-                            alt="{{ $relatedProduct->name }}"
-                            class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" />
-                    </div>
+                    @if ($relatedProduct->firstVariantImage)
+                        <div class="aspect-[3/4] bg-gray-50 flex items-center justify-center overflow-hidden rounded-md">
+                            <img src="{{ $relatedProduct->firstVariantImage->image_path ?? asset('images/placeholder.jpg') }}"
+                                 alt="{{ $relatedProduct->firstVariantImage->name }}"
+                                 class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
+                        </div>
+                    @else
+                        <div class="aspect-[3/4] bg-gray-50 flex items-center justify-center rounded-md">
+                            <img src="{{ asset('images/placeholder.jpg') }}" alt="Placeholder"
+                                 class="w-full h-full object-cover" />
+                        </div>
+                    @endif
                 </a>
-                <div class="p-3 sm:p-4 text-center">
-                    <a href="{{ route('view.product', $relatedProduct->slug) }}">
-                        <h3 class="text-base sm:text-lg font-medium text-[#171717] truncate mb-1">
-                            {{ $relatedProduct->name }}
-                        </h3>
-                    </a>
-                    <div class="flex justify-center items-center gap-2 mb-3">
-                        <span class="text-sm sm:text-base font-medium text-[#8f4da7]">
-                            {{ $relatedProduct->formatted_discount_price ?? $relatedProduct->formatted_price }}
-                        </span>
-
-                        @if ($relatedProduct->discount_price && $relatedProduct->discount_price < $relatedProduct->price)
-                            <span class="text-xs sm:text-sm text-gray-400 line-through">
-                                {{ $relatedProduct->formatted_price }}
-                            </span>
-                        @endif
-                    </div>
-
-                    <a href="{{ route('view.product', $relatedProduct->slug) }}">
-                        <button class="w-full bg-[#171717] text-white py-2 px-3 rounded-md text-xs sm:text-sm font-medium hover:bg-[#8f4da7] transition-colors">
-                            View Product
-                        </button>
-                    </a>
+                <!-- Wishlist Button -->
+                <div class="absolute top-2 right-2 sm:top-3 sm:right-3">
+                    <livewire:public.section.wishlist-button :productId="$relatedProduct->id" />
                 </div>
             </div>
-        @endforeach
-    </div>
+            <!-- Content Section -->
+            <div class="p-1 sm:p-2">
+                <a href="{{ route('view.product', $relatedProduct->slug) }}">
+                    <!-- Price Section -->
+                    <div class="flex items-center justify-center gap-1 mb-1 sm:mb-2 flex-wrap">
+                        <span class="text-xs sm:text-sm font-semibold text-[#8f4da7]">
+                            ₹{{ $relatedProduct->discount_price ?? $relatedProduct->price }}
+                        </span>
+                        @if ($relatedProduct->discount_price && $relatedProduct->discount_price < $relatedProduct->price)
+                            <span class="text-[10px] sm:text-xs text-[#8A8E92] line-through">
+                                ₹{{ $relatedProduct->price }}
+                            </span>
+                            @php
+                                $discount = 0;
+                                if ($relatedProduct->price > 0 && $relatedProduct->discount_price < $relatedProduct->price) {
+                                    $discount = round(
+                                        (($relatedProduct->price - $relatedProduct->discount_price) / $relatedProduct->price) * 100,
+                                    );
+                                }
+                            @endphp
+                            @if ($discount > 0)
+                                <span class="text-[10px] font-semibold text-green-600 bg-green-50 px-1 py-0.5 rounded-full">
+                                    {{ $discount }}% OFF
+                                </span>
+                            @endif
+                        @endif
+                    </div>
+                    <!-- Product Name -->
+                    <h3 class="text-[#3e3f40] text-[10px] sm:text-xs font-medium text-center line-clamp-2 min-h-[1.5rem] sm:min-h-[1.5rem] leading-tight truncate">
+                        {{ $relatedProduct->name }}
+                    </h3>
+                    <!-- CTA Button -->
+                    <div class="border border-[#8f4da7] text-[#8f4da7] hover:bg-[#8f4da7] hover:text-white py-2 px-2 rounded-full text-[10px] sm:text-xs font-medium transition-all duration-300 text-center">
+                        <i class="fas fa-arrow-right mr-1"></i>View Product
+                    </div>
+                </a>
+            </div>
+        </div>
+    @endforeach
 </div>
+                </div>
             @endif
 
 
