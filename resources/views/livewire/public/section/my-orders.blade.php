@@ -105,7 +105,7 @@
                                         <!-- Price and Quantity -->
                                         <div class="flex flex-wrap items-center gap-3 mt-2">
                                             <span class="text-base font-medium text-green-600">
-                                                ₹{{ number_format($item->product->discount_price, 2) }}
+                                                ₹{{ number_format($item->unit_price, 2) }}
                                             </span>
                                             <span class="text-sm text-gray-400 line-through">
                                                 ₹{{ number_format($item->product->price, 2) }}
